@@ -1,0 +1,407 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %} Kindaski | my profile {% endblock %}
+
+{% block content %}
+<style>
+    body {
+        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        margin: 0;
+        padding: 0;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        margin-top: 40px;
+    }
+    
+    .ui-w-80 {
+        width: 80px !important;
+        height: auto;
+    }
+    
+    .btn-default {
+        border-color: rgba(102, 126, 234, 0.1);
+        background: rgba(0, 0, 0, 0);
+        color: #4E5155;
+    }
+    
+    /* Styling for the account settings links */
+    .account-settings-links .list-group-item.active {
+        font-weight: bold !important;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    
+    .account-settings-fileinput {
+        position: absolute;
+        visibility: hidden;
+        width: 1px;
+        height: 1px;
+        opacity: 0;
+    }
+    
+    /* Container styling with light background */
+    .dark-container {
+        background-color: rgba(255, 255, 255, 0.95); /* Light background */
+        color: #333; /* Dark text color */
+        padding: 20px;
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+    
+    .dark-container .card {
+        background-color: rgba(255, 255, 255, 0.95); /* Light card background */
+        border: none;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        border-radius: 12px;
+    }
+    
+    .dark-container .card-footer {
+        background-color: #667eea; /* Light footer background */
+        color: white;
+        border-radius: 0 0 12px 12px;
+    }
+    
+    .dark-container .form-control {
+        background-color: rgba(255, 255, 255, 0.9); /* Light input fields */
+        color: #333;
+        border: 2px solid #e0e7ff;
+        border-radius: 12px;
+        padding: 1rem;
+        transition: all 0.2s ease;
+    }
+    
+    .dark-container .form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        outline: none;
+    }
+    
+    /* Styling for list group items */
+    .dark-container .list-group-item {
+        background-color: rgba(255, 255, 255, 0.9); /* Light list items */
+        color: #333;
+        border: 2px solid #e0e7ff;
+        border-radius: 12px;
+        margin-bottom: 10px;
+    }
+    
+    .dark-container .list-group-item.active {
+        background-color: #667eea; /* Active item color */
+        color: white;
+    }
+    
+    /* Modern button styles */
+    .btn-submit {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        margin-top: auto;
+        position: sticky;
+        bottom: 0;
+        width: 100%;
+    }
+    
+</style>
+<section>
+<div class="container dark-container flex-grow-1 container-p-y">
+    <h4 class="font-weight-bold py-3 mb-4">Account settings</h4>
+
+    <div class="card overflow-hidden">
+        <div class="row no-gutters row-bordered row-border-light">
+            <div class="col-md-3 pt-0">
+                <div class="list-group list-group-flush account-settings-links">
+                    <a class="list-group-item list-group-item-action active" data-bs-toggle="tab" href="#view-profile">View profile</a>
+                    <a class="list-group-item list-group-item-action" data-bs-toggle="tab" href="#edit-profile"> Edit profile</a>
+                    <a class="list-group-item list-group-item-action" data-bs-toggle="tab" href="#account-change-password">Change password</a>
+                    <a class="list-group-item list-group-item-action" data-bs-toggle="tab" href="#account-info">Info</a>
+                    <a class="list-group-item list-group-item-action" data-bs-toggle="tab" href="#account-social-links">Social links</a>
+                    <a class="list-group-item list-group-item-action" data-bs-toggle="tab" href="#account-notifications">Notifications</a>
+                    {% if messages %}
+        <ul>
+          {% for message in messages %}
+          <h6 class="{% if message.tags == 'error' %} red {% else %} alert alert-warning mt-3 {% endif %}; background-color: {% if message.tags == 'error' %} white {% else %} white {% endif %};">
+            {{ message }}
+          </h6>
+          {% endfor %}
+        </ul>
+    {% endif %}
+                </div>
+            </div>
+            <div class="col-md-9">
+                <div class="tab-content">
+                    <!-- General Form -->
+                    <div class="tab-pane fade" id="edit-profile">
+                        <form method="POST" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            
+                            <!-- Profile Picture -->
+                            <div class="card-body media align-items-center">
+                                <img src="{{ profile_picture }}" alt="Profile Picture" class="d-block ui-w-80">
+                                <div class="media-body ml-4">
+                                    <a href="{% url 'upload_image' %}" class="btn btn-outline-primary">
+                                        Upload new photo
+                                    </a> &nbsp;
+                                    <button type="button" class="btn btn-default md-btn-flat">Reset</button>
+                                    <div class="text-light small mt-1">Allowed JPG, GIF, or PNG. Max size of 800K</div>
+                                </div>
+                            </div>
+                            <hr class="border-dark m-0">
+                        
+                            <!-- Form Fields -->
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label class="form-label">Username</label>
+                                    <input type="text" class="form-control mb-1" name="username" value="{{ username }}">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">First name</label>
+                                    <input type="text" class="form-control" name="first_name" value="{{ first_name }}">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Last Name</label>
+                                    <input type="text" class="form-control" name="last_name" value="{{ last_name }}">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Email</label>
+                                    <input type="email" class="form-control mb-1" name="email" value="{{ email }}">
+                                    <div class="alert alert-warning mt-3">
+                                        Your email is not confirmed. Please check your inbox.<br>
+                                        <a href="javascript:void(0)">Resend confirmation</a>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Phone</label>
+                                    <input type="text" class="form-control" name="phone" value="{{ phone }}">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Date of Birth</label>
+                                    <input type="date" class="form-control mb-1" name="date_of_birth" value="{{ date_of_birth|date:'Y-m-d' }}">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Gender</label>
+                                    <select name="gender" class="form-control">
+                                        <option value="Male" {% if gender == 'Male' %}selected{% endif %}>Male</option>
+                                        <option value="Female" {% if gender == 'Female' %}selected{% endif %}>Female</option>
+                                        <option value="Other" {% if gender == 'Other' %}selected{% endif %}>Other</option>
+                                    </select>
+                                </div>
+                            </div>
+                        
+                            <!-- Buttons -->
+                            <div class="card-footer text-right">
+                                <button type="submit" class="btn btn-primary">Save</button>
+                                <button type="reset" class="btn btn-default">Cancel</button>
+                            </div>
+                        </form>
+                        
+                        
+                    </div>
+
+                    <!-- Change Password Form -->
+                    <div class="tab-pane fade" id="account-change-password">
+                        <form>
+                            <div class="card-body pb-2">
+                                <div class="form-group">
+                                    <label class="form-label">Current password</label>
+                                    <input type="password" class="form-control">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">New password</label>
+                                    <input type="password" class="form-control">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Repeat new password</label>
+                                    <input type="password" class="form-control">
+                                </div>
+                            </div>
+                            <!-- Buttons -->
+                            <div class="card-footer text-right">
+                                <button type="submit" class="btn btn-primary">Change Password</button>
+                                <button type="reset" class="btn btn-default">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Info Form -->
+                    <div class="tab-pane fade" id="account-info">
+                        <form>
+                            <div class="card-body pb-2">
+                                <div class="form-group">
+                                    <label class="form-label">Bio</label>
+                                    <textarea class="form-control" rows="5">Lorem ipsum dolor sit amet...</textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Birthday</label>
+                                    <input type="text" class="form-control" value="May 3, 1995">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Country</label>
+                                    <select class="custom-select">
+                                        <option>USA</option>
+                                        <option selected="">Canada</option>
+                                        <option>UK</option>
+                                        <option>Germany</option>
+                                        <option>France</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="card-body pb-2">
+                                <h6 class="mb-4">Contacts</h6>
+                                <div class="form-group">
+                                    <label class="form-label">Phone</label>
+                                    <input type="text" class="form-control" value="+0 (123) 456 7891">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Website</label>
+                                    <input type="text" class="form-control" value="">
+                                </div>
+                            </div>
+                            <!-- Buttons -->
+                            <div class="card-footer text-right">
+                                <button type="submit" class="btn btn-primary">Save</button>
+                                <button type="reset" class="btn btn-default">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Social Links Form -->
+                    <div class="tab-pane fade" id="account-social-links">
+                        <form>
+                            <div class="card-body pb-2">
+                                <div class="form-group">
+                                    <label class="form-label">Twitter</label>
+                                    <input type="text" class="form-control" value="https://twitter.com/user">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Facebook</label>
+                                    <input type="text" class="form-control" value="https://www.facebook.com/user">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Google+</label>
+                                    <input type="text" class="form-control" value="">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">LinkedIn</label>
+                                    <input type="text" class="form-control" value="">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Instagram</label>
+                                    <input type="text" class="form-control" value="https://www.instagram.com/user">
+                                </div>
+                            </div>
+                            <!-- Buttons -->
+                            <div class="card-footer text-right">
+                                <button type="submit" class="btn btn-primary">Save</button>
+                                <button type="reset" class="btn btn-default">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- view_profile -->
+<div class="tab-pane fade show active" id="view-profile">
+    <form>
+        <div class="card-body">
+            <div class="row">
+                <!-- Profile Picture Section -->
+<div class="col-md-4 d-flex justify-content-center align-items-center">
+    <div class="profile-pic text-center">
+        <!-- Full Screen Link for Profile Picture -->
+        <a href="{% if user.userprofile.profile_picture %}{{ user.userprofile.profile_picture.url }}{% else %}{% static 'assets/img/default_dp.png' %}{% endif %}" class="glightbox" data-gallery="profile-gallery">
+            <img src="{% if user.userprofile.profile_picture %}{{ user.userprofile.profile_picture.url }}{% else %}{% static 'assets/img/default_dp.png' %}{% endif %}" 
+                 alt="Profile Picture" 
+                 class="rounded-circle border border-3 p-2" 
+                 width="150" height="150">
+        </a>
+    </div>
+</div>
+
+
+                <!-- User Information Section -->
+                <div class="col-md-8">
+                    <h3 class="mb-4">User Information</h3>
+                    <div class="list-group">
+                        <p class="list-group-item"><strong>Username:</strong> {{ user.username }}</p>
+                        <p class="list-group-item"><strong>First Name:</strong> {% if user.first_name %}{{ user.first_name }}{% else %}<strong class="text-danger">Not provided</strong>{% endif %}</p>
+                        <p class="list-group-item"><strong>Last Name:</strong> {% if user.last_name %}{{ user.last_name }}{% else %}<strong class="text-danger">Not provided</strong>{% endif %}</p>
+                        <p class="list-group-item"><strong>Email:</strong> {% if user.email %}{{ user.email }}{% else %}<strong class="text-danger">Not provided</strong>{% endif %}</p>
+
+                        <!-- Profile Additional Information (From UserProfile model) -->
+                        <p class="list-group-item"><strong>Phone:</strong> {% if user.userprofile.phone %}{{ user.userprofile.phone }}{% else %}<strong class="text-danger">Not provided</strong>{% endif %}</p>
+                        <p class="list-group-item"><strong>Date of Birth:</strong> {% if user.userprofile.date_of_birth %}{{ user.userprofile.date_of_birth }}{% else %}<strong class="text-danger">Not provided</strong>{% endif %}</p>
+                        <p class="list-group-item"><strong>Gender:</strong> {% if user.userprofile.gender %}{{ user.userprofile.get_gender_display }}{% else %}<strong class="text-danger">Not provided</strong>{% endif %}</p>
+                    </div>
+
+                    <!-- Button to complete profile if any information is missing -->
+                    {% if not user.userprofile.profile_picture or not user.userprofile.phone or not user.userprofile.date_of_birth or not user.userprofile.gender %}
+                        <div class="alert alert-warning mt-3">Finish setting up your profile</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+
+                    <!-- Notifications Form -->
+                    <div class="tab-pane fade" id="account-notifications">
+                        <form>
+                            <div class="card-body pb-2">
+                                <h6 class="mb-4">Activity</h6>
+                                <div class="form-group">
+                                    <label class="switcher">
+                                        <input type="checkbox" class="switcher-input" checked="">
+                                        <span class="switcher-indicator">
+                                            <span class="switcher-yes"></span>
+                                            <span class="switcher-no"></span>
+                                        </span>
+                                        <span class="switcher-label">Email me when someone comments on my article</span>
+                                    </label>
+                                </div>
+                                <div class="form-group">
+                                    <label class="switcher">
+                                        <input type="checkbox" class="switcher-input" checked="">
+                                        <span class="switcher-indicator">
+                                            <span class="switcher-yes"></span>
+                                            <span class="switcher-no"></span>
+                                        </span>
+                                        <span class="switcher-label">Email me when someone answers on my forum thread</span>
+                                    </label>
+                                </div>
+                                <div class="form-group">
+                                    <label class="switcher">
+                                        <input type="checkbox" class="switcher-input">
+                                        <span class="switcher-indicator">
+                                            <span class="switcher-yes"></span>
+                                            <span class="switcher-no"></span>
+                                        </span>
+                                        <span class="switcher-label">Email me when someone follows me</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <!-- Buttons -->
+                            <div class="card-footer text-right">
+                                <button type="submit" class="btn btn-primary">Save Notifications</button>
+                                <button type="reset" class="btn btn-default">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</section>
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+{% endblock %}
+
+

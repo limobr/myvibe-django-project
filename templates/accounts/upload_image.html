@@ -1,0 +1,356 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<style>
+    /* General Layout Styles */
+    .profile-upload-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #f4f4f9;
+        padding: 1rem;
+    }
+
+    .upload-card {
+        background-color: white;
+        border-radius: 1rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        width: 100%;
+        max-width: 500px;
+        text-align: center;
+    }
+
+    .upload-title {
+        font-size: 1.8rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 1rem;
+    }
+
+    .upload-section,
+    .crop-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.5rem;
+        width: 100%;
+    }
+
+    .image-preview-container {
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 4px solid #fff;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        background-color: #f8f9fa;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .preview-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .btn-upload,
+    .btn-secondary,
+    .btn-primary {
+        background-color: #007bff;
+        color: white;
+        padding: 0.8rem 2rem;
+        border: none;
+        border-radius: 0.75rem;
+        cursor: pointer;
+        font-weight: 500;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-upload i,
+    .btn-secondary i,
+    .btn-primary i {
+        font-size: 1.2rem;
+    }
+
+    .btn-secondary {
+        background-color: #6c757d;
+    }
+
+    .btn-primary {
+        background-color: #28a745;
+    }
+
+    .btn-upload:hover,
+    .btn-secondary:hover,
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Cropper Styles */
+    .cropper-wrapper {
+        width: 100%;
+        max-width: 400px;
+        height: 400px;
+        background-color: #e9ecef;
+        border-radius: 1rem;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .cropper-view {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .crop-controls {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        margin-top: 1rem;
+    }
+
+    .preview-controls {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        margin-top: 1rem;
+    }
+
+    /* Screen Display Styles */
+    .upload-screen,
+    .crop-screen,
+    .preview-screen {
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        gap: 2rem;
+        padding: 2rem;
+    }
+
+    .upload-screen.active,
+    .crop-screen.active,
+    .preview-screen.active {
+        display: flex;
+    }
+
+    /* Responsive Styles */
+    @media (max-width: 768px) {
+        .upload-card {
+            padding: 1rem;
+        }
+
+        .upload-title {
+            font-size: 1.5rem;
+        }
+
+        .image-preview-container {
+            width: 150px;
+            height: 150px;
+        }
+
+        .cropper-wrapper {
+            height: 300px;
+        }
+
+        .btn-upload,
+        .btn-secondary,
+        .btn-primary {
+            padding: 0.7rem 1.5rem;
+            font-size: 0.9rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .upload-title {
+            font-size: 1.3rem;
+        }
+
+        .image-preview-container {
+            width: 120px;
+            height: 120px;
+        }
+
+        .btn-upload,
+        .btn-secondary,
+        .btn-primary {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .cropper-wrapper {
+            height: 250px;
+        }
+    }
+</style>
+<div class="profile-upload-container">
+    <div class="upload-card">
+        <!-- Screen 1: Upload -->
+        <div class="upload-screen active" id="upload-screen">
+            <h2 class="upload-title">Update Profile Picture</h2>
+            <div class="upload-section">
+                <div class="image-preview-container">
+                    <img id="image-preview" class="preview-image" src="{{ profile_picture_url|default:'/static/assets/img/upload.png' }}">
+                </div>
+                <input type="file" id="image-input" accept="image/*" hidden>
+                <button class="btn-upload" onclick="document.getElementById('image-input').click()">
+                    <i class="fas fa-cloud-upload-alt"></i> Choose Photo
+                </button>
+            </div>
+        </div>
+
+        <!-- Screen 2: Crop -->
+        <div class="crop-screen" id="crop-screen">
+            <h2 class="upload-title">Crop Your Photo</h2>
+            <div class="crop-container">
+                <div class="cropper-wrapper">
+                    <img id="cropper-image" class="cropper-view">
+                </div>
+                <div class="crop-controls">
+                    <button class="btn-secondary" onclick="showScreen('upload-screen')">
+                        <i class="fas fa-arrow-left"></i> Back
+                    </button>
+                    <button class="btn-primary" id="preview-btn">
+                        <i class="fas fa-check"></i> Preview
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Screen 3: Preview -->
+        <div class="preview-screen" id="preview-screen">
+            <h2 class="upload-title">Preview & Confirm</h2>
+            <div class="upload-section">
+                <div class="image-preview-container">
+                    <img id="final-preview" class="preview-image">
+                </div>
+                <div class="preview-controls">
+                    <button class="btn-secondary" onclick="showScreen('crop-screen')">
+                        <i class="fas fa-arrow-left"></i> Back
+                    </button>
+                    <button class="btn-primary" id="upload-btn">
+                        <i class="fas fa-upload"></i> Upload
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- CSRF Token -->
+        {% csrf_token %}
+        <input type="hidden" id="csrf-token" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+
+<script>
+    let cropper;
+    let croppedBlob = null;
+
+    // Screen management
+    function showScreen(screenId) {
+        document.querySelectorAll('.upload-screen, .crop-screen, .preview-screen').forEach(screen => {
+            screen.classList.remove('active');
+        });
+        document.getElementById(screenId).classList.add('active');
+    }
+
+    // File input handler
+    document.getElementById('image-input').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                showScreen('crop-screen');
+                initCropper(event.target.result);
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Cropper initialization
+    function initCropper(imageSrc) {
+        const image = document.getElementById('cropper-image');
+        image.src = imageSrc;
+
+        if (cropper) cropper.destroy();
+        
+        cropper = new Cropper(image, {
+            aspectRatio: 1,
+            viewMode: 2,
+            autoCropArea: 1,
+            responsive: true,
+            guides: false,
+            background: false
+        });
+    }
+
+    // Preview button handler
+    document.getElementById('preview-btn').addEventListener('click', function() {
+        if (cropper) {
+            const canvas = cropper.getCroppedCanvas({
+                width: 500,
+                height: 500,
+                imageSmoothingQuality: 'high'
+            });
+            
+            canvas.toBlob(function(blob) {
+                croppedBlob = blob;
+                document.getElementById('final-preview').src = URL.createObjectURL(blob);
+                showScreen('preview-screen');
+            }, 'image/jpeg');
+        }
+    });
+
+    // Upload button handler with redirection to home page
+    document.getElementById('upload-btn').addEventListener('click', function() {
+        if (!croppedBlob) return;
+    
+        const formData = new FormData();
+        formData.append('profile_picture', croppedBlob, `profile_${Date.now()}.jpg`);
+        formData.append('csrfmiddlewaretoken', document.getElementById('csrf-token').value);
+    
+        fetch("{% url 'update_profile_picture' %}", {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            credentials: 'include'
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                alert('Profile picture updated successfully!');
+                window.location.href = "{% url 'home' %}";
+            } else {
+                alert('Error: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Upload failed: ' + error.message);
+        });
+    });
+    
+    // Window resize handler
+    window.addEventListener('resize', () => cropper?.replace());
+</script>
+{% endblock %}

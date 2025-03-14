@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Interests</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #fef4e4;
+            color: #4a4a4a;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px;
+        }
+
+        .title {
+            font-size: 2.5rem;
+            color: #ff9800;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        #interests-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .interest-item {
+            background-color: #ffe0b2;
+            padding: 20px;
+            border: 2px solid transparent;
+            border-radius: 50px;
+            text-align: center;
+            cursor: pointer;
+            width: 200px;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+
+        .interest-item:hover {
+            background-color: #ffd54f;
+        }
+
+        .interest-item.selected {
+            background-color: #ff9800;
+            border-color: #ef6c00;
+            color: #fff;
+        }
+
+        .button {
+            padding: 12px 25px;
+            background-color: #ff9800;
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            font-size: 1.1rem;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background-color 0.3s ease;
+        }
+
+        .button:hover {
+            background-color: #e65100;
+        }
+
+        .button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .has-text-right {
+            text-align: right;
+            margin-top: 30px;
+        }
+
+        /* Media query for smaller screens */
+        @media (max-width: 768px) {
+            .title {
+                font-size: 1.5rem;
+            }
+
+            .interest-item {
+                width: 150px;
+                padding: 15px;
+                font-size: 0.9rem;
+            }
+
+            .button {
+                font-size: 1rem;
+                padding: 10px 20px;
+            }
+
+            .container {
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .title {
+                font-size: 1.2rem;
+            }
+
+            .interest-item {
+                width: 120px;
+                padding: 10px;
+                font-size: 0.8rem;
+            }
+
+            .button {
+                font-size: 0.9rem;
+                padding: 8px 18px;
+            }
+
+            .container {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <section class="section">
+        <div class="container">
+            <h1 class="title">{{ username }}, choose your interests to help personalize your experience</h1>
+            <div id="interests-container">
+                {% for interest in interests %}
+                <div class="interest-item" data-id="{{ interest.id }}">
+                    {{ interest.name }}
+                </div>
+                {% endfor %}
+            </div>
+            <div class="has-text-right">
+                <button class="button" id="continue-button" disabled>Continue</button>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        const interestItems = document.querySelectorAll('.interest-item');
+        const continueButton = document.getElementById('continue-button');
+        let selectedInterests = [];
+
+        interestItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const interestId = item.getAttribute('data-id');
+                // Toggle selection state
+                if (item.classList.contains('selected')) {
+                    item.classList.remove('selected');
+                    selectedInterests = selectedInterests.filter(id => id !== interestId);
+                } else {
+                    item.classList.add('selected');
+                    selectedInterests.push(interestId);
+                }
+                // Enable the Continue button if at least one interest is selected
+                continueButton.disabled = selectedInterests.length === 0;
+            });
+        });
+
+        continueButton.addEventListener('click', () => {
+            // Create a form dynamically and submit via POST
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = "{% url 'select_interests' %}";
+            
+            // Append CSRF token
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = 'csrfmiddlewaretoken';
+            csrfInput.value = "{{ csrf_token }}";
+            form.appendChild(csrfInput);
+            
+            // Append selected interest IDs as hidden inputs
+            selectedInterests.forEach(id => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'interests';
+                input.value = id;
+                form.appendChild(input);
+            });
+            
+            document.body.appendChild(form);
+            form.submit();
+        });
+    </script>
+</body>
+</html>

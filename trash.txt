@@ -1,0 +1,2 @@
+I want the next page after registration to be one for choosing interests where a collection of interests is presented to the user for them to choose from like music, coding, cooking etc
+Hence I need to figure out how I will create an efficient model to store the interests created by admin

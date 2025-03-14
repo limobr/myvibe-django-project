@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Create Post</title>
+  {% load static %}
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+  <style>
+    /* Updated base styles */
+    body {
+        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        margin: 0;
+        padding: 0;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+  
+      .post-container {
+        flex: 1;
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        width: 100%;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+  
+      .create-post-form {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 1.5rem;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+      }
+  
+      /* Improved mobile layout */
+      @media (max-width: 480px) {
+        .post-container {
+          padding: 0;
+          height: 100%;
+        }
+        
+        .create-post-form {
+          border-radius: 0;
+          padding: 1rem;
+          height: calc(100vh - 60px);
+        }
+      }
+  
+      /* Modernized modal */
+      #interest-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(5px);
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+      }
+  
+      .modal-content {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 1.5rem;
+        width: 90%;
+        max-width: 500px;
+        max-height: 80vh;
+        overflow-y: auto;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        animation: modalSlideIn 0.3s ease-out;
+      }
+  
+      /* Modal animations */
+      @keyframes modalSlideIn {
+        from { transform: translateY(20px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+      }
+  
+      /* Modern form elements */
+      textarea, select, input {
+        width: 100%;
+        padding: 1rem;
+        border: 2px solid #e0e7ff;
+        border-radius: 12px;
+        margin-top: 0.5rem;
+        background: rgba(255,255,255,0.9);
+        transition: all 0.2s ease;
+        max-width: 100%;
+      }
+  
+      textarea:focus, select:focus, input:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        outline: none;
+      }
+  
+      /* Modern button styles */
+      .btn-submit {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        margin-top: auto;
+        position: sticky;
+        bottom: 0;
+        width: 100%;
+      }
+  
+      @media (max-width: 480px) {
+        .btn-submit {
+          position: fixed;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          border-radius: 0;
+          padding: 1rem;
+          box-shadow: 0 -4px 12px rgba(0,0,0,0.1);
+        }
+      }
+  
+      /* Modern interest tags */
+      .audience-interests span {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 6px 12px;
+        border-radius: 8px;
+        color: white;
+        font-size: 0.9rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+      }
+  
+      .change-button {
+        background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+  
+      .change-button:hover {
+        opacity: 0.9;
+      }
+  
+      /* Modern modal elements */
+      .interest-option {
+        padding: 8px 16px;
+        border-radius: 8px;
+        background: #f0f4ff;
+        color: #4a5568;
+        margin: 4px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+  
+      .interest-option.selected {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+      }
+  
+      .search-box input {
+        padding: 12px 16px;
+        border: 2px solid #e0e7ff;
+        border-radius: 8px;
+        background: rgba(255,255,255,0.9);
+        width: 100%;
+      }
+  
+      .modal-footer button {
+        padding: 10px 24px;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.2s ease;
+      }
+  
+      .modal-footer button.okay-btn {
+        background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+      }
+  
+      .modal-footer button.close-btn {
+        background: linear-gradient(135deg, #fc8181 0%, #f56565 100%);
+      }
+
+    /* Additional styles for map */
+    #map {
+      height: 250px;
+      border-radius: 12px;
+      margin-top: 10px;
+      border: 2px solid #e0e7ff;
+    }
+
+    .map-btn {
+      background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 0.9rem;
+      margin-right: 8px;
+    }
+
+    .map-btn:hover {
+      opacity: 0.9;
+    }
+
+    .leaflet-control-attribution {
+      display: none;
+    }
+
+    .location-container {
+      margin-bottom: 1.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="post-container">
+    <form class="create-post-form" method="POST" action="{% url 'create_post' %}" enctype="multipart/form-data">
+      {% csrf_token %}
+      <!-- Hidden fields for coordinates -->
+      <input type="hidden" name="latitude" id="latitude">
+      <input type="hidden" name="longitude" id="longitude">
+
+      <!-- Description Field -->
+      <div class="form-group">
+        <label for="description"><i class="fas fa-edit"></i> What's on your mind?</label>
+        <textarea name="description" id="description" rows="4" placeholder="Share your thoughts..." required></textarea>
+      </div>
+
+      <!-- Privacy Field -->
+      <div class="form-group">
+        <label for="privacy"><i class="fas fa-lock"></i> Privacy</label>
+        <select name="privacy" id="privacy" required>
+          <option value="public">Public</option>
+          <option value="private">Private</option>
+          <option value="friends">Friends Only</option>
+        </select>
+      </div>
+
+      <!-- Interests Field -->
+      <div class="form-group">
+        <label><i class="fas fa-tags"></i> Audience Interests</label>
+        <div class="audience-interests">
+          {% for interest in user_interests %}
+            <span>{{ interest.name }}</span>
+          {% endfor %}
+        </div>
+        <button type="button" class="change-button" onclick="openModal()">Change</button>
+      </div>
+
+      <!-- Location Field -->
+      <div class="form-group location-container">
+        <label><i class="fas fa-map-marker-alt"></i> Location</label>
+        <input type="text" name="location" id="location" placeholder="Search or click map..." readonly>
+        <div id="map"></div>
+        <div class="map-buttons" style="margin-top: 10px;">
+          <button type="button" class="map-btn" onclick="locateUser()">
+            <i class="fas fa-location-arrow"></i> Use Current Location
+          </button>
+          <button type="button" class="map-btn" onclick="clearLocation()">
+            <i class="fas fa-times"></i> Clear Location
+          </button>
+        </div>
+      </div>
+
+      <!-- Media Upload Field -->
+      <div class="form-group">
+        <label for="media"><i class="fas fa-camera"></i> Upload Media</label>
+        <input type="file" name="media" id="media" accept="image/*,video/*">
+      </div>
+
+      <!-- Submit Button -->
+      <div style="text-align: right; margin-top: 2rem;">
+        <button type="submit" class="btn-submit">
+          <i class="fas fa-paper-plane"></i> Post
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Modal for Changing Interests -->
+  <div id="interest-modal" class="modal">
+    <div class="modal-content">
+      <h3>Select Interests</h3>
+      <div class="form-group search-box">
+        <input type="text" id="search-input" placeholder="Search interests...">
+      </div>
+      <div class="interest-list">
+        {% for interest in interests %}
+          <div class="interest-option" data-id="{{ interest.id }}">
+            {{ interest.name }}
+          </div>
+        {% endfor %}
+      </div>
+      <div class="modal-footer">
+        <button class="close-btn" onclick="closeModal()">Close</button>
+        <button class="okay-btn" onclick="applyInterests()">Okay</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    // Map-related JavaScript
+    let map;
+    let marker;
+
+    function initMap() {
+      // Initialize map with default coordinates
+      map = L.map('map').setView([0, 0], 2);
+      
+      // Add OpenStreetMap tiles
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+      }).addTo(map);
+
+      // Add click event handler
+      map.on('click', function(e) {
+        updateMarker(e.latlng);
+        reverseGeocode(e.latlng);
+      });
+
+      // Try to get user's current location
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          position => {
+            const userLocation = [position.coords.latitude, position.coords.longitude];
+            map.setView(userLocation, 13);
+            updateMarker(userLocation);
+            reverseGeocode(userLocation);
+          },
+          error => console.error('Error getting location:', error)
+        );
+      }
+    }
+
+    function updateMarker(latlng) {
+      if (marker) map.removeLayer(marker);
+      marker = L.marker(latlng).addTo(map);
+      document.getElementById('latitude').value = latlng.lat;
+      document.getElementById('longitude').value = latlng.lng;
+    }
+
+    async function reverseGeocode(latlng) {
+      try {
+        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latlng.lat}&lon=${latlng.lng}`);
+        const data = await response.json();
+        document.getElementById('location').value = data.display_name || 'Location selected';
+      } catch (error) {
+        console.error('Reverse geocoding error:', error);
+        document.getElementById('location').value = 'Location selected';
+      }
+    }
+
+    function locateUser() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          position => {
+            const userLocation = [position.coords.latitude, position.coords.longitude];
+            map.setView(userLocation, 13);
+            updateMarker(userLocation);
+            reverseGeocode(userLocation);
+          },
+          error => alert('Error getting current location: ' + error.message)
+        );
+      } else {
+        alert('Geolocation is not supported by this browser.');
+      }
+    }
+
+    function clearLocation() {
+      if (marker) map.removeLayer(marker);
+      document.getElementById('location').value = '';
+      document.getElementById('latitude').value = '';
+      document.getElementById('longitude').value = '';
+    }
+
+    // Initialize the map when the page loads
+    window.onload = initMap;
+
+    // Existing modal JavaScript
+    const interestModal = document.getElementById("interest-modal");
+
+    function openModal() {
+      interestModal.style.display = "flex";
+    }
+
+    function closeModal() {
+      interestModal.style.display = "none";
+    }
+
+    function applyInterests() {
+      const selectedInterests = document.querySelectorAll('.interest-option.selected');
+      const audienceInterests = document.querySelector('.audience-interests');
+      audienceInterests.innerHTML = '';
+      selectedInterests.forEach(option => {
+        const interestName = option.innerText;
+        const span = document.createElement('span');
+        span.classList.add('interest');
+        span.innerText = interestName;
+        audienceInterests.appendChild(span);
+      });
+      closeModal();
+    }
+
+    document.querySelectorAll('.interest-option').forEach(option => {
+      option.addEventListener('click', () => {
+        option.classList.toggle('selected');
+      });
+    });
+  </script>
+</body>
+</html>

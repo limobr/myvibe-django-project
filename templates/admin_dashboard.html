@@ -1,0 +1,241 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<!-- Custom styles specific to the admin dashboard -->
+<style>
+  /* Sidebar: full height with auto overflow if content exceeds available height */
+  .sidebar {
+    height: 100vh;
+    overflow-y: auto;
+  }
+  /* Use flexbox to push the account section to the bottom */
+  .sidebar .d-flex {
+    height: 100%;
+  }
+  .sidebar .account-section {
+    margin-top: auto;
+  }
+  /* Styling for the dashboard cards and sections */
+  .quick-stats .card {
+    margin-bottom: 20px;
+  }
+  section {
+    margin-top: 30px;
+  }
+  .footer {
+    padding: 20px;
+    background-color: #343a40;
+    color: #fff;
+    text-align: center;
+    margin-top: 40px;
+  }
+</style>
+
+<div class="container-fluid">
+  <div class="row">
+    <!-- Sidebar -->
+    <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-dark sidebar">
+      <div class="d-flex flex-column">
+        <!-- Top Navigation -->
+        <div>
+          <a href="/" class="d-flex align-items-center mb-3 text-white text-decoration-none">
+            <svg class="bi me-2" width="40" height="32"><use xlink:href="#bootstrap"/></svg>
+            <span class="fs-4">Admin Panel</span>
+          </a>
+          <hr>
+          <ul class="nav nav-pills flex-column mb-auto">
+            <li class="nav-item">
+              <a href="{% url 'admin_dashboard' %}" class="nav-link active" aria-current="page">
+                <svg class="bi me-2" width="16" height="16"><use xlink:href="#home"/></svg>
+                Dashboard
+              </a>
+            </li>
+            <li>
+              <a href="{% url 'create_interest' %}" class="nav-link text-white">
+                <svg class="bi me-2" width="16" height="16"><use xlink:href="#tools"/></svg>
+                Create Interest
+              </a>
+            </li>
+            <li>
+              <a href="{% url 'manage_users' %}" class="nav-link text-white">
+                <svg class="bi me-2" width="16" height="16"><use xlink:href="#people-circle"/></svg>
+                Manage Users
+              </a>
+            </li>
+            <li>
+              <a href="{% url 'view_events' %}" class="nav-link text-white">
+                <svg class="bi me-2" width="16" height="16"><use xlink:href="#calendar3"/></svg>
+                View Events
+              </a>
+            </li>
+            <li>
+              <a href="{% url 'admin_reports' %}" class="nav-link text-white">
+                <svg class="bi me-2" width="16" height="16"><use xlink:href="#speedometer"/></svg>
+                Reports
+              </a>
+            </li>
+          </ul>
+        </div>
+        <!-- Account Section at the bottom -->
+        <div class="account-section">
+          <hr>
+          <div class="dropdown">
+            <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
+              <img src="{% if user.userprofile.profile_picture %}{{ user.userprofile.profile_picture.url }}{% else %}{% static 'assets/img/default_dp.png' %}{% endif %}" alt="" width="32" height="32" class="rounded-circle me-2">
+              <strong>{{ user.username }}</strong>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-dark text-small shadow" aria-labelledby="dropdownUser1">
+              <li><a class="dropdown-item" href="#">New Project...</a></li>
+              <li><a class="dropdown-item" href="#">Settings</a></li>
+              <li><a class="dropdown-item" href="#">Profile</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="{% url 'logout' %}">Sign out</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+      <h2 class="mt-4">Admin Dashboard</h2>
+      <p>Welcome, <strong>{{ user.username }}</strong>. Here is your quick overview:</p>
+      
+      <!-- Quick Stats Section -->
+      <section class="quick-stats">
+        <div class="row">
+          <!-- Total Users -->
+          <div class="col-md-3">
+            <div class="card text-white bg-primary">
+              <div class="card-body">
+                <h5 class="card-title">Total Users</h5>
+                <p class="card-text display-6">1,234</p>
+              </div>
+            </div>
+          </div>
+          <!-- Active Events -->
+          <div class="col-md-3">
+            <div class="card text-white bg-success">
+              <div class="card-body">
+                <h5 class="card-title">Active Events</h5>
+                <p class="card-text display-6">56</p>
+              </div>
+            </div>
+          </div>
+          <!-- Messages Today -->
+          <div class="col-md-3">
+            <div class="card text-white bg-warning">
+              <div class="card-body">
+                <h5 class="card-title">Messages</h5>
+                <p class="card-text display-6">89</p>
+              </div>
+            </div>
+          </div>
+          <!-- Revenue Generated -->
+          <div class="col-md-3">
+            <div class="card text-white bg-danger">
+              <div class="card-body">
+                <h5 class="card-title">Revenue</h5>
+                <p class="card-text display-6">$4,567</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Recent Activity Section -->
+      <section class="recent-activity">
+        <h3>Recent Activity</h3>
+        <ul class="list-group">
+          <li class="list-group-item">New user <strong>john_doe</strong> registered.</li>
+          <li class="list-group-item">Event <strong>Cooking Class</strong> created.</li>
+          <li class="list-group-item">Message received from <strong>jane_smith</strong>.</li>
+          <li class="list-group-item">Revenue updated for <strong>March</strong>.</li>
+        </ul>
+      </section>
+
+      <!-- User Management Section -->
+      <section class="user-management">
+        <h3>User Management</h3>
+        <div class="table-responsive">
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>john_doe</td>
+                <td>john@example.com</td>
+                <td>User</td>
+                <td>
+                  <button class="btn btn-sm btn-primary">Edit</button>
+                  <button class="btn btn-sm btn-danger">Delete</button>
+                </td>
+              </tr>
+              <tr>
+                <td>admin_user</td>
+                <td>admin@example.com</td>
+                <td>Admin</td>
+                <td>
+                  <button class="btn btn-sm btn-primary">Edit</button>
+                  <button class="btn btn-sm btn-danger">Delete</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Event Management Section -->
+      <section class="event-management">
+        <h3>Event Management</h3>
+        <div class="table-responsive">
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>Event Name</th>
+                <th>Date</th>
+                <th>Participants</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Cooking Class</td>
+                <td>2025-03-12</td>
+                <td>25</td>
+                <td>
+                  <button class="btn btn-sm btn-primary">Edit</button>
+                  <button class="btn btn-sm btn-danger">Delete</button>
+                </td>
+              </tr>
+              <tr>
+                <td>Photography Walk</td>
+                <td>2025-03-15</td>
+                <td>40</td>
+                <td>
+                  <button class="btn btn-sm btn-primary">Edit</button>
+                  <button class="btn btn-sm btn-danger">Delete</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer class="footer">
+        <div class="container">
+          <p class="mb-0">&copy; 2025 myVibe. All rights reserved. <a href="#" class="text-white">Documentation</a> | <a href="#" class="text-white">Support</a></p>
+        </div>
+      </footer>
+    </main>
+  </div>
+</div>
+{% endblock content %}

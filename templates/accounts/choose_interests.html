@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>Choose Your Interests</h2>
+  <div class="interests-grid">
+    {% for interest in interests %}
+      <a href="{% url 'choose_interests' %}?selected={{ interest.id }}" class="interest-card {% if interest.id|stringformat:"s" == selected_interest %}selected{% endif %}">
+        {{ interest.name }}
+      </a>
+    {% endfor %}
+  </div>
+  <div class="actions">
+    <a href="{% url 'update_profile' %}" class="btn btn-primary">Continue</a>
+    <a href="{% url 'update_profile' %}" class="btn btn-secondary">Skip</a>
+  </div>
+{% endblock %}

@@ -1,0 +1,47 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+    <link rel="stylesheet" href="{% static 'assets/events/styles.css' %}">
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <title>Events</title>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center">Upcoming Events</h1>
+        <div class="row">
+            {% for event in events %}
+                <div class="col-md-4">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">
+                                <a href="{% url 'event_detail' event.id %}">{{ event.title }}</a>
+                            </h3>
+                        </div>
+                        <div class="panel-body">
+                            <p><strong>Date & Time:</strong> {{ event.start_time|date:"F j, Y, g:i a" }} - {{ event.end_time|date:"g:i a" }}</p>
+                            {% if event.images.exists %}
+                                {% for image in event.images.all %}
+                                    {% if image.is_primary %}
+                                        <img src="{{ image.image.url }}" alt="{{ event.title }}" class="img-responsive" style="max-height: 200px; width: 100%;">
+                                    {% endif %}
+                                {% endfor %}
+                            {% else %}
+                                <p>No image available</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-md-12">
+                    <p class="text-center">No events available.</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>

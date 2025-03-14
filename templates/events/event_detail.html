@@ -1,0 +1,130 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+    <link rel="stylesheet" href="{% static 'assets/events/styles.css' %}">
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <!-- Leaflet for map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <title>{{ event.title }} - Details</title>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center">{{ event.title }}</h1>
+        <div class="row">
+            <!-- Event Details -->
+            <div class="col-md-8">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Event Details</h3>
+                    </div>
+                    <div class="panel-body">
+                        <p><strong>Description:</strong> {{ event.description|default:"No description provided" }}</p>
+                        <p><strong>Creator:</strong> {{ event.creator.get_full_name|default:event.creator.username }}</p>
+                        <p><strong>Start Time:</strong> {{ event.start_time|date:"F j, Y, g:i a" }}</p>
+                        <p><strong>End Time:</strong> {{ event.end_time|date:"F j, Y, g:i a" }}</p>
+                        <p><strong>Venue:</strong> {{ event.venue_name|default:"Missing" }}</p>
+                        <p><strong>Category:</strong> {{ event.get_category_display|default:"Missing" }}</p>
+                        <p><strong>Public:</strong> {{ event.is_public|yesno:"Yes,No" }}</p>
+                        <p><strong>Max Attendees:</strong> {{ event.max_attendees|default_if_none:"Unlimited" }}</p>
+                        <p><strong>Price:</strong> KES {{ event.price|floatformat:2|default:"0.00" }}</p>
+                        <p><strong>Registration Deadline:</strong> {{ event.registration_deadline|date:"F j, Y, g:i a"|default:"Missing" }}</p>
+                        <p><strong>Interests:</strong> 
+                            {% if event.interests.exists %}
+                                {% for interest in event.interests.all %}
+                                    {{ interest.name }}{% if not forloop.last %}, {% endif %}
+                                {% endfor %}
+                            {% else %}
+                                None
+                            {% endif %}
+                        </p>
+                        <p><strong>Tags:</strong> 
+                            {% if event.tags.exists %}
+                                {% for tag in event.tags.all %}
+                                    {{ tag.name }}{% if not forloop.last %}, {% endif %}
+                                {% endfor %}
+                            {% else %}
+                                None
+                            {% endif %}
+                        </p>
+                        <p><strong>Created At:</strong> {{ event.created_at|date:"F j, Y, g:i a" }}</p>
+                        <p><strong>Updated At:</strong> {{ event.updated_at|date:"F j, Y, g:i a" }}</p>
+                    </div>
+                </div>
+
+                <!-- Attendees -->
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Attendees</h3>
+                    </div>
+                    <div class="panel-body">
+                        {% if event.attendees.exists %}
+                            <ul>
+                                {% for attendee in event.attendees.all %}
+                                    <li>
+                                        {% if attendee.user %}
+                                            {{ attendee.user.get_full_name|default:attendee.user.username }} ({{ attendee.status }})
+                                        {% else %}
+                                            {{ attendee.external_guest }} ({{ attendee.status }})
+                                        {% endif %}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p>No attendees yet.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Images and Map -->
+            <div class="col-md-4">
+                <!-- Images -->
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Event Images</h3>
+                    </div>
+                    <div class="panel-body">
+                        {% if event.images.exists %}
+                            {% for image in event.images.all %}
+                                <img src="{{ image.image.url }}" alt="{{ image.caption|default:event.title }}" class="img-responsive" style="max-width: 100%; margin-bottom: 10px;">
+                                {% if image.caption %}
+                                    <p>{{ image.caption }}</p>
+                                {% endif %}
+                            {% endfor %}
+                        {% else %}
+                            <p>No images available.</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Map -->
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Location</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div id="map" style="height: 300px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leaflet Map Script -->
+    <script>
+        $(document).ready(function () {
+            var map = L.map('map').setView([{{ event.latitude }}, {{ event.longitude }}], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+            L.marker([{{ event.latitude }}, {{ event.longitude }}]).addTo(map);
+        });
+    </script>
+</body>
+</html>
