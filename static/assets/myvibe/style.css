@@ -66,6 +66,8 @@ body {
 
 .profile-pic {
   width: 2.7rem;
+  height: 2.7rem;
+  object-fit: cover;
   aspect-ratio: 1/1;
   border-radius: 50%;
   overflow: hidden;
@@ -922,3 +924,29 @@ nav .nav-links {
     display: none;
   }
 }
+
+.more-images {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 5px;
+  border-radius: 5px;
+}
+
+.event-title {
+  background-color: #e9f5ff;
+  padding: 10px;
+  margin: 5px 0;
+  border-radius: 5px;
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #2c3e50;
+}
+.event-title a {
+  color: #2c3e50;
+  text-decoration: none;
+}
+

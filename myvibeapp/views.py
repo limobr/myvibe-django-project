@@ -4,8 +4,11 @@ from django.contrib.auth.decorators import login_required
 from accounts.models import Interest
 from django.utils import timezone
 from django.contrib import messages
+import json
+from django.http import JsonResponse
+from django.template.loader import render_to_string
 
-from myvibeapp.models import Media, Post
+from myvibeapp.models import Comment, Media, Post
 
 @login_required
 def admin_dashboard(request):
@@ -75,19 +78,50 @@ def shorten_location(location):
 
 @login_required
 def home_view(request):
-    # Fetch active, public posts ordered by creation date (newest first)
     posts = Post.objects.filter(is_active=True, privacy='public').order_by('-created_at')
-    
-    # Process each post's location
     for post in posts:
         if post.location:
             post.short_location = shorten_location(post.location)
         else:
             post.short_location = None
-
     context = {'posts': posts}
     return render(request, 'myvibe/homepage.html', context)
 
+def post_detail_modal(request, post_id):
+    post = get_object_or_404(Post, id=post_id, is_active=True)
+    return render(request, 'myvibe/post_detail_modal.html', {'post': post})
+
+@login_required
+def add_comment(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            post_id = data.get('post_id')
+            text = data.get('text')
+
+            if not post_id or not text:
+                return JsonResponse({'success': False, 'error': 'Missing post_id or text'}, status=400)
+
+            post = get_object_or_404(Post, id=post_id)
+            comment = Comment.objects.create(user=request.user, post=post, text=text)
+
+            # Update post's total_comments
+            post.total_comments = post.comments.count()
+            post.save()
+
+            # Return success response with comment details
+            response_data = {
+                'success': True,
+                'comment': {
+                    'text': comment.text,
+                    'user': comment.user.get_full_name() or comment.user.username,
+                    'created_at': comment.created_at.strftime('%B %d, %Y, %I:%M %p')
+                }
+            }
+            return JsonResponse(response_data, status=200)
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)}, status=500)
+    return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=405)
 
 @login_required
 def create_post(request):

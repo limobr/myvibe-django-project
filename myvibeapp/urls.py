@@ -11,4 +11,6 @@ urlpatterns = [
     ####################################### users #############################################
     path('', views.home_view, name='home'),
     path('create-post/', views.create_post, name='create_post'),
+    path('post/<int:post_id>/details/', views.post_detail_modal, name='post_detail_modal'),
+    path('add-comment/', views.add_comment, name='add_comment'),
 ]

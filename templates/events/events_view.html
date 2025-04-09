@@ -1,47 +1,151 @@
+{% extends "myvibe/base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
-    <link rel="stylesheet" href="{% static 'assets/events/styles.css' %}">
-    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-    <title>Events</title>
-</head>
-<body>
-    <div class="container">
-        <h1 class="text-center">Upcoming Events</h1>
-        <div class="row">
-            {% for event in events %}
-                <div class="col-md-4">
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            <h3 class="panel-title">
-                                <a href="{% url 'event_detail' event.id %}">{{ event.title }}</a>
-                            </h3>
-                        </div>
-                        <div class="panel-body">
-                            <p><strong>Date & Time:</strong> {{ event.start_time|date:"F j, Y, g:i a" }} - {{ event.end_time|date:"g:i a" }}</p>
-                            {% if event.images.exists %}
-                                {% for image in event.images.all %}
-                                    {% if image.is_primary %}
-                                        <img src="{{ image.image.url }}" alt="{{ event.title }}" class="img-responsive" style="max-height: 200px; width: 100%;">
-                                    {% endif %}
-                                {% endfor %}
-                            {% else %}
-                                <p>No image available</p>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-            {% empty %}
-                <div class="col-md-12">
-                    <p class="text-center">No events available.</p>
-                </div>
-            {% endfor %}
-        </div>
+{% block content %}
+<style>
+    .caption {
+      padding: 10px;
+      background-color: #f9f9f9;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .caption .event-time {
+      margin: 0 0 10px 0;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #34495e;
+      background-color: #dfe9f5;
+      padding: 8px 12px;
+      border-radius: 5px;
+      display: inline-block;
+    }
+    .caption .event-time strong {
+      color: #2980b9;
+    }
+    .caption .event-time span {
+      font-weight: 400;
+      color: #2c3e50;
+    }
+    .caption .description {
+      margin: 0;
+      font-size: 1rem;
+      line-height: 1.5;
+      color: #555;
+      font-family: 'Arial', sans-serif;
+      letter-spacing: 0.2px;
+    }
+  </style>
+  <!-- Middle Section -->
+  <div class="middle-section">
+    <!-- Event Creation Placeholder -->
+    <div class="create-post" style="display: flex; align-items: center; background-color: #fff; padding: 15px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.1);">
+      <div class="profile-pic" style="margin-right: 10px;">
+        {% if user.is_authenticated and user.userprofile.profile_picture %}
+          <img src="{{ user.userprofile.profile_picture.url }}" alt="{{ user.first_name }}'s profile picture" style="width: 50px; height: 50px; border-radius: 50%;" />
+        {% else %}
+          <img src="{% static 'assets/myvibe/images/main-profile.jpg' %}" alt="Default profile picture" style="width: 50px; height: 50px; border-radius: 50%;" />
+        {% endif %}
+      </div>
+      <div style="flex: 1;">
+        <input type="text" placeholder="Create a new event" onclick="window.location.href='{% url 'create_event' %}'" 
+               style="width: 100%; padding: 10px; font-size: 1rem; border: 1px solid #d3d3d3; border-radius: 5px; background-color: #fff; cursor: pointer;" readonly />
+      </div>
     </div>
-</body>
-</html>
+
+    <!-- Events List -->
+    {% if events %}
+      <div class="news-feeds">
+        {% for event in events %}
+          <div class="feed">
+            <!-- Header: Creator, Venue, Time Since Posted -->
+            <div class="head">
+              <div class="user">
+                <div class="profile-pic">
+                  {% if event.creator.userprofile.profile_picture %}
+                    <img src="{{ event.creator.userprofile.profile_picture.url }}" alt="" />
+                  {% else %}
+                    <img src="{% static 'assets/myvibe/images/default_profile.jpg' %}" alt="" />
+                  {% endif %}
+                </div>
+                <div class="info">
+                  <h3>{{ event.creator.get_full_name|default:event.creator.username }}</h3>
+                  <small>
+                    {% if event.venue_name %}{{ event.venue_name }}, {% endif %}
+                    {{ event.created_at|timesince }} ago
+                  </small>
+                </div>
+              </div>
+              <span class="edit">
+                <i class="fa-solid fa-ellipsis"></i>
+              </span>
+            </div>
+
+            <!-- Event Title -->
+            <div style="background-color: #e9f5ff; padding: 10px; margin: 5px 0; border-radius: 5px; text-align: center; font-size: 1.2rem; font-weight: bold; color: #2c3e50;">
+              <a href="{% url 'event_detail' event.id %}" style="color: #2c3e50; text-decoration: none;">{{ event.title }}</a>
+            </div>
+
+            <!-- Event Details: Date, Time, Truncated Description -->
+            <div class="caption" style="padding: 10px; background-color: #f9f9f9; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+              <p style="margin: 0 0 10px 0; font-size: 1rem; font-weight: 600; color: #34495e; padding: 8px 12px; border-radius: 5px; display: inline-block;">
+                <strong style="color: #2980b9;">Event Time:</strong> 
+                <span style="font-weight: 400; color: #2c3e50;">{{ event.start_time|date:"F j, Y, g:i a" }} - {{ event.end_time|date:"g:i a" }}</span>
+              </p>
+              <p style="margin: 0; font-size: 1rem; line-height: 1.5; color: #555; font-family: 'Arial', sans-serif; letter-spacing: 0.2px;">
+                {{ event.description|truncatewords:50 }}
+              </p>
+            </div>
+
+            <!-- Primary Image with +X for Additional Images -->
+            <div class="post-img">
+              {% if event.primary_image %}
+                <img src="{{ event.primary_image.image.url }}" alt="{{ event.title }}" />
+                {% with other_images_count=event.images.count|add:-1 %}
+                  {% if other_images_count > 0 %}
+                    <div class="more-images">+{{ other_images_count }}</div>
+                  {% endif %}
+                {% endwith %}
+              {% else %}
+                <p>No primary image available</p>
+              {% endif %}
+            </div>
+
+            <!-- Interaction Buttons -->
+            <div class="action-btn">
+              <div class="interaction-btn">
+                <span><i class="fa-regular fa-heart"></i></span>
+                <span><i class="fa-regular fa-comment"></i></span>
+                <span><i class="fa-regular fa-paper-plane"></i></span>
+              </div>
+              <div class="bookmark">
+                <span><i class="fa-regular fa-bookmark"></i></span>
+              </div>
+            </div>
+
+            <!-- Likes Section -->
+            {% if event.likes.count > 0 %}
+              <div class="liked-by">
+                <span><img src="{% static 'assets/myvibe/images/profile-10.jpg' %}" alt="" /></span>
+                <span><img src="{% static 'assets/myvibe/images/profile-8.jpg' %}" alt="" /></span>
+                <span><img src="{% static 'assets/myvibe/images/profile-17.jpg' %}" alt="" /></span>
+                <p>Liked by <b>Amanda Johnson</b> and <b>{{ event.likes.count }} other users.</b></p>
+              </div>
+            {% endif %}
+
+            <!-- Comments Section -->
+            <div class="comment muted-text">
+              {% if event.comments.count > 0 %}
+                View all {{ event.comments.count }} Comments
+              {% else %}
+                Be the first to comment
+              {% endif %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p>No events found.</p>
+    {% endif %}
+    
+  </div>
+  {% include 'myvibe/rightside.html' %}
+{% endblock %}

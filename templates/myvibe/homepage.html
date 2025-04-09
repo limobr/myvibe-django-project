@@ -1,119 +1,296 @@
-{% extends "myvibe/base.html" %} 
-{% load static %} 
+{% extends "myvibe/base.html" %}
+{% load static %}
 {% block content %}
   <!-- Middle Section -->
   <div class="middle-section">
-    <!------------------------------------- STORIES HERE--------------------------------------------------->
-
     <!-- Post Form -->
-<div class="create-post" style="display: flex; align-items: center; background-color: #fff; padding: 15px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.1);">
-  <div class="profile-pic" style="margin-right: 10px;">
-
-    {% if user.is_authenticated and user.userprofile.profile_picture %}
-    <img src="{{ user.userprofile.profile_picture.url }}" alt="{{ user.first_name }}'s profile picture" style="width: 50px; height: 50px; border-radius: 50%;"/>
-{% else %}
-    <img src="{% static 'assets/myvibe/images/main-profile.jpg' %}" alt="Default profile picture" style="width: 50px; height: 50px; border-radius: 50%;"/>
-{% endif %}
-  </div>
-
-  <!-- Clickable input field -->
-  <div style="flex: 1;">
-    <input type="text" placeholder="What's on your mind?" id="create-post" onclick="window.location.href='{% url 'create_post' %}'" 
-           style="width: 100%; padding: 10px; font-size: 1rem; border: 1px solid #d3d3d3; border-radius: 5px; background-color: #fff; cursor: pointer;" readonly />
-  </div>
-</div>
-
+    <div class="create-post" style="display: flex; align-items: center; background-color: #fff; padding: 15px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.1);">
+      <div class="profile-pic" style="margin-right: 10px;">
+        {% if user.is_authenticated and user.userprofile.profile_picture %}
+          <img src="{{ user.userprofile.profile_picture.url }}" alt="{{ user.first_name }}'s profile picture" style="width: 50px; height: 50px; border-radius: 50%;" />
+        {% else %}
+          <img src="{% static 'assets/myvibe/images/main-profile.jpg' %}" alt="Default profile picture" style="width: 50px; height: 50px; border-radius: 50%;" />
+        {% endif %}
+      </div>
+      <div style="flex: 1;">
+        <input type="text" placeholder="What's on your mind?" id="create-post" onclick="window.location.href='{% url 'create_post' %}'" 
+               style="width: 100%; padding: 10px; font-size: 1rem; border: 1px solid #d3d3d3; border-radius: 5px; background-color: #fff; cursor: pointer;" readonly />
+      </div>
+    </div>
 
     {% if posts %}
-  <div class="news-feeds">
-    {% for post in posts %}
-      <div class="feed">
-        <div class="head">
-          <div class="user">
-            <div class="profile-pic">
-              {% if post.user.userprofile.profile_picture %}
-                <img src="{{ post.user.userprofile.profile_picture.url }}" alt="" />
+      <div class="news-feeds">
+        {% for post in posts %}
+          <div class="feed" style="cursor: pointer;" onclick="openPostModal({{ post.id }})">
+            <div class="head">
+              <div class="user">
+                <div class="profile-pic">
+                  {% if post.user.userprofile.profile_picture %}
+                    <img src="{{ post.user.userprofile.profile_picture.url }}" alt="" />
+                  {% else %}
+                    <img src="{% static 'assets/myvibe/images/default_profile.jpg' %}" alt="" />
+                  {% endif %}
+                </div>
+                <div class="info">
+                  <h3>{{ post.user.get_full_name|default:post.user.username }}</h3>
+                  <small>
+                    {% if post.short_location %}{{ post.short_location }}, {% endif %}
+                    {{ post.created_at|timesince }} ago
+                  </small>
+                </div>
+              </div>
+              <span class="edit">
+                <i class="fa-solid fa-ellipsis"></i>
+              </span>
+            </div>
+
+            <div class="caption" style="padding: 5px;">
+              <p>{{ post.description }}</p>
+            </div>
+
+            <div class="post-img">
+              {% with first_media=post.media_files.all|first %}
+                {% if first_media and first_media.media_type == 'image' %}
+                  <img src="{{ first_media.file.url }}" alt="" />
+                {% endif %}
+              {% endwith %}
+            </div>
+
+            <div class="action-btn" onclick="event.stopPropagation()">
+              <div class="interaction-btn">
+                <span><i class="fa-regular fa-heart"></i></span>
+                <span><i class="fa-regular fa-comment"></i></span>
+                <span><i class="fa-regular fa-paper-plane"></i></span>
+              </div>
+              <div class="bookmark">
+                <span><i class="fa-regular fa-bookmark"></i></span>
+              </div>
+            </div>
+
+            {% if post.total_likes > 0 %}
+              <div class="liked-by">
+                <span><img src="{% static 'assets/myvibe/images/profile-10.jpg' %}" alt="" /></span>
+                <span><img src="{% static 'assets/myvibe/images/profile-8.jpg' %}" alt="" /></span>
+                <span><img src="{% static 'assets/myvibe/images/profile-17.jpg' %}" alt="" /></span>
+                <p>Liked by <b>Amanda Johnson</b> and <b>{{ post.total_likes }} other users.</b></p>
+              </div>
+            {% endif %}
+
+            <div class="comment muted-text">
+              {% if post.total_comments > 0 %}
+                View all {{ post.total_comments }} Comments
               {% else %}
-                <img src="{% static 'assets/myvibe/images/default_profile.jpg' %}" alt="" />
+                Be the first to comment
               {% endif %}
             </div>
-            <div class="info">
-              <h3>{{ post.user.get_full_name|default:post.user.username }}</h3>
-              <small>
-                {% if post.short_location %}{{ post.short_location }}, {% endif %}
-                {{ post.created_at|timesince }} ago
-              </small>
-            </div>
-            
           </div>
-          <span class="edit">
-            <i class="fa-solid fa-ellipsis"></i>
-          </span>
-        </div>
-
-        <div class="caption" style="padding: 5px;">
-          <p>
-            {{ post.description }}
-          </p>
-        </div>
-
-        <div class="post-img">
-          {% with first_media=post.media_files.all|first %}
-            {% if first_media and first_media.media_type == 'image' %}
-              <img src="{{ first_media.file.url }}" alt="" />
-            {% endif %}
-          {% endwith %}
-        </div>
-
-        <div class="action-btn">
-          <div class="interaction-btn">
-            <span><i class="fa-regular fa-heart"></i></span>
-            <span><i class="fa-regular fa-comment"></i></span>
-            <span><i class="fa-regular fa-paper-plane"></i></span>
-          </div>
-          <div class="bookmark">
-            <span><i class="fa-regular fa-bookmark"></i></span>
-          </div>
-        </div>
-
-        {% if post.total_likes > 0 %}
-        <div class="liked-by">
-          {# You might want to loop through a subset of users who liked the post #}
-          <span>
-            <img src="{% static 'assets/myvibe/images/profile-10.jpg' %}" alt="" />
-          </span>
-          <span>
-            <img src="{% static 'assets/myvibe/images/profile-8.jpg' %}" alt="" />
-          </span>
-          <span>
-            <img src="{% static 'assets/myvibe/images/profile-17.jpg' %}" alt="" />
-          </span>
-          <p>
-            Liked by <b>Amanda Johnson</b> and <b>{{ post.total_likes }} other users.</b>
-          </p>
-        </div>
-        {% endif %}
-
-        
-
-        <div class="comment muted-text">
-          {% if post.total_comments > 0 %}
-            View all {{ post.total_comments }} Comments
-          {% else %}
-            Be the first to comment
-          {% endif %}
-        </div>
+        {% endfor %}
       </div>
-    {% endfor %}
-  </div>
-{% else %}
-  <p>No posts found.</p>
-{% endif %}
+    {% else %}
+      <p>No posts found.</p>
+    {% endif %}
+
+    <!-- Post Modal -->
+    <div id="postModal" class="modal">
+      <div class="modal-content">
+        <span class="close">×</span>
+        <div id="modalContent"><div class="loader"></div></div>
+      </div>
+    </div>
 
   </div>
 
-  
-  {% include 'myvibe/rightside.html'%}
+  {% include 'myvibe/rightside.html' %}
+
 </div>
+  <!-- JavaScript for Modal Functionality -->
+  <script>
+    var csrfToken = '{{ csrf_token }}';
 
+    function openPostModal(postId) {
+      var modal = document.getElementById('postModal');
+      var modalContent = document.getElementById('modalContent');
+      modal.style.display = 'block';
+      document.body.style.overflow = 'hidden'; // Prevent background scrolling
+      modalContent.innerHTML = '<div class="loader"></div>'; // Show loader while fetching
+    
+      // Fetch post details via AJAX
+      fetch('/post/' + postId + '/details/')
+        .then(response => {
+          if (!response.ok) throw new Error('Failed to load post details');
+          return response.text();
+        })
+        .then(html => {
+          modalContent.innerHTML = html;
+    
+          // Attach event listener to comment form
+          var commentForm = document.getElementById('commentForm');
+          var commentInput = document.getElementById('commentInput');
+          var commentLoader = document.getElementById('commentLoader');
+          var commentsSection = document.getElementById('commentsSection');
+    
+          if (commentForm) {
+            commentForm.addEventListener('submit', function(e) {
+              e.preventDefault();
+              var commentText = commentInput.value.trim();
+              if (!commentText) return;
+    
+              commentLoader.style.display = 'block'; // Show loader
+    
+              fetch('/add-comment/', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({ post_id: postId, text: commentText })
+              })
+                .then(response => {
+                  if (!response.ok) throw new Error('Failed to post comment');
+                  return response.json();
+                })
+                .then(data => {
+                  commentLoader.style.display = 'none'; // Hide loader
+                  if (data.success) {
+                    var newComment = document.createElement('div');
+                    newComment.className = 'comment';
+                    newComment.innerHTML = `
+                      <p>${data.comment.text}</p>
+                      <small>By ${data.comment.user} on ${data.comment.created_at}</small>
+                    `;
+                    commentsSection.appendChild(newComment);
+                    commentInput.value = ''; // Clear input
+                  } else {
+                    alert('Failed to add comment: ' + (data.error || 'Unknown error'));
+                  }
+                })
+                .catch(error => {
+                  commentLoader.style.display = 'none';
+                  alert('Error posting comment: ' + error.message);
+                });
+            });
+          }
+        })
+        .catch(error => {
+          modalContent.innerHTML = '<p>Error loading post details: ' + error.message + '</p>';
+        });
+    }
+    
+    // Close modal when clicking the close button
+    document.querySelector('.close').addEventListener('click', function() {
+      document.getElementById('postModal').style.display = 'none';
+      document.body.style.overflow = ''; // Restore background scrolling
+    });
+    
+    // Close modal when clicking outside
+    window.addEventListener('click', function(event) {
+      if (event.target === document.getElementById('postModal')) {
+        document.getElementById('postModal').style.display = 'none';
+        document.body.style.overflow = ''; // Restore background scrolling
+      }
+    });
+  </script>
+
+  <!-- Modal CSS -->
+  <style>
+    /* Modal Styling */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 200;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.4);
+    }
+
+    .modal img{
+      max-height: 450px;
+      object-fit: cover;
+    }
+
+    .modal-content {
+      background-color: #fefefe;
+      margin: 10% auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 90%; /* Responsive width */
+      max-width: 600px; /* Maximum width for larger screens */
+      border-radius: 10px; /* Rounded corners */
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+    }
+
+    .close:hover,
+    .close:focus {
+      color: black;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    /* Loader Styling */
+    .loader {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #3498db;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+      margin: 20px auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Comments Section */
+    #commentsSection {
+      max-height: 300px;
+      overflow-y: auto;
+      margin-bottom: 10px;
+    }
+
+    #commentLoader {
+      display: none;
+      margin: 10px 0;
+    }
+
+    /* Image Viewer Styling */
+  .image-viewer {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .image-viewer img {
+    max-width: 90%;
+    max-height: 90%;
+  }
+
+  .close-viewer {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    font-size: 40px;
+    color: white;
+    cursor: pointer;
+  }
+  </style>
 {% endblock %}

@@ -38,7 +38,11 @@ class Event(models.Model):
             models.Index(fields=['start_time']),
             models.Index(fields=['category']),
         ]
-
+    def get_primary_image(self):
+            """Return the URL of the primary image or a default image if none exists."""
+            primary = self.images.filter(is_primary=True).first()
+            return primary.image.url if primary else '/static/default_event_image.jpg'
+        
     def __str__(self):
         return self.title
 
