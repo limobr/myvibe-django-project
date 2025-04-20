@@ -7,7 +7,7 @@ from django.contrib import messages
 import json
 from django.http import JsonResponse
 from django.template.loader import render_to_string
-
+from django.views.decorators.csrf import csrf_exempt
 from myvibeapp.models import Comment, Media, Post
 
 @login_required
@@ -91,6 +91,8 @@ def post_detail_modal(request, post_id):
     post = get_object_or_404(Post, id=post_id, is_active=True)
     return render(request, 'myvibe/post_detail_modal.html', {'post': post})
 
+
+@csrf_exempt
 @login_required
 def add_comment(request):
     if request.method == 'POST':
@@ -99,26 +101,29 @@ def add_comment(request):
             post_id = data.get('post_id')
             text = data.get('text')
 
+            # Validate input
             if not post_id or not text:
                 return JsonResponse({'success': False, 'error': 'Missing post_id or text'}, status=400)
 
-            post = get_object_or_404(Post, id=post_id)
-            comment = Comment.objects.create(user=request.user, post=post, text=text)
+            # Create the comment
+            post = Post.objects.get(id=post_id)
+            comment = Comment.objects.create(
+                user=request.user,
+                post=post,
+                text=text
+            )
 
-            # Update post's total_comments
-            post.total_comments = post.comments.count()
-            post.save()
-
-            # Return success response with comment details
-            response_data = {
+            # Return the comment data with created_at in ISO format
+            return JsonResponse({
                 'success': True,
                 'comment': {
                     'text': comment.text,
                     'user': comment.user.get_full_name() or comment.user.username,
-                    'created_at': comment.created_at.strftime('%B %d, %Y, %I:%M %p')
+                    'created_at': comment.created_at.isoformat()  # ISO 8601 format
                 }
-            }
-            return JsonResponse(response_data, status=200)
+            })
+        except Post.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Post not found'}, status=404)
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)}, status=500)
     return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=405)

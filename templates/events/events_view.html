@@ -2,150 +2,383 @@
 {% load static %}
 {% block content %}
 <style>
+    .create-post {
+        display: flex;
+        align-items: center;
+        background-color: var(--card-bg);
+        padding: 15px;
+        border-radius: 12px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+        transition: transform 0.2s;
+    }
+
+    .create-post:hover {
+        transform: translateY(-2px);
+    }
+
+    .create-post .profile-pic img {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .create-post input {
+        flex: 1;
+        padding: 12px;
+        font-size: 1rem;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background-color: #f9f9f9;
+        cursor: pointer;
+        margin-left: 10px;
+        transition: border-color 0.3s;
+    }
+
+    .create-post input:hover {
+        border-color: var(--primary);
+    }
+
+    .news-feeds {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .feed {
+        background-color: var(--card-bg);
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        padding: 15px;
+        transition: transform 0.2s;
+    }
+
+    .feed:hover {
+        transform: translateY(-2px);
+    }
+
+    .head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+    .user {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .user .profile-pic img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .info h3 {
+        margin: 0;
+        font-size: 1.1rem;
+        color: var(--text);
+        font-weight: 600;
+    }
+
+    .info small {
+        color: var(--text);
+        font-size: 0.85rem;
+    }
+
+    .edit {
+        cursor: pointer;
+        color: var(--muted-text);
+        font-size: 1.2rem;
+    }
+
+    .edit:hover {
+      color: var(--text);
+    }
+
+    .event-title {
+        background: var(--primary, #4a90e2);
+        padding: 10px;
+        margin: 10px 0;
+        border-radius: 8px;
+        text-align: center;
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--text);
+    }
+
+    .event-title a {
+        color: white;
+        text-decoration: none;
+        transition: color 0.3s;
+    }
+
+    .event-title a:hover {
+      color: var(--text);
+    }
+
     .caption {
-      padding: 10px;
-      background-color: #f9f9f9;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        padding: 15px;
+        border-radius: 8px;
+        margin: 10px 0;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     }
+
     .caption .event-time {
-      margin: 0 0 10px 0;
-      font-size: 1rem;
-      font-weight: 600;
-      color: #34495e;
-      background-color: #dfe9f5;
-      padding: 8px 12px;
-      border-radius: 5px;
-      display: inline-block;
+        margin: 0 0 10px 0;
+        font-size: 1rem;
+        font-weight: 600;
+        color: white;
+        background: var(--primary, #4a90e2);
+        padding: 8px 12px;
+        border-radius: 6px;
+        display: inline-block;
     }
+
     .caption .event-time strong {
-      color: #2980b9;
+        color: white;
     }
+
     .caption .event-time span {
-      font-weight: 400;
-      color: #2c3e50;
+        font-weight: 400;
+        color: white;
     }
+
     .caption .description {
-      margin: 0;
-      font-size: 1rem;
-      line-height: 1.5;
-      color: #555;
-      font-family: 'Arial', sans-serif;
-      letter-spacing: 0.2px;
+        margin: 0;
+        font-size: 1rem;
+        line-height: 1.6;
+        color: var(--text);
+        font-family: 'Arial', sans-serif;
+        letter-spacing: 0.2px;
     }
-  </style>
-  <!-- Middle Section -->
-  <div class="middle-section">
+
+    .post-img {
+        position: relative;
+        margin: 10px 0;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .post-img img {
+        width: 100%;
+        max-height: 400px;
+        object-fit: cover;
+        border-radius: 12px;
+    }
+
+    .more-images {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        background-color: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 5px 10px;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+    .action-btn {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 0;
+        border-top: 1px solid var(--border);
+        border-bottom: 1px solid var(--border);
+    }
+
+    .interaction-btn {
+        display: flex;
+        gap: 15px;
+    }
+
+    .interaction-btn span {
+        cursor: pointer;
+        color: var(--text);
+        font-size: 1.2rem;
+        transition: color 0.3s;
+    }
+
+    .interaction-btn span:hover {
+      color: var(--text);
+    }
+
+    .bookmark span {
+        cursor: pointer;
+        color: var(--text);
+        font-size: 1.2rem;
+        transition: color 0.3s;
+    }
+
+    .bookmark span:hover {
+      color: var(--text);
+    }
+
+    .liked-by {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 10px 0;
+        font-size: 0.9rem;
+        color: var(--text);
+    }
+
+    .liked-by img {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .comment {
+        margin: 10px 0;
+        font-size: 0.9rem;
+        color: var(--text);
+        cursor: pointer;
+    }
+
+    .comment:hover {
+      color: var(--text);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .middle-section {
+            padding: 10px;
+        }
+
+        .create-post {
+            padding: 10px;
+        }
+
+        .create-post input {
+            font-size: 0.9rem;
+            padding: 8px;
+        }
+
+        .feed {
+            padding: 10px;
+        }
+
+        .post-img img {
+            max-height: 300px;
+        }
+
+        .action-btn {
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .interaction-btn {
+            justify-content: center;
+        }
+    }
+</style>
+
     <!-- Event Creation Placeholder -->
-    <div class="create-post" style="display: flex; align-items: center; background-color: #fff; padding: 15px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.1);">
-      <div class="profile-pic" style="margin-right: 10px;">
-        {% if user.is_authenticated and user.userprofile.profile_picture %}
-          <img src="{{ user.userprofile.profile_picture.url }}" alt="{{ user.first_name }}'s profile picture" style="width: 50px; height: 50px; border-radius: 50%;" />
-        {% else %}
-          <img src="{% static 'assets/myvibe/images/main-profile.jpg' %}" alt="Default profile picture" style="width: 50px; height: 50px; border-radius: 50%;" />
-        {% endif %}
-      </div>
-      <div style="flex: 1;">
-        <input type="text" placeholder="Create a new event" onclick="window.location.href='{% url 'create_event' %}'" 
-               style="width: 100%; padding: 10px; font-size: 1rem; border: 1px solid #d3d3d3; border-radius: 5px; background-color: #fff; cursor: pointer;" readonly />
-      </div>
+    <div class="create-post">
+        <div class="profile-pic">
+            {% if user.is_authenticated and user.userprofile.profile_picture %}
+                <img src="{{ user.userprofile.profile_picture.url }}" alt="{{ user.first_name }}'s profile picture" />
+            {% else %}
+                <img src="{% static 'assets/myvibe/images/main-profile.jpg' %}" alt="Default profile picture" />
+            {% endif %}
+        </div>
+        <input type="text" placeholder="Create a new event" onclick="window.location.href='{% url 'create_event' %}'" readonly />
     </div>
 
     <!-- Events List -->
     {% if events %}
-      <div class="news-feeds">
-        {% for event in events %}
-          <div class="feed">
-            <!-- Header: Creator, Venue, Time Since Posted -->
-            <div class="head">
-              <div class="user">
-                <div class="profile-pic">
-                  {% if event.creator.userprofile.profile_picture %}
-                    <img src="{{ event.creator.userprofile.profile_picture.url }}" alt="" />
-                  {% else %}
-                    <img src="{% static 'assets/myvibe/images/default_profile.jpg' %}" alt="" />
-                  {% endif %}
+        <div class="news-feeds">
+            {% for event in events %}
+                <div class="feed">
+                    <!-- Header: Creator, Venue, Time Since Posted -->
+                    <div class="head">
+                        <div class="user">
+                            <div class="profile-pic">
+                                {% if event.creator.userprofile.profile_picture %}
+                                    <img src="{{ event.creator.userprofile.profile_picture.url }}" alt="{{ event.creator.username }}" />
+                                {% else %}
+                                    <img src="{% static 'assets/myvibe/images/default_profile.jpg' %}" alt="Default profile" />
+                                {% endif %}
+                            </div>
+                            <div class="info">
+                                <h3>{{ event.creator.get_full_name|default:event.creator.username }}</h3>
+                                <small>
+                                    {% if event.venue_name %}{{ event.venue_name }}, {% endif %}
+                                    {{ event.created_at|timesince }} ago
+                                </small>
+                            </div>
+                        </div>
+                        <span class="edit">
+                            <i class="fa-solid fa-ellipsis"></i>
+                        </span>
+                    </div>
+
+                    <!-- Event Title -->
+                    <div class="event-title">
+                        <a href="{% url 'event_detail' event.id %}">{{ event.title }}</a>
+                    </div>
+
+                    <!-- Event Details: Date, Time, Truncated Description -->
+                    <div class="caption">
+                        <p class="event-time">
+                            <strong>Event Time:</strong>
+                            <span>{{ event.start_time|date:"F j, Y, g:i a" }} - {{ event.end_time|date:"g:i a" }}</span>
+                        </p>
+                        <p class="description">{{ event.description|truncatewords:50 }}</p>
+                    </div>
+
+                    <!-- Primary Image with +X for Additional Images -->
+                    <div class="post-img">
+                        {% if event.primary_image %}
+                            <img src="{{ event.primary_image.image.url }}" alt="{{ event.title }}" />
+                            {% with other_images_count=event.images.count|add:-1 %}
+                                {% if other_images_count > 0 %}
+                                    <div class="more-images">+{{ other_images_count }}</div>
+                                {% endif %}
+                            {% endwith %}
+                        {% else %}
+                            <p>No primary image available</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Interaction Buttons -->
+                    <div class="action-btn">
+                        <div class="interaction-btn">
+                            <span><i class="fa-regular fa-heart"></i></span>
+                            <span><i class="fa-regular fa-comment"></i></span>
+                            <span><i class="fa-regular fa-paper-plane"></i></span>
+                        </div>
+                        <div class="bookmark">
+                            <span><i class="fa-regular fa-bookmark"></i></span>
+                        </div>
+                    </div>
+
+                    <!-- Likes Section -->
+                    {% if event.likes.count > 0 %}
+                        <div class="liked-by">
+                            <p>Liked by <b>{{ event.likes.count }} user{{ event.likes.count|pluralize }}</b></p>
+                        </div>
+                    {% endif %}
+
+                    <!-- Comments Section -->
+                    <div class="comment">
+                        {% if event.comments.count > 0 %}
+                            View all {{ event.comments.count }} Comment{{ event.comments.count|pluralize }}
+                        {% else %}
+                            Be the first to comment
+                        {% endif %}
+                    </div>
                 </div>
-                <div class="info">
-                  <h3>{{ event.creator.get_full_name|default:event.creator.username }}</h3>
-                  <small>
-                    {% if event.venue_name %}{{ event.venue_name }}, {% endif %}
-                    {{ event.created_at|timesince }} ago
-                  </small>
-                </div>
-              </div>
-              <span class="edit">
-                <i class="fa-solid fa-ellipsis"></i>
-              </span>
-            </div>
-
-            <!-- Event Title -->
-            <div style="background-color: #e9f5ff; padding: 10px; margin: 5px 0; border-radius: 5px; text-align: center; font-size: 1.2rem; font-weight: bold; color: #2c3e50;">
-              <a href="{% url 'event_detail' event.id %}" style="color: #2c3e50; text-decoration: none;">{{ event.title }}</a>
-            </div>
-
-            <!-- Event Details: Date, Time, Truncated Description -->
-            <div class="caption" style="padding: 10px; background-color: #f9f9f9; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-              <p style="margin: 0 0 10px 0; font-size: 1rem; font-weight: 600; color: #34495e; padding: 8px 12px; border-radius: 5px; display: inline-block;">
-                <strong style="color: #2980b9;">Event Time:</strong> 
-                <span style="font-weight: 400; color: #2c3e50;">{{ event.start_time|date:"F j, Y, g:i a" }} - {{ event.end_time|date:"g:i a" }}</span>
-              </p>
-              <p style="margin: 0; font-size: 1rem; line-height: 1.5; color: #555; font-family: 'Arial', sans-serif; letter-spacing: 0.2px;">
-                {{ event.description|truncatewords:50 }}
-              </p>
-            </div>
-
-            <!-- Primary Image with +X for Additional Images -->
-            <div class="post-img">
-              {% if event.primary_image %}
-                <img src="{{ event.primary_image.image.url }}" alt="{{ event.title }}" />
-                {% with other_images_count=event.images.count|add:-1 %}
-                  {% if other_images_count > 0 %}
-                    <div class="more-images">+{{ other_images_count }}</div>
-                  {% endif %}
-                {% endwith %}
-              {% else %}
-                <p>No primary image available</p>
-              {% endif %}
-            </div>
-
-            <!-- Interaction Buttons -->
-            <div class="action-btn">
-              <div class="interaction-btn">
-                <span><i class="fa-regular fa-heart"></i></span>
-                <span><i class="fa-regular fa-comment"></i></span>
-                <span><i class="fa-regular fa-paper-plane"></i></span>
-              </div>
-              <div class="bookmark">
-                <span><i class="fa-regular fa-bookmark"></i></span>
-              </div>
-            </div>
-
-            <!-- Likes Section -->
-            {% if event.likes.count > 0 %}
-              <div class="liked-by">
-                <span><img src="{% static 'assets/myvibe/images/profile-10.jpg' %}" alt="" /></span>
-                <span><img src="{% static 'assets/myvibe/images/profile-8.jpg' %}" alt="" /></span>
-                <span><img src="{% static 'assets/myvibe/images/profile-17.jpg' %}" alt="" /></span>
-                <p>Liked by <b>Amanda Johnson</b> and <b>{{ event.likes.count }} other users.</b></p>
-              </div>
-            {% endif %}
-
-            <!-- Comments Section -->
-            <div class="comment muted-text">
-              {% if event.comments.count > 0 %}
-                View all {{ event.comments.count }} Comments
-              {% else %}
-                Be the first to comment
-              {% endif %}
-            </div>
-          </div>
-        {% endfor %}
-      </div>
+            {% endfor %}
+        </div>
     {% else %}
-      <p>No events found.</p>
+        <p>No events found.</p>
     {% endif %}
-    
-  </div>
-  {% include 'myvibe/rightside.html' %}
 {% endblock %}

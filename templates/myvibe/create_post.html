@@ -1,219 +1,212 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Create Post</title>
-  {% load static %}
+{% extends "myvibe/base.html" %}
+{% load static %}
+
+{% block content %}
   <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
-  <style>
-    /* Updated base styles */
-    body {
-        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-        margin: 0;
-        padding: 0;
-        height: 100vh;
-        display: flex;
-        flex-direction: column;
-      }
-  
-      .post-container {
-        flex: 1;
-        max-width: 600px;
-        margin: 0 auto;
-        padding: 20px;
-        width: 100%;
-        height: 100vh;
-        display: flex;
-        flex-direction: column;
-      }
-  
-      .create-post-form {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(10px);
-        border-radius: 20px;
-        padding: 1.5rem;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        overflow-y: auto;
-      }
-  
-      /* Improved mobile layout */
-      @media (max-width: 480px) {
-        .post-container {
-          padding: 0;
-          height: 100%;
-        }
-        
-        .create-post-form {
-          border-radius: 0;
-          padding: 1rem;
-          height: calc(100vh - 60px);
-        }
-      }
-  
-      /* Modernized modal */
-      #interest-modal {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.4);
-        backdrop-filter: blur(5px);
-        align-items: center;
-        justify-content: center;
-        z-index: 1000;
-      }
-  
-      .modal-content {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(10px);
-        border-radius: 20px;
-        padding: 1.5rem;
-        width: 90%;
-        max-width: 500px;
-        max-height: 80vh;
-        overflow-y: auto;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-        animation: modalSlideIn 0.3s ease-out;
-      }
-  
-      /* Modal animations */
-      @keyframes modalSlideIn {
-        from { transform: translateY(20px); opacity: 0; }
-        to { transform: translateY(0); opacity: 1; }
-      }
-  
-      /* Modern form elements */
-      textarea, select, input {
-        width: 100%;
-        padding: 1rem;
-        border: 2px solid #e0e7ff;
-        border-radius: 12px;
-        margin-top: 0.5rem;
-        background: rgba(255,255,255,0.9);
-        transition: all 0.2s ease;
-        max-width: 100%;
-      }
-  
-      textarea:focus, select:focus, input:focus {
-        border-color: #667eea;
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
-        outline: none;
-      }
-  
-      /* Modern button styles */
-      .btn-submit {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border: none;
-        padding: 1rem 2rem;
-        border-radius: 12px;
-        font-weight: 600;
-        cursor: pointer;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        margin-top: auto;
-        position: sticky;
-        bottom: 0;
-        width: 100%;
-      }
-  
-      @media (max-width: 480px) {
-        .btn-submit {
-          position: fixed;
-          bottom: 0;
-          left: 0;
-          right: 0;
-          border-radius: 0;
-          padding: 1rem;
-          box-shadow: 0 -4px 12px rgba(0,0,0,0.1);
-        }
-      }
-  
-      /* Modern interest tags */
-      .audience-interests span {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 6px 12px;
-        border-radius: 8px;
-        color: white;
-        font-size: 0.9rem;
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-      }
-  
-      .change-button {
-        background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
-        color: white;
-        border: none;
-        padding: 8px 16px;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-      }
-  
-      .change-button:hover {
-        opacity: 0.9;
-      }
-  
-      /* Modern modal elements */
-      .interest-option {
-        padding: 8px 16px;
-        border-radius: 8px;
-        background: #f0f4ff;
-        color: #4a5568;
-        margin: 4px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-      }
-  
-      .interest-option.selected {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-      }
-  
-      .search-box input {
-        padding: 12px 16px;
-        border: 2px solid #e0e7ff;
-        border-radius: 8px;
-        background: rgba(255,255,255,0.9);
-        width: 100%;
-      }
-  
-      .modal-footer button {
-        padding: 10px 24px;
-        border-radius: 8px;
-        font-weight: 600;
-        transition: all 0.2s ease;
-      }
-  
-      .modal-footer button.okay-btn {
-        background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
-      }
-  
-      .modal-footer button.close-btn {
-        background: linear-gradient(135deg, #fc8181 0%, #f56565 100%);
-      }
 
-    /* Additional styles for map */
+  <style>
+
+    .create-post-form {
+      background: var(--card-bg);
+      border-radius: 20px;
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    /* Form group styling */
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 0.5rem;
+    }
+
+    /* Input fields */
+    textarea, select, input {
+      width: 100%;
+      padding: 1rem;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      margin-top: 0.5rem;
+      background: var(--input-bg);
+      color: var(--text);
+      transition: all 0.2s ease;
+      max-width: 100%;
+    }
+
+    textarea:focus, select:focus, input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+      outline: none;
+    }
+
+    /* Submit button */
+    .btn-submit {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      margin-top: auto;
+      position: sticky;
+      bottom: 0;
+      width: 100%;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    .btn-submit:hover {
+      background: var(--primary-hover);
+    }
+
+    /* Interest tags */
+    .audience-interests span {
+      background: var(--primary);
+      padding: 6px 12px;
+      border-radius: 8px;
+      color: white;
+      font-size: 0.9rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin: 4px;
+      transition: background 0.3s ease;
+    }
+
+    .change-button {
+      background: var(--border);
+      color: var(--text);
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .change-button:hover {
+      background: var(--primary);
+      color: white;
+    }
+
+    /* Modal styling */
+    #interest-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: var(--modal-overlay);
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background: var(--modal-bg);
+      border-radius: 20px;
+      padding: 1.5rem;
+      width: 90%;
+      max-width: 500px;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow);
+      color: var(--text);
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    /* Modal animations */
+    @keyframes modalSlideIn {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .modal-content {
+      animation: modalSlideIn 0.3s ease-out;
+    }
+
+    /* Modal elements */
+    .interest-option {
+      padding: 8px 16px;
+      border-radius: 8px;
+      background: var(--light-bg);
+      color: var(--text);
+      margin: 4px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .interest-option.selected {
+      background: var(--primary);
+      color: white;
+    }
+
+    .search-box input {
+      padding: 12px 16px;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      background: var(--input-bg);
+      color: var(--text);
+      width: 100%;
+      transition: all 0.2s ease;
+    }
+
+    .modal-footer button {
+      padding: 10px 24px;
+      border-radius: 8px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .modal-footer button.okay-btn {
+      background: var(--primary);
+      color: white;
+    }
+
+    .modal-footer button.close-btn {
+      background: var(--border);
+      color: var(--text);
+    }
+
+    .modal-footer button.okay-btn:hover {
+      background: var(--primary-hover);
+    }
+
+    .modal-footer button.close-btn:hover {
+      background: var(--primary);
+      color: white;
+    }
+
+    /* Map styling */
     #map {
       height: 250px;
       border-radius: 12px;
       margin-top: 10px;
-      border: 2px solid #e0e7ff;
+      border: 2px solid var(--border);
+      transition: border-color 0.3s ease;
     }
 
     .map-btn {
-      background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
-      color: white;
+      background: var(--border);
+      color: var(--text);
       border: none;
       padding: 8px 16px;
       border-radius: 8px;
@@ -224,7 +217,8 @@
     }
 
     .map-btn:hover {
-      opacity: 0.9;
+      background: var(--primary);
+      color: white;
     }
 
     .leaflet-control-attribution {
@@ -234,10 +228,64 @@
     .location-container {
       margin-bottom: 1.5rem;
     }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .post-container {
+        padding: 10px;
+      }
+
+      .create-post-form {
+        padding: 1rem;
+        border-radius: 12px;
+      }
+
+      #map {
+        height: 200px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .post-container {
+        padding: 0;
+      }
+
+      .create-post-form {
+        border-radius: 0;
+        padding: 1rem;
+        min-height: calc(100vh - 60px);
+      }
+
+      .btn-submit {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        border-radius: 0;
+        padding: 1rem;
+        box-shadow: 0 -4px 12px var(--shadow);
+      }
+
+      textarea, select, input {
+        padding: 0.8rem;
+        font-size: 0.9rem;
+      }
+
+      .form-group label {
+        font-size: 0.9rem;
+      }
+
+      #map {
+        height: 150px;
+      }
+
+      .map-btn {
+        padding: 6px 12px;
+        font-size: 0.8rem;
+      }
+    }
   </style>
-</head>
-<body>
-  <div class="post-container">
+
     <form class="create-post-form" method="POST" action="{% url 'create_post' %}" enctype="multipart/form-data">
       {% csrf_token %}
       <!-- Hidden fields for coordinates -->
@@ -299,7 +347,6 @@
         </button>
       </div>
     </form>
-  </div>
 
   <!-- Modal for Changing Interests -->
   <div id="interest-modal" class="modal">
@@ -402,7 +449,7 @@
     // Initialize the map when the page loads
     window.onload = initMap;
 
-    // Existing modal JavaScript
+    // Modal JavaScript
     const interestModal = document.getElementById("interest-modal");
 
     function openModal() {
@@ -432,6 +479,15 @@
         option.classList.toggle('selected');
       });
     });
+
+    // Theme change listener to ensure map updates
+    document.addEventListener('themeChange', (e) => {
+      const theme = e.detail.theme;
+      console.log('Theme changed to:', theme);
+      // Trigger map redraw if needed
+      if (map) {
+        map.invalidateSize();
+      }
+    });
   </script>
-</body>
-</html>
+{% endblock %}

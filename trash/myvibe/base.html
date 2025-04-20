@@ -1,0 +1,256 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SocialBook - A Social Media Clone Website</title>
+    <link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+    />
+    <link rel="icon" type="image/png" href="{% static 'assets/myvibe/images/icon.png' %}" />
+
+    <link rel="stylesheet" href="{% static 'assets/myvibe/style.css' %}" />
+  </head>
+  <body>
+    <nav>
+        <div class="container">
+          <a href="#" class="logo">
+            <img src="{% static 'assets/img/logo.png' %}" alt="myVibe" />
+          </a>
+      
+          <div class="search-bar">
+            <i class="fas fa-search"></i>
+            <input type="search" placeholder="Search..." />
+          </div>
+      
+          <div class="nav-links">
+            <a href="#" class="nav-item">
+              <i class="fas fa-home"></i>
+              <span class="notification-badge">2</span> <!-- New posts -->
+            </a>
+            <a href="#" class="nav-item">
+              <i class="fas fa-calendar-alt"></i>
+              <span class="notification-badge">5</span> <!-- New events -->
+            </a>
+            <a href="#" class="nav-item">
+              <i class="fas fa-bell"></i>
+              <span class="notification-badge">3</span> <!-- New notifications -->
+            </a>
+            <a href="#" class="nav-item">
+              <i class="fas fa-comments"></i>
+              <span class="notification-badge">1</span> <!-- New messages -->
+            </a>
+          </div>
+      
+          <div class="create">
+            <div class="profile-pic">
+              <a href="{% url 'user_profile' %}" class="profile">
+                {% if user.is_authenticated and user.userprofile.profile_picture %}
+                  <img src="{{ user.userprofile.profile_picture.url }}" alt="{{ user.first_name }}'s profile picture" />
+                {% else %}
+                  <img src="{% static 'assets/img/upload.png' %}" alt="Default profile picture" />
+                {% endif %}
+              </a>
+      
+              <div class="active"></div>
+            </div>
+          </div>
+        </div>
+      </nav>
+        
+      
+
+    <!-- Main Section -->
+
+    <main>
+        <div class="container">
+        <!-- Left Section -->
+        <!-- Left section of the page, containing the profile information and sidebar -->
+        <div class="left-section">
+          <!-- Profile information, including profile picture and handle -->
+<a href="{% url 'user_profile' %}" class="profile">
+    <div class="profile-pic">
+        <!-- Check if user is authenticated and display their profile picture -->
+        {% if user.is_authenticated and user.userprofile.profile_picture %}
+            <img src="{{ user.userprofile.profile_picture.url }}" alt="{{ user.first_name }}'s profile picture" />
+        {% else %}
+            <!-- Default profile picture if not authenticated or no profile picture -->
+            <img src="{% static 'assets/assets/img/upload.png' %}" alt="Default profile picture" />
+        {% endif %}
+    </div>
+
+    <div class="handle">
+        <!-- Display the user's full name or a placeholder if not authenticated -->
+        {% if user.is_authenticated %}
+            <h4>{{ user.first_name }} {{ user.last_name }}</h4>
+            <p class="muted-text">@{{ user.username }}</p>
+        {% else %}
+            <h4>Jane Smith</h4>
+            <p class="muted-text">@jsmith</p>
+        {% endif %}
+    </div>
+</a>
+
+      
+          <!-- Start of Navbar -->
+          <div class="sidebar">
+      
+            <a href="#" class="menu-item active">
+              <span><i class="fas fa-home"></i></span>
+              <h3>Home</h3>
+            </a>
+      
+            <a href="#" class="menu-item">
+              <span><i class="fas fa-compass"></i></span>
+              <h3>Explore</h3>
+            </a>
+      
+            <a href="{% url 'create_post' %}" class="menu-item">
+              <span><i class="fas fa-plus"></i></span>
+              <h3>Create Post</h3>
+            </a>
+      
+            <a href="#" class="menu-item" id="notification">
+              <span
+                ><i class="fas fa-bell"
+                  ><small class="notification-count">9+</small></i
+                ></span
+              >
+              <h3>Notifications</h3>
+            </a>
+      
+            <a href="#" class="menu-item" id="msg-notification">
+              <span
+                ><i class="fas fa-comments"
+                  ><small class="notification-count">12</small></i
+                ></span
+              >
+              <h3>Messages</h3>
+            </a>
+      
+            <a href="#" class="menu-item">
+              <span><i class="fas fa-calendar-alt"></i></span>
+              <h3>Events</h3>
+            </a>
+      
+            <a href="#" class="menu-item">
+              <span><i class="fas fa-users"></i></span>
+              <h3>Groups</h3>
+            </a>
+      
+            <a href="#" class="menu-item">
+              <span><i class="fas fa-bookmark"></i></span>
+              <h3>Bookmarks</h3>
+            </a>
+      
+            <a href="#" class="menu-item">
+              <span><i class="fas fa-cog"></i></span>
+              <h3>Settings</h3>
+            </a>
+      
+            <a href="#" class="menu-item">
+              <span><i class="fas fa-question-circle"></i></span>
+              <h3>Help</h3>
+            </a>
+          </div>
+        </div>
+        {% block content %}
+        {% endblock %}
+    </main>
+    <!-- Custom Themes section -->
+    <div class="custom-theme">
+      <!-- Card container for the custom theme options -->
+      <div class="card">
+        <!-- Heading for the custom theme section -->
+        <h2>Customize Your Theme</h2>
+        <!-- Description of the custom theme options -->
+        <p class="muted-text">
+          Manage your font size, color and background color
+        </p>
+
+        <!-- Font Sizes section -->
+        <div class="font-size">
+          <!-- Heading for the font sizes section -->
+          <h4>Font Size</h4>
+
+          <!-- Container for the font size options -->
+          <div>
+            <!-- Sample text to demonstrate font sizes -->
+            <h6>Aa</h6>
+            <!-- Container for the font size options -->
+            <div class="choose-size">
+              <!-- Font size option 1 -->
+              <span class="f-size-1"></span>
+              <!-- Font size option 2 (active by default) -->
+              <span class="f-size-2 active"></span>
+              <!-- Font size option 3 -->
+              <span class="f-size-3"></span>
+              <!-- Font size option 4 -->
+              <span class="f-size-4"></span>
+              <!-- Font size option 5 -->
+              <span class="f-size-5"></span>
+            </div>
+            <!-- Sample text to demonstrate font sizes -->
+            <h3>Aa</h3>
+          </div>
+        </div>
+
+        <!-- Colors section -->
+        <div class="color">
+          <!-- Heading for the colors section -->
+          <h4>Colors</h4>
+          <!-- Container for the color options -->
+          <div class="choose-color">
+            <!-- Color option 1 (active by default) -->
+            <span class="color-1 active"></span>
+            <!-- Color option 2 -->
+            <span class="color-2"></span>
+            <!-- Color option 3 -->
+            <span class="color-3"></span>
+            <!-- Color option 4 -->
+            <span class="color-4"></span>
+            <!-- Color option 5 -->
+            <span class="color-5"></span>
+          </div>
+        </div>
+
+        <!-- Background Color section -->
+        <div class="background">
+          <!-- Heading for the background color section -->
+          <h4>Background</h4>
+          <!-- Container for the background color options -->
+          <div class="choose-bg">
+            <!-- Background color option 1 (active by default) -->
+            <div class="bg-1 active">
+              <!-- Color swatch for the background color option -->
+              <span></span>
+              <!-- Label for the background color option -->
+              <h5 for="bg-1">Light</h5>
+            </div>
+            <!-- Background color option 2 -->
+            <div class="bg-2">
+              <!-- Color swatch for the background color option -->
+              <span></span>
+              <!-- Label for the background color option -->
+              <h5>Dim</h5>
+            </div>
+            <!-- Background color option 3 -->
+            <div class="bg-3">
+              <!-- Color swatch for the background color option -->
+              <span></span>
+              <!-- Label for the background color option -->
+              <h5 for="bg-3">Dark</h5>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- JavaScript file inclusion -->
+    <script src="{% static 'assets/myvibe/app.js' %}"></script>
+  </body>
+</html>

@@ -1,723 +1,700 @@
+{% extends "myvibe/base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="{% static 'assets/events/styles.css' %}">
-    <!-- Leaflet for map -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <style>
-        :root {
-            --primary-color: #4a90e2;
-            --secondary-color: #6c757d;
-            --accent-color: #ff6b6b;
-            --light-bg: #f8f9fa;
-            --border-radius: 12px;
-            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+{% block content %}
+<!-- Include Leaflet for the map -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<style>
+    .event-detail-container {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 0 15px;
+        margin-bottom: 100px;
+    }
+
+    .event-detail-header {
+        color: var(--text);
+        text-align: center;
+        margin-bottom: 2.5rem;
+        padding: 2rem;
+        background: var(--card-bg);
+        border-radius: var(--border-radius, 12px);
+        box-shadow: var(--box-shadow, 0 4px 6px rgba(0, 0, 0, 0.1));
+    }
+
+    .event-detail-card {
+        background: var(--card-bg);
+        border-radius: var(--border-radius, 12px);
+        box-shadow: var(--box-shadow, 0 4px 6px rgba(0, 0, 0, 0.1));
+        margin-bottom: 1.5rem;
+        overflow: hidden;
+    }
+
+    .ev-card-header {
+        padding: 1.2rem 1.5rem;
+        background: var(--primary, #4a90e2);
+        color: white;
+    }
+
+    .ev-card-body {
+        padding: 1.5rem;
+        color: var(--text);
+    }
+
+    .ev-detail-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.2rem;
+    }
+
+    .ev-detail-item {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        padding: 0.8rem;
+        background: var(--card-bg, #4a90e2);
+        border-radius: 8px;
+        color: var(--text);
+    }
+
+    .ev-detail-item i {
+        color: var(--text);
+        font-size: 1.2rem;
+    }
+
+    .ev-image-gallery {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .ev-gallery-image {
+        border-radius: 8px;
+        overflow: hidden;
+        transition: transform 0.3s ease;
+        cursor: pointer;
+    }
+
+    .ev-gallery-image img {
+        width: 100%;
+        height: auto;
+        max-height: 150px;
+        object-fit: cover;
+    }
+
+    .ev-gallery-image:hover {
+        transform: translateY(-3px);
+    }
+
+    .ev-attendee-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-top: 1rem;
+        color: var(--text);
+    }
+
+    .ev-attendee-badge {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.6rem 1rem;
+        background: var(--card-bg);
+        border-radius: 20px;
+        font-size: 0.9rem;
+
+    }
+
+    .ev-map-container {
+        height: 300px;
+        border-radius: var(--border-radius, 12px);
+        overflow: hidden;
+        box-shadow: var(--box-shadow, 0 4px 6px rgba(0, 0, 0, 0.1));
+    }
+
+    .ev-price-tag {
+        font-size: 1.5rem;
+        color: var(--accent, #ff6b6b);
+        font-weight: 600;
+    }
+
+    .ev-tag-list, .ev-interest-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .ev-tag-item, .ev-interest-item {
+        padding: 0.3rem 0.8rem;
+        background: var(--primary, #4a90e2);
+        color: white;
+        border-radius: 15px;
+        font-size: 0.85rem;
+    }
+
+    .ev-sticky-footer {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background: var(--light-bg, #f8f9fa);
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        justify-content: space-around;
+        align-items: center;
+        padding: 0.近年5rem;
+        box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+    }
+
+    .ev-interaction-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        padding: 0.5rem 0.8rem;
+        background: var(--card-bg);
+        border: 1px solid var(--secondary, #6c757d);
+        border-radius: 20px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        color: var(--secondary, #6c757d);
+        flex-shrink: 0;
+    }
+
+    .ev-interaction-btn:hover {
+        background: var(--primary, #4a90e2);
+        color: white;
+        border-color: var(--primary, #4a90e2);
+    }
+
+    .ev-interaction-btn i {
+        font-size: 1.1rem;
+    }
+
+    .ev-comment-popup {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 2000;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .ev-popup-content {
+        background: var(--card-bg);
+        padding: 2rem;
+        border-radius: 8px;
+        max-width: 600px;
+        width: 90%;
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+
+    .ev-comment-list {
+        margin-bottom: 1rem;
+    }
+
+    .ev-comment {
+        padding: 1rem;
+        background: var(--light-bg, #f8f9fa);
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        box-shadow: var(--box-shadow, 0 4px 6px rgba(0, 0, 0, 0.1));
+    }
+
+    .ev-comment-author {
+        font-weight: 500;
+        color: var(--primary, #4a90e2);
+    }
+
+    .ev-comment-date {
+        font-size: 0.85rem;
+        color: var(--secondary, #6c757d);
+    }
+
+    .ev-comment-form {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .ev-comment-form textarea {
+        flex: 1;
+        padding: 0.8rem;
+        border: 1px solid var(--secondary, #6c757d);
+        border-radius: 8px;
+        resize: vertical;
+    }
+
+    .ev-comment-form button, .ev-close-popup {
+        padding: 0.8rem 1.5rem;
+        background: var(--primary, #4a90e2);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background 0.3s ease;
+    }
+
+    .ev-comment-form button:hover, .ev-close-popup:hover {
+        background: #357abd;
+    }
+
+    .ev-image-viewer {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.9);
+        z-index: 3000;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .ev-viewer-content {
+        position: relative;
+        max-width: 90%;
+        max-height: 90%;
+    }
+
+    .ev-viewer-content img {
+        width: 100%;
+        height: auto;
+        max-height: 80vh;
+        object-fit: contain;
+    }
+
+    .ev-viewer-nav {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 2rem;
+        color: white;
+        cursor: pointer;
+        padding: 1rem;
+    }
+
+    .ev-viewer-prev {
+        left: 10px;
+    }
+
+    .ev-viewer-next {
+        right: 10px;
+    }
+
+    .ev-viewer-close {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        font-size: 2rem;
+        color: white;
+        cursor: pointer;
+        padding: 1rem;
+    }
+
+    .ev-location-actions {
+        margin-top: 1rem;
+        text-align: center;
+    }
+
+    .ev-alert {
+        padding: 1rem;
+        margin: 1rem 0;
+        border-radius: 8px;
+        color: white;
+    }
+
+    .ev-alert-success { background: #28a745; }
+    .ev-alert-info { background: #17a2b8; }
+    .ev-alert-error { background: #dc3545; }
+
+    @media (max-width: 768px) {
+        .ev-detail-grid {
+            grid-template-columns: 1fr;
         }
 
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #f5f7fb;
-            margin: 0;
-            padding-bottom: 80px;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 2rem auto;
-            padding: 0 15px;
-        }
-
-        .event-header {
-            text-align: center;
-            margin-bottom: 2.5rem;
-            padding: 2rem;
-            background: white;
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
-        }
-
-        .detail-card {
-            background: white;
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
-            margin-bottom: 1.5rem;
-            overflow: hidden;
-        }
-
-        .card-header {
-            padding: 1.2rem 1.5rem;
-            background: var(--primary-color);
-            color: white;
-        }
-
-        .card-body {
-            padding: 1.5rem;
-        }
-
-        .detail-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.2rem;
-        }
-
-        .detail-item {
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-            padding: 0.8rem;
-            background: var(--light-bg);
-            border-radius: 8px;
-        }
-
-        .detail-item i {
-            color: var(--primary-color);
-            font-size: 1.2rem;
-        }
-
-        .image-gallery {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-
-        .gallery-image {
-            border-radius: 8px;
-            overflow: hidden;
-            transition: transform 0.3s ease;
-            cursor: pointer;
-        }
-
-        .gallery-image img {
-            width: 100%;
-            height: auto;
-            max-height: 150px;
-            object-fit: cover;
-        }
-
-        .gallery-image:hover {
-            transform: translateY(-3px);
-        }
-
-        .attendee-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-
-        .attendee-badge {
-            display: flex;
-            align-items: center;
+        .ev-sticky-footer {
+            flex-direction: column;
             gap: 0.5rem;
-            padding: 0.6rem 1rem;
-            background: var(--light-bg);
-            border-radius: 20px;
+            padding: 0.3rem;
+        }
+
+        .ev-interaction-btn {
+            padding: 0.4rem 0.6rem;
+            gap: 0.2rem;
+        }
+
+        .ev-interaction-btn .btn-text {
+            display: none;
+        }
+
+        .ev-interaction-btn .btn-count {
             font-size: 0.9rem;
         }
+    }
+</style>
 
-        .map-container {
-            height: 300px;
-            border-radius: var(--border-radius);
-            overflow: hidden;
-            box-shadow: var(--box-shadow);
-        }
-
-        .price-tag {
-            font-size: 1.5rem;
-            color: var(--accent-color);
-            font-weight: 600;
-        }
-
-        .tag-list, .interest-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-        }
-
-        .tag-item, .interest-item {
-            padding: 0.3rem 0.8rem;
-            background: var(--primary-color);
-            color: white;
-            border-radius: 15px;
-            font-size: 0.85rem;
-        }
-
-        /* Sticky Footer */
-        .sticky-footer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background: var(--light-bg);
-            display: flex;
-            flex-direction: row; /* Explicitly enforce horizontal layout */
-            flex-wrap: nowrap; /* Prevent wrapping */
-            justify-content: space-around; /* Evenly space items */
-            align-items: center;
-            padding: 0.5rem; /* Reduced padding for compactness */
-            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-        }
-
-        .interaction-btn {
-            display: flex;
-            align-items: center;
-            gap: 0.3rem; /* Smaller gap for tighter spacing */
-            padding: 0.5rem 0.8rem; /* Adjusted padding */
-            background: white;
-            border: 1px solid var(--secondary-color);
-            border-radius: 20px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            color: var(--secondary-color);
-            flex-shrink: 0; /* Prevent buttons from shrinking too much */
-        }
-
-        .interaction-btn:hover {
-            background: var(--primary-color);
-            color: white;
-            border-color: var(--primary-color);
-        }
-
-        .interaction-btn i {
-            font-size: 1.1rem;
-        }
-
-        /* Adjustments for smaller screens */
-        @media (max-width: 768px) {
-            .sticky-footer {
-                padding: 0.3rem; /* Even tighter padding on small screens */
-            }
-            .interaction-btn {
-                padding: 0.4rem 0.6rem; /* Smaller padding */
-                gap: 0.2rem; /* Tighter gap */
-            }
-            .interaction-btn .btn-text {
-                display: none; /* Hide only the descriptive text */
-            }
-            .interaction-btn .btn-count {
-                font-size: 0.9rem; /* Slightly smaller font for counts */
-            }
-        }
-        /* Comment Popup */
-        .comment-popup {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 2000;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .popup-content {
-            background: white;
-            padding: 2rem;
-            border-radius: 8px;
-            max-width: 600px;
-            width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-
-        .comment-list {
-            margin-bottom: 1rem;
-        }
-
-        .comment {
-            padding: 1rem;
-            background: var(--light-bg);
-            border-radius: 8px;
-            margin-bottom: 1rem;
-            box-shadow: var(--box-shadow);
-        }
-
-        .comment-author {
-            font-weight: 500;
-            color: var(--primary-color);
-        }
-
-        .comment-date {
-            font-size: 0.85rem;
-            color: var(--secondary-color);
-        }
-
-        .comment-form {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .comment-form textarea {
-            flex: 1;
-            padding: 0.8rem;
-            border: 1px solid var(--secondary-color);
-            border-radius: 8px;
-            resize: vertical;
-        }
-
-        .comment-form button, .close-popup {
-            padding: 0.8rem 1.5rem;
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background 0.3s ease;
-        }
-
-        .comment-form button:hover, .close-popup:hover {
-            background: #357abd;
-        }
-
-        /* Full-Screen Image Viewer */
-        .image-viewer {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            z-index: 3000;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .viewer-content {
-            position: relative;
-            max-width: 90%;
-            max-height: 90%;
-        }
-
-        .viewer-content img {
-            width: 100%;
-            height: auto;
-            max-height: 80vh;
-            object-fit: contain;
-        }
-
-        .viewer-nav {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 2rem;
-            color: white;
-            cursor: pointer;
-            padding: 1rem;
-        }
-
-        .viewer-prev {
-            left: 10px;
-        }
-
-        .viewer-next {
-            right: 10px;
-        }
-
-        .viewer-close {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            font-size: 2rem;
-            color: white;
-            cursor: pointer;
-            padding: 1rem;
-        }
-
-        /* Location Section */
-        .location-actions {
-            margin-top: 1rem;
-            text-align: center;
-        }
-
-        /* Messages */
-        .alert {
-            padding: 1rem;
-            margin: 1rem 0;
-            border-radius: 8px;
-            color: white;
-        }
-
-        .alert-success { background: #28a745; }
-        .alert-info { background: #17a2b8; }
-        .alert-error { background: #dc3545; }
-
-        @media (max-width: 768px) {
-            .detail-grid {
-                grid-template-columns: 1fr;
-            }
-            .sticky-footer {
-                flex-direction: column;
-                gap: 0.5rem;
-            }
-        }
-    </style>
-    <title>{{ event.title }} - Details</title>
-</head>
-<body>
-    <div class="container">
-        <!-- Messages -->
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
-
-        <div class="event-header">
-            <h1 class="display-4">{{ event.title }}</h1>
-            <div class="price-tag">
-                {% if event.price == 0 %}
-                    Free
-                {% else %}
-                    KES {{ event.price|floatformat:2 }}
-                {% endif %}
-            </div>
-        </div>
-
-        <div class="row">
-            <!-- Left Column -->
-            <div class="col-md-8">
-                <div class="detail-card">
-                    <div class="card-header">
-                        <h3 class="mb-0"><i class="fas fa-info-circle"></i> Event Details</h3>
-                    </div>
-                    <div class="card-body">
-                        <div class="detail-grid">
-                            <div class="detail-item">
-                                <i class="fas fa-user"></i>
-                                <div>
-                                    <small>Organizer</small>
-                                    <div>{{ event.creator.get_full_name|default:event.creator.username }}</div>
-                                </div>
-                            </div>
-                            
-                            <div class="detail-item">
-                                <i class="fas fa-calendar-alt"></i>
-                                <div>
-                                    <small>Date & Time</small>
-                                    <div>{{ event.start_time|date:"M j, Y • g:i a" }} - {{ event.end_time|date:"g:i a" }}</div>
-                                </div>
-                            </div>
-
-                            <div class="detail-item">
-                                <i class="fas fa-map-marker-alt"></i>
-                                <div>
-                                    <small>Venue</small>
-                                    <div>{{ event.venue_name|default:"To be announced" }}</div>
-                                </div>
-                            </div>
-
-                            <div class="detail-item">
-                                <i class="fas fa-tags"></i>
-                                <div>
-                                    <small>Category</small>
-                                    <div>{{ event.get_category_display|default:"General" }}</div>
-                                </div>
-                            </div>
-
-                            <div class="detail-item">
-                                <i class="fas fa-hourglass-end"></i>
-                                <div>
-                                    <small>Registration Deadline</small>
-                                    <div class="{{ event.registration_deadline|yesno:'text-success,text-danger' }}">
-                                        {{ event.registration_deadline|date:"M j, Y • g:i a"|default:"No deadline" }}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="detail-item">
-                                <i class="fas fa-lock"></i>
-                                <div>
-                                    <small>Visibility</small>
-                                    <div>{{ event.is_public|yesno:"Public,Private" }}</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="mt-4">
-                            <h5>Description</h5>
-                            <p class="text-muted">{{ event.description|default:"No description provided" }}</p>
-                        </div>
-
-                        <div class="mt-4">
-                            <h5>Interests</h5>
-                            {% if event.interests.exists %}
-                                <div class="interest-list">
-                                    {% for interest in event.interests.all %}
-                                        <span class="interest-item">{{ interest.name }}</span>
-                                    {% endfor %}
-                                </div>
-                            {% else %}
-                                <p class="text-muted">No interests specified</p>
-                            {% endif %}
-                        </div>
-
-                        <div class="mt-4">
-                            <h5>Tags</h5>
-                            {% if event.tags.exists %}
-                                <div class="tag-list">
-                                    {% for tag in event.tags.all %}
-                                        <span class="tag-item">{{ tag.name }}</span>
-                                    {% endfor %}
-                                </div>
-                            {% else %}
-                                <p class="text-muted">No tags added</p>
-                            {% endif %}
-                        </div>
-
-                        <div class="mt-4">
-                            <div class="detail-item">
-                                <i class="fas fa-clock"></i>
-                                <div>
-                                    <small>Created</small>
-                                    <div>{{ event.created_at|date:"M j, Y • g:i a" }}</div>
-                                </div>
-                            </div>
-                            <div class="detail-item">
-                                <i class="fas fa-sync"></i>
-                                <div>
-                                    <small>Updated</small>
-                                    <div>{{ event.updated_at|date:"M j, Y • g:i a" }}</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="detail-card">
-                    <div class="card-header">
-                        <h3 class="mb-0"><i class="fas fa-users"></i> Attendees ({{ event.attendees.count }}/{{ event.max_attendees|default:"∞" }})</h3>
-                    </div>
-                    <div class="card-body">
-                        {% if request.user.is_authenticated %}
-                            {% if attendance %}
-                                {% if attendance.status == 'invited' %}
-                                    <a href="{% url 'accept_invite' event.id %}" class="interaction-btn">
-                                        <i class="fas fa-check"></i> Accept Invite
-                                    </a>
-                                {% else %}
-                                    <p>Your status: {{ attendance.get_status_display }}</p>
-                                {% endif %}
-                            {% else %}
-                                <a href="{% url 'join_waiting_list' event.id %}" class="interaction-btn">
-                                    <i class="fas fa-check"></i> Attend
-                                </a>
-                            {% endif %}
-                        {% else %}
-                            <p class="text-muted">Please log in to attend this event.</p>
-                        {% endif %}
-                        {% if event.attendees.exists %}
-                            <div class="attendee-list">
-                                {% for attendee in event.attendees.all %}
-                                    <div class="attendee-badge">
-                                        {% if attendee.user %}
-                                            <i class="fas fa-user-circle"></i>
-                                            {{ attendee.user.get_full_name|default:attendee.user.username }}
-                                            <span class="badge bg-primary">{{ attendee.get_status_display }}</span>
-                                        {% else %}
-                                            <i class="fas fa-user-clock"></i>
-                                            {{ attendee.external_guest }}
-                                            <span class="badge bg-secondary">{{ attendee.get_status_display }}</span>
-                                        {% endif %}
-                                    </div>
-                                {% endfor %}
-                            </div>
-                        {% else %}
-                            <div class="text-center py-3">
-                                <i class="fas fa-users-slash fa-2x text-muted"></i>
-                                <p class="mt-2 text-muted">Be the first to join this event!</p>
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-
-            <!-- Right Column -->
-            <div class="col-md-4">
-                <div class="detail-card">
-                    <div class="card-header">
-                        <h3 class="mb-0"><i class="fas fa-images"></i> Gallery</h3>
-                    </div>
-                    <div class="card-body">
-                        {% if event.images.exists %}
-                            <div class="image-gallery">
-                                {% for image in event.images.all %}
-                                    <div class="gallery-image" data-src="{{ image.image.url }}">
-                                        <img src="{{ image.image.url }}" 
-                                             alt="{{ image.caption|default:event.title }}" 
-                                             class="img-fluid">
-                                    </div>
-                                {% endfor %}
-                            </div>
-                        {% else %}
-                            <div class="text-center py-3">
-                                <i class="fas fa-image fa-2x text-muted"></i>
-                                <p class="mt-2 text-muted">No images available</p>
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
-
-                <div class="detail-card mt-4">
-                    <div class="card-header">
-                        <h3 class="mb-0"><i class="fas fa-map-marked-alt"></i> Location</h3>
-                    </div>
-                    <div class="card-body">
-                        <div class="map-container">
-                            <div id="map" style="height: 100%;"></div>
-                        </div>
-                        <div class="location-actions">
-                            {% if event.venue_name %}
-                                <div class="mt-3 text-center">
-                                    <i class="fas fa-building"></i>
-                                    <span class="text-muted">{{ event.venue_name }}</span>
-                                </div>
-                            {% endif %}
-                            {% if event.latitude and event.longitude %}
-                                <a href="https://www.google.com/maps?q={{ event.latitude }},{{ event.longitude }}" 
-                                   target="_blank" 
-                                   class="interaction-btn mt-2">
-                                    <i class="fas fa-map"></i> Open in Google Maps
-                                </a>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Sticky Footer -->
-    {% if request.user.is_authenticated %}
-    <div class="sticky-footer">
-        <a href="{% url 'like_event' event.id %}" class="interaction-btn like-btn">
-            <i class="fas fa-heart"></i>
-            <span class="btn-text">{% if user_has_liked %} Unlike {% else %} Like {% endif %}</span>
-            <span class="btn-count">({{ likes_count }})</span>
-        </a>
-        <div class="interaction-btn comment-btn">
-            <i class="fas fa-comment"></i>
-            <span class="btn-text">Comment</span>
-            <span class="btn-count">({{ comments.count }})</span>
-        </div>
-        <a href="{% url 'share_event' event.id %}" class="interaction-btn share-btn">
-            <i class="fas fa-share"></i>
-            <span class="btn-text">Share</span>
-        </a>
-    </div>
+<div class="event-detail-container">
+    <!-- Messages -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="ev-alert ev-alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
     {% endif %}
 
-    <!-- Comment Popup -->
-    {% if request.user.is_authenticated %}
-        <div class="comment-popup">
-            <div class="popup-content">
-                <h3>{{ event.title }} - Comments</h3>
-                <div class="comment-list">
-                    {% if comments.exists %}
-                        {% for comment in comments %}
-                            <div class="comment">
-                                <div class="comment-author">{{ comment.user.username }}</div>
-                                <div class="comment-date">{{ comment.created_at|date:"M j, Y • g:i a" }}</div>
-                                <p>{{ comment.content }}</p>
+    <div class="event-detail-header">
+        <h1 class="display-4">{{ event.title }}</h1>
+        <div class="ev-price-tag">
+            {% if event.price == 0 %}
+                Free
+            {% else %}
+                KES {{ event.price|floatformat:2 }}
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Left Column -->
+        <div class="col-md-8">
+            <div class="event-detail-card">
+                <div class="ev-card-header">
+                    <h3 class="mb-0"><i class="fas fa-info-circle"></i> Event Details</h3>
+                </div>
+                <div class="ev-card-body">
+                    <div class="ev-detail-grid">
+                        <div class="ev-detail-item">
+                            <i class="fas fa-user"></i>
+                            <div>
+                                <small>Organizer</small>
+                                <div>{{ event.creator.get_full_name|default:event.creator.username }}</div>
                             </div>
-                        {% endfor %}
+                        </div>
+                        
+                        <div class="ev-detail-item">
+                            <i class="fas fa-calendar-alt"></i>
+                            <div>
+                                <small>Date & Time</small>
+                                <div>{{ event.start_time|date:"M j, Y • g:i a" }} - {{ event.end_time|date:"g:i a" }}</div>
+                            </div>
+                        </div>
+
+                        <div class="ev-detail-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <div>
+                                <small>Venue</small>
+                                <div>{{ event.venue_name|default:"To be announced" }}</div>
+                            </div>
+                        </div>
+
+                        <div class="ev-detail-item">
+                            <i class="fas fa-tags"></i>
+                            <div>
+                                <small>Category</small>
+                                <div>{{ event.get_category_display|default:"General" }}</div>
+                            </div>
+                        </div>
+
+                        <div class="ev-detail-item">
+                            <i class="fas fa-hourglass-end"></i>
+                            <div>
+                                <small>Registration Deadline</small>
+                                <div class="{{ event.registration_deadline|yesno:'text-success,text-danger' }}">
+                                    {{ event.registration_deadline|date:"M j, Y • g:i a"|default:"No deadline" }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="ev-detail-item">
+                            <i class="fas fa-lock"></i>
+                            <div>
+                                <small>Visibility</small>
+                                <div>{{ event.is_public|yesno:"Public,Private" }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <h5>Description</h5>
+                        <p class="text-muted">{{ event.description|default:"No description provided" }}</p>
+                    </div>
+
+                    <div class="mt-4">
+                        <h5>Interests</h5>
+                        {% if event.interests.exists %}
+                            <div class="ev-interest-list">
+                                {% for interest in event.interests.all %}
+                                    <span class="ev-interest-item">{{ interest.name }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="text-muted">No interests specified</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="mt-4">
+                        <h5>Tags</h5>
+                        {% if event.tags.exists %}
+                            <div class="ev-tag-list">
+                                {% for tag in event.tags.all %}
+                                    <span class="ev-tag-item">{{ tag.name }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="text-muted">No tags added</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="mt-4">
+                        <div class="ev-detail-item">
+                            <i class="fas fa-clock"></i>
+                            <div>
+                                <small>Created</small>
+                                <div>{{ event.created_at|date:"M j, Y • g:i a" }}</div>
+                            </div>
+                        </div>
+                        <div class="ev-detail-item">
+                            <i class="fas fa-sync"></i>
+                            <div>
+                                <small>Updated</small>
+                                <div>{{ event.updated_at|date:"M j, Y • g:i a" }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="event-detail-card">
+                <div class="ev-card-header">
+                    <h3 class="mb-0"><i class="fas fa-users"></i> Attendees ({{ event.attendees.count }}/{{ event.max_attendees|default:"∞" }})</h3>
+                </div>
+                <div class="ev-card-body">
+                    {% if request.user.is_authenticated %}
+                        {% if attendance %}
+                            {% if attendance.status == 'invited' %}
+                                <a href="{% url 'accept_invite' event.id %}" class="ev-interaction-btn">
+                                    <i class="fas fa-check"></i> Accept Invite
+                                </a>
+                            {% else %}
+                                <p>Your status: {{ attendance.get_status_display }}</p>
+                            {% endif %}
+                        {% else %}
+                            <a href="{% url 'join_waiting_list' event.id %}" class="ev-interaction-btn">
+                                <i class="fas fa-check"></i> Attend
+                            </a>
+                        {% endif %}
                     {% else %}
-                        <p class="text-muted">No comments yet. Be the first to comment!</p>
+                        <p class="text-muted">Please log in to attend this event.</p>
+                    {% endif %}
+                    {% if event.attendees.exists %}
+                        <div class="ev-attendee-list">
+                            {% for attendee in event.attendees.all %}
+                                <div class="ev-attendee-badge">
+                                    {% if attendee.user %}
+                                        <i class="fas fa-user-circle"></i>
+                                        {{ attendee.user.get_full_name|default:attendee.user.username }}
+                                        <span class="badge bg-primary">{{ attendee.get_status_display }}</span>
+                                    {% else %}
+                                        <i class="fas fa-user-clock"></i>
+                                        {{ attendee.external_guest }}
+                                        <span class="badge bg-secondary">{{ attendee.get_status_display }}</span>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-3">
+                            <i class="fas fa-users-slash fa-2x text-muted"></i>
+                            <p class="mt-2 text-muted">Be the first to join this event!</p>
+                        </div>
                     {% endif %}
                 </div>
-                <form method="post" action="{% url 'add_comment' event.id %}" class="comment-form">
-                    {% csrf_token %}
-                    <textarea name="content" placeholder="Write a comment..." rows="3" required></textarea>
-                    <button type="submit">Post</button>
-                </form>
-                <button class="close-popup">Close</button>
             </div>
         </div>
-    {% endif %}
 
-    <!-- Full-Screen Image Viewer -->
-    <div class="image-viewer">
-        <div class="viewer-content">
-            <img src="" alt="Full-screen image">
-            <span class="viewer-nav viewer-prev"><i class="fas fa-chevron-left"></i></span>
-            <span class="viewer-nav viewer-next"><i class="fas fa-chevron-right"></i></span>
-            <span class="viewer-close"><i class="fas fa-times"></i></span>
+        <!-- Right Column -->
+        <div class="col-md-4">
+            <div class="event-detail-card">
+                <div class="ev-card-header">
+                    <h3 class="mb-0"><i class="fas fa-images"></i> Gallery</h3>
+                </div>
+                <div class="ev-card-body">
+                    {% if event.images.exists %}
+                        <div class="ev-image-gallery">
+                            {% for image in event.images.all %}
+                                <div class="ev-gallery-image" data-src="{{ image.image.url }}">
+                                    <img src="{{ image.image.url }}" 
+                                         alt="{{ image.caption|default:event.title }}" 
+                                         class="img-fluid">
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-3">
+                            <i class="fas fa-image fa-2x text-muted"></i>
+                            <p class="mt-2 text-muted">No images available</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="event-detail-card mt-4">
+                <div class="ev-card-header">
+                    <h3 class="mb-0"><i class="fas fa-map-marked-alt"></i> Location</h3>
+                </div>
+                <div class="ev-card-body">
+                    <div class="ev-map-container">
+                        <div id="map" style="height: 100%;"></div>
+                    </div>
+                    <div class="ev-location-actions">
+                        {% if event.venue_name %}
+                            <div class="mt-3 text-center">
+                                <i class="fas fa-building"></i>
+                                <span class="text-muted">{{ event.venue_name }}</span>
+                            </div>
+                        {% endif %}
+                        {% if event.latitude and event.longitude %}
+                            <a href="https://www.google.com/maps?q={{ event.latitude }},{{ event.longitude }}" 
+                               target="_blank" 
+                               class="ev-interaction-btn mt-2">
+                                <i class="fas fa-map"></i> Open in Google Maps
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+</div>
 
-    <!-- Scripts -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Leaflet Map
-            var map = L.map('map').setView([{{ event.latitude }}, {{ event.longitude }}], 13);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-            }).addTo(map);
-            var marker = L.marker([{{ event.latitude }}, {{ event.longitude }}]).addTo(map);
-            marker.bindPopup("<b>{{ event.venue_name|default:'Event Location' }}</b>").openPopup();
+<!-- Sticky Footer -->
+{% if request.user.is_authenticated %}
+<div class="ev-sticky-footer">
+    <a href="{% url 'like_event' event.id %}" class="ev-interaction-btn ev-like-btn">
+        <i class="fas fa-heart"></i>
+        <span class="btn-text">{% if user_has_liked %} Unlike {% else %} Like {% endif %}</span>
+        <span class="btn-count">({{ likes_count }})</span>
+    </a>
+    <div class="ev-interaction-btn ev-comment-btn">
+        <i class="fas fa-comment"></i>
+        <span class="btn-text">Comment</span>
+        <span class="btn-count">({{ comments.count }})</span>
+    </div>
+    <a href="{% url 'share_event' event.id %}" class="ev-interaction-btn ev-share-btn">
+        <i class="fas fa-share"></i>
+        <span class="btn-text">Share</span>
+    </a>
+</div>
+{% endif %}
 
-            // Comment Popup Toggle
-            const commentBtn = document.querySelector('.comment-btn');
-            const commentPopup = document.querySelector('.comment-popup');
-            const closePopup = document.querySelector('.close-popup');
-            if (commentBtn && commentPopup && closePopup) {
-                commentBtn.addEventListener('click', () => {
-                    commentPopup.style.display = 'flex';
-                });
-                closePopup.addEventListener('click', () => {
-                    commentPopup.style.display = 'none';
-                });
-            }
+<!-- Comment Popup -->
+{% if request.user.is_authenticated %}
+<div class="ev-comment-popup">
+    <div class="ev-popup-content">
+        <h3>{{ event.title }} - Comments</h3>
+        <div class="ev-comment-list">
+            {% if comments.exists %}
+                {% for comment in comments %}
+                    <div class="ev-comment">
+                        <div class="ev-comment-author">{{ comment.user.username }}</div>
+                        <div class="ev-comment-date">{{ comment.created_at|date:"M j, Y • g:i a" }}</div>
+                        <p>{{ comment.content }}</p>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-muted">No comments yet. Be the first to comment!</p>
+            {% endif %}
+        </div>
+        <form method="post" action="{% url 'add_comment' event.id %}" class="ev-comment-form">
+            {% csrf_token %}
+            <textarea name="content" placeholder="Write a comment..." rows="3" required></textarea>
+            <button type="submit">Post</button>
+        </form>
+        <button class="ev-close-popup">Close</button>
+    </div>
+</div>
+{% endif %}
 
-            // Full-Screen Image Viewer
-            const galleryImages = document.querySelectorAll('.gallery-image');
-            const imageViewer = document.querySelector('.image-viewer');
-            const viewerImg = imageViewer.querySelector('img');
-            const prevBtn = imageViewer.querySelector('.viewer-prev');
-            const nextBtn = imageViewer.querySelector('.viewer-next');
-            const closeBtn = imageViewer.querySelector('.viewer-close');
-            let currentIndex = 0;
+<!-- Full-Screen Image Viewer -->
+<div class="ev-image-viewer">
+    <div class="ev-viewer-content">
+        <img src="" alt="Full-screen image">
+        <span class="ev-viewer-nav ev-viewer-prev"><i class="fas fa-chevron-left"></i></span>
+        <span class="ev-viewer-nav ev-viewer-next"><i class="fas fa-chevron-right"></i></span>
+        <span class="ev-viewer-close"><i class="fas fa-times"></i></span>
+    </div>
+</div>
 
-            galleryImages.forEach((image, index) => {
-                image.addEventListener('click', function() {
-                    currentIndex = index;
-                    viewerImg.src = this.getAttribute('data-src');
-                    imageViewer.style.display = 'flex';
-                });
+<!-- Scripts -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Leaflet Map
+        var map = L.map('map').setView([{{ event.latitude|default:0 }}, {{ event.longitude|default:0 }}], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        }).addTo(map);
+        var marker = L.marker([{{ event.latitude|default:0 }}, {{ event.longitude|default:0 }}]).addTo(map);
+        marker.bindPopup("<b>{{ event.venue_name|default:'Event Location'|escapejs }}</b>").openPopup();
+
+        // Comment Popup Toggle
+        const commentBtn = document.querySelector('.ev-comment-btn');
+        const commentPopup = document.querySelector('.ev-comment-popup');
+        const closePopup = document.querySelector('.ev-close-popup');
+        if (commentBtn && commentPopup && closePopup) {
+            commentBtn.addEventListener('click', () => {
+                commentPopup.style.display = 'flex';
             });
-
-            prevBtn.addEventListener('click', function() {
-                currentIndex = (currentIndex - 1 + galleryImages.length) % galleryImages.length;
-                viewerImg.src = galleryImages[currentIndex].getAttribute('data-src');
+            closePopup.addEventListener('click', () => {
+                commentPopup.style.display = 'none';
             });
+        }
 
-            nextBtn.addEventListener('click', function() {
-                currentIndex = (currentIndex + 1) % galleryImages.length;
-                viewerImg.src = galleryImages[currentIndex].getAttribute('data-src');
-            });
+        // Full-Screen Image Viewer
+        const galleryImages = document.querySelectorAll('.ev-gallery-image');
+        const imageViewer = document.querySelector('.ev-image-viewer');
+        const viewerImg = imageViewer.querySelector('img');
+        const prevBtn = imageViewer.querySelector('.ev-viewer-prev');
+        const nextBtn = imageViewer.querySelector('.ev-viewer-next');
+        const closeBtn = imageViewer.querySelector('.ev-viewer-close');
+        let currentIndex = 0;
 
-            closeBtn.addEventListener('click', function() {
-                imageViewer.style.display = 'none';
-            });
-
-            imageViewer.addEventListener('click', function(e) {
-                if (e.target === imageViewer) {
-                    imageViewer.style.display = 'none';
-                }
+        galleryImages.forEach((image, index) => {
+            image.addEventListener('click', function() {
+                currentIndex = index;
+                viewerImg.src = this.getAttribute('data-src');
+                imageViewer.style.display = 'flex';
             });
         });
-    </script>
-</body>
-</html>
+
+        prevBtn.addEventListener('click', function() {
+            currentIndex = (currentIndex - 1 + galleryImages.length) % galleryImages.length;
+            viewerImg.src = galleryImages[currentIndex].getAttribute('data-src');
+        });
+
+        nextBtn.addEventListener('click', function() {
+            currentIndex = (currentIndex + 1) % galleryImages.length;
+            viewerImg.src = galleryImages[currentIndex].getAttribute('data-src');
+        });
+
+        closeBtn.addEventListener('click', function() {
+            imageViewer.style.display = 'none';
+        });
+
+        imageViewer.addEventListener('click', function(e) {
+            if (e.target === imageViewer) {
+                imageViewer.style.display = 'none';
+            }
+        });
+    });
+</script>
+{% endblock %}

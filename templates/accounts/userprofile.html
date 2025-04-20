@@ -1,19 +1,55 @@
-{% extends 'base.html' %}
+{% extends 'myvibe/base.html' %}
 {% load static %}
 {% block title %} Kindaski | my profile {% endblock %}
 
 {% block content %}
 <style>
-    body {
-        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-        margin: 0;
-        padding: 0;
-        height: 100vh;
-        display: flex;
-        flex-direction: column;
-        margin-top: 40px;
-    }
+    
+.dark-container {
+    background-color: rgba(255, 255, 255, 0.95);
+    padding: 20px;
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.dark-container .card {
+    background-color: rgba(255, 255, 255, 0.95);
+    border: none;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+}
+
+/* Styling for the account settings links (tabs) */
+.account-settings-links .list-group-item {
+    background-color: rgba(255, 255, 255, 0.9);
+    color: #333;
+    border: 2px solid #e0e7ff;
+    border-radius: 12px;
+    margin-bottom: 10px;
+    padding: 15px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    cursor: pointer;
+}
+
+.account-settings-links .list-group-item.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-weight: bold;
+    border-color: #667eea;
+}
+
+/* Tab content styling */
+.tab-content {
+    padding: 20px;
+}
+
+.tab-pane {
+    display: none;
+}
+
+.tab-pane.active {
+    display: block;
+}
     
     .ui-w-80 {
         width: 80px !important;

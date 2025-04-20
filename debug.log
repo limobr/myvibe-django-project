@@ -1,0 +1,441 @@
+Watching for file changes with StatReloader
+Internal Server Error: /events/
+Traceback (most recent call last):
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\urls\base.py", line 71, in reverse
+    extra, resolver = resolver.namespace_dict[ns]
+                      ~~~~~~~~~~~~~~~~~~~~~~~^^^^
+KeyError: 'accounts'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\events\views.py", line 108, in events_view
+    return render(request, 'events/events_view.html', {'events': events})
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\template\base.py", line 1008, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\template\base.py", line 1008, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\template\base.py", line 969, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\template\base.py", line 1008, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\template\base.py", line 1008, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\template\base.py", line 969, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\template\defaulttags.py", line 480, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\urls\base.py", line 82, in reverse
+    raise NoReverseMatch("%s is not a registered namespace" % key)
+django.urls.exceptions.NoReverseMatch: 'accounts' is not a registered namespace
+Internal Server Error: /accounts/update-theme/
+Traceback (most recent call last):
+  File "C:\Users\Limo\Desktop\MYVIBE\accounts\views.py", line 165, in update_theme
+    data = json.loads(request.body)
+           ^^^^
+NameError: name 'json' is not defined
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\contrib\auth\decorators.py", line 60, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\accounts\views.py", line 178, in update_theme
+    except json.JSONDecodeError as e:
+           ^^^^
+NameError: name 'json' is not defined
+C:\Users\Limo\Desktop\MYVIBE\accounts\views.py changed, reloading.
+Watching for file changes with StatReloader
+Received theme update request: {'theme': 'dark'}
+Theme updated for user limo: dark
+Received theme update request: {'theme': 'light'}
+Theme updated for user limo: light
+Received theme update request: {'theme': 'dark'}
+Theme updated for user limo: dark
+Received theme update request: {'theme': 'light'}
+Theme updated for user limo: light
+Received theme update request: {'theme': 'dark'}
+Theme updated for user limo: dark
+Received theme update request: {'theme': 'light'}
+Theme updated for user limo: light
+Received theme update request: {'theme': 'light'}
+Theme updated for user limo: light
+Received theme update request: {'theme': 'light'}
+Theme updated for user limo: light
+Received theme update request: {'theme': 'light'}
+Theme updated for user limo: light
+Received theme update request: {'theme': 'light'}
+Theme updated for user limo: light
+Received theme update request: {'theme': 'light'}
+Theme updated for user limo: light
+Received theme update request: {'theme': 'light'}
+Theme updated for user limo: light
+Received theme update request: {'theme': 'light'}
+Theme updated for user limo: light
+Received theme update request: {'theme': 'light'}
+Theme updated for user limo: light
+Received theme update request: {'theme': 'dark'}
+Theme updated for user limo: dark
+Received theme update request: {'theme': 'light'}
+Theme updated for user limo: light
+Received theme update request: {'theme': 'light'}
+Theme updated for user limo: light
+Received theme update request: {'theme': 'light'}
+Theme updated for user limo: light
+Received theme update request: {'theme': 'light'}
+Theme updated for user limo: light
+Internal Server Error: /events/
+Traceback (most recent call last):
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\urls\base.py", line 71, in reverse
+    extra, resolver = resolver.namespace_dict[ns]
+                      ~~~~~~~~~~~~~~~~~~~~~~~^^^^
+KeyError: 'accounts'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\events\views.py", line 108, in events_view
+    return render(request, 'events/events_view.html', {'events': events})
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\template\base.py", line 1008, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\template\base.py", line 1008, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\template\base.py", line 969, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\template\base.py", line 1008, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\template\base.py", line 1008, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\template\base.py", line 969, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\template\defaulttags.py", line 480, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\urls\base.py", line 82, in reverse
+    raise NoReverseMatch("%s is not a registered namespace" % key)
+django.urls.exceptions.NoReverseMatch: 'accounts' is not a registered namespace
+Received theme update request: {'theme': 'dark'}
+Theme updated for user limo: dark
+Received theme update request: {'theme': 'dark'}
+Theme updated for user limo: dark
+Received theme update request: {'theme': 'dark'}
+Theme updated for user limo: dark
+Received theme update request: {'theme': 'dark'}
+Theme updated for user limo: dark
+Received theme update request: {'theme': 'dark'}
+Theme updated for user limo: dark
+Received theme update request: {'theme': 'light'}
+Theme updated for user limo: light
+Received theme update request: {'theme': 'light'}
+Theme updated for user limo: light
+Received theme update request: {'theme': 'dark'}
+Theme updated for user villy: dark
+Received theme update request: {'theme': 'dark'}
+Theme updated for user villy: dark
+Received theme update request: {'theme': 'light'}
+Theme updated for user villy: light
+Internal Server Error: /events/
+Traceback (most recent call last):
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\urls\base.py", line 71, in reverse
+    extra, resolver = resolver.namespace_dict[ns]
+                      ~~~~~~~~~~~~~~~~~~~~~~~^^^^
+KeyError: 'accounts'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\events\views.py", line 108, in events_view
+    return render(request, 'events/events_view.html', {'events': events})
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\template\base.py", line 1008, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\template\base.py", line 1008, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\template\base.py", line 969, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\template\base.py", line 1008, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\template\base.py", line 1008, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\template\base.py", line 969, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\template\defaulttags.py", line 480, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\urls\base.py", line 82, in reverse
+    raise NoReverseMatch("%s is not a registered namespace" % key)
+django.urls.exceptions.NoReverseMatch: 'accounts' is not a registered namespace
+Received theme update request: {'theme': 'dark'}
+Theme updated for user limo: dark
+Received theme update request: {'theme': 'dark'}
+Theme updated for user limo: dark
+Received theme update request: {'theme': 'dark'}
+Theme updated for user limo: dark
+Received theme update request: {'theme': 'dark'}
+Theme updated for user limo: dark
+Received theme update request: {'theme': 'light'}
+Theme updated for user limo: light
+Received theme update request: {'theme': 'light'}
+Theme updated for user limo: light
+Received theme update request: {'theme': 'light'}
+Theme updated for user limo: light
+Received theme update request: {'theme': 'light'}
+Theme updated for user limo: light
+Received theme update request: {'theme': 'light'}
+Theme updated for user limo: light
+Received theme update request: {'theme': 'light'}
+Theme updated for user limo: light
+Received theme update request: {'theme': 'dark'}
+Theme updated for user limo: dark
+Received theme update request: {'theme': 'dark'}
+Theme updated for user limo: dark
+Received theme update request: {'theme': 'dark'}
+Theme updated for user limo: dark
+Received theme update request: {'theme': 'dark'}
+Theme updated for user limo: dark
+Received theme update request: {'theme': 'dark'}
+Theme updated for user limo: dark
+Received theme update request: {'theme': 'dark'}
+Theme updated for user limo: dark
+Received theme update request: {'theme': 'dark'}
+Theme updated for user limo: dark
+Received theme update request: {'theme': 'dark'}
+Theme updated for user limo: dark
+Received theme update request: {'theme': 'dark'}
+Theme updated for user limo: dark
+Received theme update request: {'theme': 'light'}
+Theme updated for user limo: light
+Received theme update request: {'theme': 'light'}
+Theme updated for user limo: light
+Received theme update request: {'theme': 'light'}
+Theme updated for user limo: light
+Received theme update request: {'theme': 'light'}
+Theme updated for user limo: light
+Received theme update request: {'theme': 'dark'}
+Theme updated for user limo: dark
+Received theme update request: {'theme': 'dark'}
+Theme updated for user limo: dark
+Received theme update request: {'theme': 'dark'}
+Theme updated for user limo: dark
+Received theme update request: {'theme': 'dark'}
+Theme updated for user limo: dark
+Received theme update request: {'theme': 'dark'}
+Theme updated for user limo: dark
+Received theme update request: {'theme': 'dark'}
+Theme updated for user limo: dark
+Received theme update request: {'theme': 'dark'}
+Theme updated for user limo: dark
+Received theme update request: {'theme': 'dark'}
+Theme updated for user limo: dark
+Received theme update request: {'theme': 'light'}
+Theme updated for user limo: light
+Received theme update request: {'theme': 'dark'}
+Theme updated for user limo: dark
+Received theme update request: {'theme': 'light'}
+Theme updated for user limo: light
+Received theme update request: {'theme': 'dark'}
+Theme updated for user limo: dark
+Received theme update request: {'theme': 'dark'}
+Theme updated for user limo: dark
+Received theme update request: {'theme': 'dark'}
+Theme updated for user limo: dark
+Received theme update request: {'theme': 'light'}
+Theme updated for user limo: light
+Received theme update request: {'theme': 'dark'}
+Theme updated for user limo: dark
+Received theme update request: {'theme': 'light'}
+Theme updated for user limo: light
+Received theme update request: {'theme': 'dark'}
+Theme updated for user limo: dark
+Received theme update request: {'theme': 'dark'}
+Theme updated for user limo: dark
+Received theme update request: {'theme': 'dark'}
+Theme updated for user limo: dark
+Received theme update request: {'theme': 'dark'}
+Theme updated for user limo: dark
+Received theme update request: {'theme': 'dark'}
+Theme updated for user limo: dark
+Received theme update request: {'theme': 'dark'}
+Theme updated for user limo: dark
+Received theme update request: {'theme': 'dark'}
+Theme updated for user limo: dark
+Internal Server Error: /events/event/1/
+Traceback (most recent call last):
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\urls\base.py", line 71, in reverse
+    extra, resolver = resolver.namespace_dict[ns]
+                      ~~~~~~~~~~~~~~~~~~~~~~~^^^^
+KeyError: 'accounts'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\events\views.py", line 135, in event_detail
+    return render(request, 'events/event_detail.html', context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\template\base.py", line 1008, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\template\base.py", line 1008, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\template\base.py", line 969, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\template\base.py", line 1008, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\template\base.py", line 1008, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\template\base.py", line 969, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\template\defaulttags.py", line 480, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Limo\Desktop\MYVIBE\env\Lib\site-packages\django\urls\base.py", line 82, in reverse
+    raise NoReverseMatch("%s is not a registered namespace" % key)
+django.urls.exceptions.NoReverseMatch: 'accounts' is not a registered namespace
+Received theme update request: {'theme': 'light'}
+Theme updated for user limo: light
+Received theme update request: {'theme': 'light'}
+Theme updated for user limo: light

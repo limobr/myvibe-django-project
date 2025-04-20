@@ -12,6 +12,14 @@ from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import SimpleUploadedFile
 from .models import Interest, UserProfile
 from django.core.files.base import ContentFile
+from django.core.mail import send_mail
+from django.utils import timezone
+from datetime import timedelta
+import random
+from django.core.mail import EmailMessage
+from django.template.loader import render_to_string
+import logging
+import json
 
 def register(request):
     """Show the registration form and handle user registration"""
@@ -82,6 +90,100 @@ def login_view(request):
             messages.error(request, "Invalid username or password.")
     
     return render(request, 'accounts/login.html')
+
+def generate_otp():
+    return str(random.randint(100000, 999999))
+
+def confirm_email(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+    
+    profile = request.user.userprofile  # Assuming a UserProfile model linked to User
+    
+    if request.method == 'POST':
+        if 'request_otp' in request.POST:
+            # Check if a new OTP can be requested (1-minute cooldown)
+            if not profile.otp_created_at or timezone.now() - profile.otp_created_at > timedelta(minutes=1):
+                otp = generate_otp()  # Assuming this function generates a 6-digit OTP
+                profile.otp_code = otp
+                profile.otp_created_at = timezone.now()
+                profile.save()
+                
+                # Prepare email content
+                subject = "Verify Your Email Address for myVibe"
+                from_email = "verification@myvibe.com"  # Recognizable "From" address
+                to_email = request.user.email
+                
+                # Render HTML email template
+                html_content = render_to_string('accounts/otp_email.html', {
+                    'otp': otp,
+                    'user': request.user,
+                })
+                
+                # Create and send EmailMessage
+                email = EmailMessage(
+                    subject,
+                    html_content,
+                    from_email,
+                    [to_email],
+                )
+                email.content_subtype = "html"  # Set content type to HTML
+                email.send(fail_silently=False)
+                
+                messages.info(request, "OTP has been sent to your email.")
+            else:
+                messages.info(request, "Please wait 1 minute before requesting a new OTP.")
+        elif 'verify_otp' in request.POST:
+            entered_otp = request.POST.get('otp')
+            if profile.otp_code and profile.otp_created_at:
+                if timezone.now() - profile.otp_created_at < timedelta(hours=2):
+                    if entered_otp == profile.otp_code:
+                        profile.email_confirmed = True
+                        profile.otp_code = None
+                        profile.otp_created_at = None
+                        profile.save()
+                        messages.success(request, "Your email has been confirmed!")
+                        return redirect('home')
+                    else:
+                        messages.error(request, "Invalid OTP.")
+                else:
+                    messages.error(request, "OTP has expired.")
+            else:
+                messages.error(request, "No OTP found. Please request a new one.")
+    
+    # Check if user can request a new OTP
+    can_request_otp = not profile.otp_created_at or timezone.now() - profile.otp_created_at > timedelta(minutes=1)
+    
+    return render(request, 'accounts/confirm_email.html', {'can_request_otp': can_request_otp})
+
+logger = logging.getLogger(__name__)
+
+@login_required
+@csrf_exempt
+def update_theme(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            theme = data.get('theme')
+            logger.debug(f'Received theme update request: {data}')
+            if theme not in ['light', 'dark']:
+                logger.error(f'Invalid theme value: {theme}')
+                return JsonResponse({'success': False, 'error': 'Invalid theme value'}, status=400)
+            if not hasattr(request.user, 'userprofile'):
+                logger.error('User has no UserProfile')
+                return JsonResponse({'success': False, 'error': 'User profile not found'}, status=400)
+            request.user.userprofile.theme = theme
+            request.user.userprofile.save()
+            logger.info(f'Theme updated for user {request.user.username}: {theme}')
+            return JsonResponse({'success': True})
+        except json.JSONDecodeError as e:
+            logger.error(f'JSON decode error: {str(e)}')
+            return JsonResponse({'success': False, 'error': 'Invalid JSON'}, status=400)
+        except Exception as e:
+            logger.error(f'Unexpected error: {str(e)}')
+            return JsonResponse({'success': False, 'error': str(e)}, status=400)
+    logger.warning(f'Invalid request method: {request.method}')
+    return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=400)
 
 
 @login_required

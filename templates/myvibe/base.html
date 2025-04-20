@@ -1,256 +1,253 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SocialBook - A Social Media Clone Website</title>
-    <link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet" type="text/css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
-    />
-    <link rel="icon" type="image/png" href="{% static 'assets/myvibe/images/icon.png' %}" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>myvibe - Connect Through Interests</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="{% static 'assets/myvibe/style.css' %}">
+</head>
+<body data-theme="light">
+    <!-- Main Header -->
+    <header class="main-header">
+        <div class="header-content">
+            <button id="sidebarToggle" class="sidebar-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h1 class="logo">myvibe</h1>
+            <div class="search-bar">
+                <input type="text" placeholder="Search myvibe...">
+                <i class="fas fa-search"></i>
+            </div>
+            <div class="header-right">
+                <div class="mobile-search-icon">
+                    <i class="fas fa-search"></i>
+                </div>
+                <div class="theme-switcher">
+                    <i class="fas fa-moon"></i>
+                </div>
+            </div>
+        </div>
+    </header>
 
-    <link rel="stylesheet" href="{% static 'assets/myvibe/style.css' %}" />
-  </head>
-  <body>
-    <nav>
-        <div class="container">
-          <a href="#" class="logo">
-            <img src="{% static 'assets/img/logo.png' %}" alt="myVibe" />
-          </a>
-      
-          <div class="search-bar">
-            <i class="fas fa-search"></i>
-            <input type="search" placeholder="Search..." />
-          </div>
-      
-          <div class="nav-links">
-            <a href="#" class="nav-item">
-              <i class="fas fa-home"></i>
-              <span class="notification-badge">2</span> <!-- New posts -->
-            </a>
-            <a href="#" class="nav-item">
-              <i class="fas fa-calendar-alt"></i>
-              <span class="notification-badge">5</span> <!-- New events -->
-            </a>
-            <a href="#" class="nav-item">
-              <i class="fas fa-bell"></i>
-              <span class="notification-badge">3</span> <!-- New notifications -->
-            </a>
-            <a href="#" class="nav-item">
-              <i class="fas fa-comments"></i>
-              <span class="notification-badge">1</span> <!-- New messages -->
-            </a>
-          </div>
-      
-          <div class="create">
-            <div class="profile-pic">
-              <a href="{% url 'user_profile' %}" class="profile">
+    <div class="container">
+        <!-- Message Container -->
+        <div class="message-container">
+            {% for message in messages %}
+            <div class="message {{ message.tags }} animate-in">
+                <div class="message-content">
+                    {{ message }}
+                    <div class="progress-bar">
+                        <div class="progress"></div>
+                    </div>
+                    <button class="close-message">×</button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Left Sidebar -->
+        <aside class="sidebar">
+            <div class="profile">
                 {% if user.is_authenticated and user.userprofile.profile_picture %}
-                  <img src="{{ user.userprofile.profile_picture.url }}" alt="{{ user.first_name }}'s profile picture" />
+                <img src="{{ user.userprofile.profile_picture.url }}" class="profile-img" alt="Your profile">
                 {% else %}
-                  <img src="{% static 'assets/img/upload.png' %}" alt="Default profile picture" />
+                <img src="{% static 'assets/myvibe/images/main-profile.jpg' %}" class="profile-img" alt="Default profile">
                 {% endif %}
-              </a>
-      
-              <div class="active"></div>
+                <h3>{{ user.first_name }} {{ user.last_name }}</h3>
             </div>
-          </div>
-        </div>
-      </nav>
-        
-      
+            <nav class="menu">
+                <div class="menu-item" data-tooltip="Profile">
+                    <i class="fas fa-user"></i>
+                    <span>Profile</span>
+                </div>
+                <div class="menu-item" data-tooltip="Events">
+                    <i class="fas fa-calendar"></i>
+                    <span>Events</span>
+                </div>
+                <div class="menu-item" data-tooltip="Explore">
+                    <i class="fas fa-compass"></i>
+                    <span>Explore</span>
+                </div>
+                <div class="menu-item" data-tooltip="Notifications">
+                    <i class="fas fa-bell"></i>
+                    <span>Notifications</span>
+                    <span class="badge">3</span>
+                </div>
+                <div class="menu-item" data-tooltip="Create Post">
+                    <i class="fas fa-plus"></i>
+                    <span>Create Post</span>
+                </div>
+                <div class="menu-item" data-tooltip="Settings">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </div>
+                <div class="menu-item" data-tooltip="Log Out">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Log Out</span>
+                </div>
+            </nav>
+        </aside>
 
-    <!-- Main Section -->
+        <!-- Main Content -->
+        <main class="main-content">
+            {% block content %}
+            {% endblock %}
+            <div class="modal" id="postModal">
+                <div class="modal-content">
+                    <button class="close-modal">×</button>
+                    <div id="modalContent"></div>
+                </div>
+            </div>
+        </main>
 
-    <main>
-        <div class="container">
-        <!-- Left Section -->
-        <!-- Left section of the page, containing the profile information and sidebar -->
-        <div class="left-section">
-          <!-- Profile information, including profile picture and handle -->
-<a href="{% url 'user_profile' %}" class="profile">
-    <div class="profile-pic">
-        <!-- Check if user is authenticated and display their profile picture -->
-        {% if user.is_authenticated and user.userprofile.profile_picture %}
-            <img src="{{ user.userprofile.profile_picture.url }}" alt="{{ user.first_name }}'s profile picture" />
-        {% else %}
-            <!-- Default profile picture if not authenticated or no profile picture -->
-            <img src="{% static 'assets/assets/img/upload.png' %}" alt="Default profile picture" />
-        {% endif %}
+        <!-- Right Column -->
+        <aside class="right-column">
+            <h3>Upcoming Events</h3>
+            <div class="event-card card">
+                <img src="https://picsum.photos/320/120?random=9" alt="Event" class="event-image">
+                <div class="event-details">
+                    <h4>Tech Conference 2023</h4>
+                    <div class="tags">
+                        <span class="tag">#coding</span>
+                        <span class="tag">#technology</span>
+                    </div>
+                </div>
+            </div>
+            <div class="ad-card card">
+                <img src="https://picsum.photos/320/200?random=10" alt="Ad" class="ad-image">
+                <p>Sponsored Content</p>
+            </div>
+        </aside>
     </div>
 
-    <div class="handle">
-        <!-- Display the user's full name or a placeholder if not authenticated -->
-        {% if user.is_authenticated %}
-            <h4>{{ user.first_name }} {{ user.last_name }}</h4>
-            <p class="muted-text">@{{ user.username }}</p>
-        {% else %}
-            <h4>Jane Smith</h4>
-            <p class="muted-text">@jsmith</p>
-        {% endif %}
-    </div>
-</a>
+    <!-- Mobile Navigation -->
+    <nav class="mobile-nav">
+        <i class="fas fa-home active"></i>
+        <i class="fas fa-calendar"><span class="badge">2</span></i>
+        <i class="fas fa-bell"><span class="badge">3</span></i>
+        <i class="fas fa-envelope"><span class="badge">1</span></i>
+    </nav>
 
-      
-          <!-- Start of Navbar -->
-          <div class="sidebar">
-      
-            <a href="#" class="menu-item active">
-              <span><i class="fas fa-home"></i></span>
-              <h3>Home</h3>
-            </a>
-      
-            <a href="#" class="menu-item">
-              <span><i class="fas fa-compass"></i></span>
-              <h3>Explore</h3>
-            </a>
-      
-            <a href="{% url 'create_post' %}" class="menu-item">
-              <span><i class="fas fa-plus"></i></span>
-              <h3>Create Post</h3>
-            </a>
-      
-            <a href="#" class="menu-item" id="notification">
-              <span
-                ><i class="fas fa-bell"
-                  ><small class="notification-count">9+</small></i
-                ></span
-              >
-              <h3>Notifications</h3>
-            </a>
-      
-            <a href="#" class="menu-item" id="msg-notification">
-              <span
-                ><i class="fas fa-comments"
-                  ><small class="notification-count">12</small></i
-                ></span
-              >
-              <h3>Messages</h3>
-            </a>
-      
-            <a href="#" class="menu-item">
-              <span><i class="fas fa-calendar-alt"></i></span>
-              <h3>Events</h3>
-            </a>
-      
-            <a href="#" class="menu-item">
-              <span><i class="fas fa-users"></i></span>
-              <h3>Groups</h3>
-            </a>
-      
-            <a href="#" class="menu-item">
-              <span><i class="fas fa-bookmark"></i></span>
-              <h3>Bookmarks</h3>
-            </a>
-      
-            <a href="#" class="menu-item">
-              <span><i class="fas fa-cog"></i></span>
-              <h3>Settings</h3>
-            </a>
-      
-            <a href="#" class="menu-item">
-              <span><i class="fas fa-question-circle"></i></span>
-              <h3>Help</h3>
-            </a>
-          </div>
-        </div>
-        {% block content %}
-        {% endblock %}
-    </main>
-    <!-- Custom Themes section -->
-    <div class="custom-theme">
-      <!-- Card container for the custom theme options -->
-      <div class="card">
-        <!-- Heading for the custom theme section -->
-        <h2>Customize Your Theme</h2>
-        <!-- Description of the custom theme options -->
-        <p class="muted-text">
-          Manage your font size, color and background color
-        </p>
+    <script>
+        // Ensure script runs after DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM loaded, initializing event listeners');
 
-        <!-- Font Sizes section -->
-        <div class="font-size">
-          <!-- Heading for the font sizes section -->
-          <h4>Font Size</h4>
+            // Message handling
+            document.querySelectorAll('.message').forEach(message => {
+                console.log('Found message element:', message);
+                setTimeout(() => {
+                    message.classList.remove('animate-in');
+                    setTimeout(() => message.remove(), 300);
+                }, 5000);
 
-          <!-- Container for the font size options -->
-          <div>
-            <!-- Sample text to demonstrate font sizes -->
-            <h6>Aa</h6>
-            <!-- Container for the font size options -->
-            <div class="choose-size">
-              <!-- Font size option 1 -->
-              <span class="f-size-1"></span>
-              <!-- Font size option 2 (active by default) -->
-              <span class="f-size-2 active"></span>
-              <!-- Font size option 3 -->
-              <span class="f-size-3"></span>
-              <!-- Font size option 4 -->
-              <span class="f-size-4"></span>
-              <!-- Font size option 5 -->
-              <span class="f-size-5"></span>
-            </div>
-            <!-- Sample text to demonstrate font sizes -->
-            <h3>Aa</h3>
-          </div>
-        </div>
+                message.querySelector('.close-message').addEventListener('click', () => {
+                    console.log('Close message clicked');
+                    message.classList.remove('animate-in');
+                    setTimeout(() => message.remove(), 300);
+                });
 
-        <!-- Colors section -->
-        <div class="color">
-          <!-- Heading for the colors section -->
-          <h4>Colors</h4>
-          <!-- Container for the color options -->
-          <div class="choose-color">
-            <!-- Color option 1 (active by default) -->
-            <span class="color-1 active"></span>
-            <!-- Color option 2 -->
-            <span class="color-2"></span>
-            <!-- Color option 3 -->
-            <span class="color-3"></span>
-            <!-- Color option 4 -->
-            <span class="color-4"></span>
-            <!-- Color option 5 -->
-            <span class="color-5"></span>
-          </div>
-        </div>
+                message.querySelector('.progress-bar').addEventListener('click', () => {
+                    console.log('Progress bar clicked');
+                    message.classList.remove('animate-in');
+                    setTimeout(() => message.remove(), 300);
+                });
+            });
 
-        <!-- Background Color section -->
-        <div class="background">
-          <!-- Heading for the background color section -->
-          <h4>Background</h4>
-          <!-- Container for the background color options -->
-          <div class="choose-bg">
-            <!-- Background color option 1 (active by default) -->
-            <div class="bg-1 active">
-              <!-- Color swatch for the background color option -->
-              <span></span>
-              <!-- Label for the background color option -->
-              <h5 for="bg-1">Light</h5>
-            </div>
-            <!-- Background color option 2 -->
-            <div class="bg-2">
-              <!-- Color swatch for the background color option -->
-              <span></span>
-              <!-- Label for the background color option -->
-              <h5>Dim</h5>
-            </div>
-            <!-- Background color option 3 -->
-            <div class="bg-3">
-              <!-- Color swatch for the background color option -->
-              <span></span>
-              <!-- Label for the background color option -->
-              <h5 for="bg-3">Dark</h5>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+            // Sidebar and Search Toggle
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const container = document.querySelector('.container');
+            const sidebar = document.querySelector('.sidebar');
+            const mobileSearchIcon = document.querySelector('.mobile-search-icon i');
+            const searchBar = document.querySelector('.search-bar');
 
-    <!-- JavaScript file inclusion -->
-    <script src="{% static 'assets/myvibe/app.js' %}"></script>
-  </body>
+            if (!sidebarToggle) console.error('Sidebar toggle button not found');
+            if (!sidebar) console.error('Sidebar not found');
+            if (!mobileSearchIcon) console.error('Mobile search icon not found');
+            if (!searchBar) console.error('Search bar not found');
+
+            // Sidebar Toggle Handler
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Sidebar toggle clicked, screen width:', window.innerWidth);
+                    if (window.innerWidth > 1024) {
+                        console.log('Toggling sidebar-collapsed for large screen');
+                        container.classList.toggle('sidebar-collapsed');
+                        sidebar.classList.toggle('sidebar-collapsed');
+                    } else if (window.innerWidth > 768) {
+                        console.log('Toggling sidebar-expanded for semi screen');
+                        container.classList.toggle('sidebar-expanded');
+                        sidebar.classList.toggle('sidebar-collapsed');
+                    } else {
+                        console.log('Toggling sidebar-active for small screen');
+                        sidebar.classList.toggle('sidebar-active');
+                    }
+                });
+            }
+
+            // Mobile Search Toggle Handler
+            if (mobileSearchIcon) {
+                mobileSearchIcon.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Mobile search icon clicked');
+                    searchBar.classList.toggle('active');
+                });
+            }
+
+            // Outside Click Handler with Debounce
+            let justToggled = false;
+            document.addEventListener('click', (e) => {
+                if (window.innerWidth <= 768 && !justToggled) {
+                    if (sidebar && !sidebar.contains(e.target) && e.target !== sidebarToggle && !e.target.closest('#sidebarToggle')) {
+                        console.log('Outside click, closing sidebar');
+                        sidebar.classList.remove('sidebar-active');
+                    }
+                    if (searchBar && !searchBar.contains(e.target) && e.target !== mobileSearchIcon && !e.target.closest('.mobile-search-icon')) {
+                        console.log('Outside click, closing search bar');
+                        searchBar.classList.remove('active');
+                    }
+                }
+                justToggled = false;
+            });
+
+            // Prevent immediate outside click after toggle
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', () => {
+                    justToggled = true;
+                    setTimeout(() => { justToggled = false; }, 100);
+                });
+            }
+            if (mobileSearchIcon) {
+                mobileSearchIcon.addEventListener('click', () => {
+                    justToggled = true;
+                    setTimeout(() => { justToggled = false; }, 100);
+                });
+            }
+
+            // Resize Handler
+            window.addEventListener('resize', () => {
+                console.log('Window resized, width:', window.innerWidth);
+                if (window.innerWidth > 1024) {
+                    container.classList.remove('sidebar-expanded');
+                    sidebar.classList.remove('sidebar-active', 'sidebar-collapsed');
+                } else if (window.innerWidth > 768) {
+                    container.classList.remove('sidebar-collapsed');
+                    sidebar.classList.remove('sidebar-active');
+                    container.classList.add('sidebar-expanded');
+                    sidebar.classList.remove('sidebar-collapsed');
+                } else {
+                    container.classList.remove('sidebar-collapsed', 'sidebar-expanded');
+                    sidebar.classList.remove('sidebar-collapsed');
+                }
+                searchBar.classList.remove('active');
+            });
+        });
+    </script>
+    <script src="{% static 'assets/myvibe/script.js' %}"></script>
+</body>
 </html>

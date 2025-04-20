@@ -31,6 +31,10 @@ class UserProfile(models.Model):
     )
     usertype = models.CharField(max_length=10, choices=USER_TYPE_CHOICES, default='user')
     interests = models.ManyToManyField(Interest, blank=True, related_name='user_profiles')
+    email_confirmed = models.BooleanField(default=False)
+    otp_code = models.CharField(max_length=6, blank=True, null=True)
+    otp_created_at = models.DateTimeField(blank=True, null=True)
+    theme = models.CharField(max_length=10, choices=[('light', 'Light'), ('dark', 'Dark')], default='light')
 
     def __str__(self):
         return f"{self.user.username} Profile"
