@@ -12,9 +12,9 @@
     <!-- Main Header -->
     <header class="main-header">
         <div class="header-content">
-            <button id="sidebarToggle" class="sidebar-toggle">
-                <i class="fas fa-bars"></i>
-            </button>
+        <button id="sidebarToggle" class="sidebar-toggle" aria-label="Toggle sidebar">
+            <i class="fas fa-bars"></i>
+        </button>
             <h1 class="logo">myvibe</h1>
             <div class="search-bar">
                 <input type="text" placeholder="Search myvibe...">
@@ -48,53 +48,73 @@
         </div>
 
         <!-- Left Sidebar -->
-        <aside class="sidebar">
-            <div class="profile">
-                {% if user.is_authenticated and user.userprofile.profile_picture %}
-                <img src="{{ user.userprofile.profile_picture.url }}" class="profile-img" alt="Your profile">
-                {% else %}
-                <img src="{% static 'assets/myvibe/images/main-profile.jpg' %}" class="profile-img" alt="Default profile">
+<aside class="sidebar">
+    <div class="profile">
+        {% if user.is_authenticated and user.userprofile.profile_picture %}
+        <a href="{% url 'my_profile' %}">
+            <img src="{{ user.userprofile.profile_picture.url }}" class="profile-img" alt="Your profile">
+        </a>
+        {% else %}
+        <a href="{% url 'my_profile' %}">
+            <img src="{% static 'assets/myvibe/images/main-profile.jpg' %}" class="profile-img" alt="Default profile">
+        </a>
+        {% endif %}
+        <h3>{{ user.first_name }} {{ user.last_name }}</h3>
+    </div>
+    <nav class="menu">
+        <div class="menu-item {% if is_home_active %}active{% endif %}" data-page="home">
+            <a href="{% url 'home' %}">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </a>
+        </div>
+        <div class="menu-item {% if is_account_active %}active{% endif %}" data-page="my_profile">
+            <a href="{% url 'my_profile' %}">
+                <i class="fas fa-user"></i>
+                <span>Account</span>
+            </a>
+        </div>
+        <div class="menu-item {% if is_events_active %}active{% endif %}" data-page="events_view">
+            <a href="{% url 'events_view' %}">
+                <i class="fas fa-calendar"></i>
+                <span>Events</span>
+            </a>
+        </div>
+        <div class="menu-item {% if is_discover_active %}active{% endif %}" data-page="discover_users">
+            <a href="{% url 'discover_users' %}">
+                <i class="fas fa-compass"></i>
+                <span>Discover</span>
+            </a>
+        </div>
+        <div class="menu-item {% if is_notifications_active %}active{% endif %}" data-page="notifications">
+            <a href="{% url 'notifications' %}">
+                <i class="fas fa-bell"></i>
+                <span>Notifications</span>
+                {% if unread_notification_count > 0 %}
+                <span class="badge">{{ unread_notification_count }}</span>
                 {% endif %}
-                <h3>{{ user.first_name }} {{ user.last_name }}</h3>
-            </div>
-            <nav class="menu">
-                <div class="menu-item" data-tooltip="Profile">
-                    <i class="fas fa-user"></i>
-                    <span>Profile</span>
-                </div>
-                <div class="menu-item" data-tooltip="Events">
-                    <i class="fas fa-calendar"></i>
-                    <span>Events</span>
-                </div>
-                <div class="menu-item" data-tooltip="Explore">
-                    <i class="fas fa-compass"></i>
-                    <span>Explore</span>
-                </div>
-                <div class="menu-item" data-tooltip="Notifications">
-                    <i class="fas fa-bell"></i>
-                    <span>Notifications</span>
-                    <span class="badge">3</span>
-                </div>
-                <div class="menu-item" data-tooltip="Create Post">
-                    <i class="fas fa-plus"></i>
-                    <span>Create Post</span>
-                </div>
-                <div class="menu-item" data-tooltip="Settings">
-                    <i class="fas fa-cog"></i>
-                    <span>Settings</span>
-                </div>
-                <div class="menu-item" data-tooltip="Log Out">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span>Log Out</span>
-                </div>
-            </nav>
-        </aside>
+            </a>
+        </div>
+        <div class="menu-item {% if is_create_post_active %}active{% endif %}" data-page="create_post">
+            <a href="{% url 'create_post' %}">
+                <i class="fas fa-plus"></i>
+                <span>Create Post</span>
+            </a>
+        </div>
+        <div class="menu-item" data-page="logout">
+            <a href="{% url 'logout' %}">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Log Out</span>
+            </a>
+        </div>
+    </nav>
+</aside>
 
         <!-- Main Content -->
         <main class="main-content">
             {% block content %}
             {% endblock %}
-            <div class="modal" id="postModal">
+            <div class="post-modal" id="postModal">
                 <div class="modal-content">
                     <button class="close-modal">×</button>
                     <div id="modalContent"></div>
@@ -104,150 +124,76 @@
 
         <!-- Right Column -->
         <aside class="right-column">
-            <h3>Upcoming Events</h3>
-            <div class="event-card card">
-                <img src="https://picsum.photos/320/120?random=9" alt="Event" class="event-image">
-                <div class="event-details">
-                    <h4>Tech Conference 2023</h4>
-                    <div class="tags">
-                        <span class="tag">#coding</span>
-                        <span class="tag">#technology</span>
+            <div class="myprofile-events">
+                <div class="myprofile-heading">
+                    <h3>Upcoming Events</h3>
+                    <i class="fa-solid fa-pen-to-square"></i>
+                </div>
+                {% for event in events %}
+                <a href="{% url 'event_detail' event.id %}" style="text-decoration: none; color: inherit;">
+                    <div class="myprofile-event-card card">
+                        <img src="{{ event.get_primary_image }}" alt="{{ event.title }}" class="event-image">
+                        <div class="event-details">
+                            <h4>{{ event.title }}</h4>
+                            <p class="muted textured">{{ event.start_time|date:"M d, Y H:i" }}</p>
+                            <div class="tags">
+                                {% for interest in event.interests.all %}
+                                {% if forloop.counter|divisibleby:4 %}
+                                <span class="tag blue">{{ interest.name }}</span>
+                                {% elif forloop.counter|divisibleby:3 %}
+                                <span class="tag green">{{ interest.name }}</span>
+                                {% elif forloop.counter|divisibleby:2 %}
+                                <span class="tag purple">{{ interest.name }}</span>
+                                {% else %}
+                                <span class="tag orange">{{ interest.name }}</span>
+                                {% endif %}
+                                {% empty %}
+                                <span class="tag gray">No Interests</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </a>
+                {% empty %}
+                <p class="muted-text">No events found.</p>
+                {% endfor %}
+            </div>
+            <div class="myprofile-friend-requests card">
+                <h4>Requests</h4>
+                <div class="myprofile-request">
+                    <div class="myprofile-info">
+                        <div class="myprofile-profile-pic">
+                            <img src="{% static 'assets/myvibe/images/profile-6.jpg' %}" alt="Isabella Cooper" />
+                        </div>
+                        <div>
+                            <h5>Isabella Cooper</h5>
+                            <p class="muted-text">10 Mutual Friends</p>
+                        </div>
+                    </div>
+                    <div class="myprofile-action">
+                        <button class="btn btn-primary">Accept</button>
+                        <button class="btn">Decline</button>
                     </div>
                 </div>
-            </div>
-            <div class="ad-card card">
-                <img src="https://picsum.photos/320/200?random=10" alt="Ad" class="ad-image">
-                <p>Sponsored Content</p>
             </div>
         </aside>
     </div>
 
     <!-- Mobile Navigation -->
-    <nav class="mobile-nav">
-        <i class="fas fa-home active"></i>
-        <i class="fas fa-calendar"><span class="badge">2</span></i>
-        <i class="fas fa-bell"><span class="badge">3</span></i>
-        <i class="fas fa-envelope"><span class="badge">1</span></i>
-    </nav>
+<nav class="mobile-nav">
+    <a href="{% url 'home' %}" class="{% if is_home_active %}active{% endif %}"><i class="fas fa-home"></i></a>
+    <a href="{% url 'events_view' %}" class="{% if is_events_active %}active{% endif %}"><i class="fas fa-calendar"><span class="badge">2</span></i></a>
+    <a href="{% url 'notifications' %}" class="{% if is_notifications_active %}active{% endif %}">
+        <i class="fas fa-bell">
+            {% if unread_notification_count > 0 %}
+            <span class="badge">{{ unread_notification_count }}</span>
+            {% endif %}
+        </i>
+    </a>
+    <a href="{% url 'create_post' %}" class="{% if is_create_post_active %}active{% endif %}"><i class="fas fa-plus"></i></a>
+</nav>
 
-    <script>
-        // Ensure script runs after DOM is fully loaded
-        document.addEventListener('DOMContentLoaded', () => {
-            console.log('DOM loaded, initializing event listeners');
-
-            // Message handling
-            document.querySelectorAll('.message').forEach(message => {
-                console.log('Found message element:', message);
-                setTimeout(() => {
-                    message.classList.remove('animate-in');
-                    setTimeout(() => message.remove(), 300);
-                }, 5000);
-
-                message.querySelector('.close-message').addEventListener('click', () => {
-                    console.log('Close message clicked');
-                    message.classList.remove('animate-in');
-                    setTimeout(() => message.remove(), 300);
-                });
-
-                message.querySelector('.progress-bar').addEventListener('click', () => {
-                    console.log('Progress bar clicked');
-                    message.classList.remove('animate-in');
-                    setTimeout(() => message.remove(), 300);
-                });
-            });
-
-            // Sidebar and Search Toggle
-            const sidebarToggle = document.getElementById('sidebarToggle');
-            const container = document.querySelector('.container');
-            const sidebar = document.querySelector('.sidebar');
-            const mobileSearchIcon = document.querySelector('.mobile-search-icon i');
-            const searchBar = document.querySelector('.search-bar');
-
-            if (!sidebarToggle) console.error('Sidebar toggle button not found');
-            if (!sidebar) console.error('Sidebar not found');
-            if (!mobileSearchIcon) console.error('Mobile search icon not found');
-            if (!searchBar) console.error('Search bar not found');
-
-            // Sidebar Toggle Handler
-            if (sidebarToggle) {
-                sidebarToggle.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    console.log('Sidebar toggle clicked, screen width:', window.innerWidth);
-                    if (window.innerWidth > 1024) {
-                        console.log('Toggling sidebar-collapsed for large screen');
-                        container.classList.toggle('sidebar-collapsed');
-                        sidebar.classList.toggle('sidebar-collapsed');
-                    } else if (window.innerWidth > 768) {
-                        console.log('Toggling sidebar-expanded for semi screen');
-                        container.classList.toggle('sidebar-expanded');
-                        sidebar.classList.toggle('sidebar-collapsed');
-                    } else {
-                        console.log('Toggling sidebar-active for small screen');
-                        sidebar.classList.toggle('sidebar-active');
-                    }
-                });
-            }
-
-            // Mobile Search Toggle Handler
-            if (mobileSearchIcon) {
-                mobileSearchIcon.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    console.log('Mobile search icon clicked');
-                    searchBar.classList.toggle('active');
-                });
-            }
-
-            // Outside Click Handler with Debounce
-            let justToggled = false;
-            document.addEventListener('click', (e) => {
-                if (window.innerWidth <= 768 && !justToggled) {
-                    if (sidebar && !sidebar.contains(e.target) && e.target !== sidebarToggle && !e.target.closest('#sidebarToggle')) {
-                        console.log('Outside click, closing sidebar');
-                        sidebar.classList.remove('sidebar-active');
-                    }
-                    if (searchBar && !searchBar.contains(e.target) && e.target !== mobileSearchIcon && !e.target.closest('.mobile-search-icon')) {
-                        console.log('Outside click, closing search bar');
-                        searchBar.classList.remove('active');
-                    }
-                }
-                justToggled = false;
-            });
-
-            // Prevent immediate outside click after toggle
-            if (sidebarToggle) {
-                sidebarToggle.addEventListener('click', () => {
-                    justToggled = true;
-                    setTimeout(() => { justToggled = false; }, 100);
-                });
-            }
-            if (mobileSearchIcon) {
-                mobileSearchIcon.addEventListener('click', () => {
-                    justToggled = true;
-                    setTimeout(() => { justToggled = false; }, 100);
-                });
-            }
-
-            // Resize Handler
-            window.addEventListener('resize', () => {
-                console.log('Window resized, width:', window.innerWidth);
-                if (window.innerWidth > 1024) {
-                    container.classList.remove('sidebar-expanded');
-                    sidebar.classList.remove('sidebar-active', 'sidebar-collapsed');
-                } else if (window.innerWidth > 768) {
-                    container.classList.remove('sidebar-collapsed');
-                    sidebar.classList.remove('sidebar-active');
-                    container.classList.add('sidebar-expanded');
-                    sidebar.classList.remove('sidebar-collapsed');
-                } else {
-                    container.classList.remove('sidebar-collapsed', 'sidebar-expanded');
-                    sidebar.classList.remove('sidebar-collapsed');
-                }
-                searchBar.classList.remove('active');
-            });
-        });
-    </script>
     <script src="{% static 'assets/myvibe/script.js' %}"></script>
+    <script src="{% static 'assets/myvibe/post_modal.js' %}"></script>
 </body>
 </html>

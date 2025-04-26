@@ -1,0 +1,301 @@
+{% extends "myvibe/base.html" %}
+{% load static %}
+{% load profile_tags %}
+
+{% block content %}
+<style>
+    /* Theme Variables */
+    :root {
+        /* Light Theme Defaults */
+        --text: #1f2937;
+        --card-bg: #ffffff;
+        --border: #d1d5db;
+        --bg: #f9fafb;
+        --primary: #3b82f6;
+        --primary-hover: #2563eb;
+        --meta-text: #6b7280;
+    }
+
+    [data-theme="dark"] {
+        /* Dark Theme Overrides */
+        --text: #e5e7eb;
+        --card-bg: #1f2937;
+        --border: #374151;
+        --bg: #111827;
+        --meta-text: #9ca3af;
+    }
+
+    .discover-container {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: var(--bg);
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--text);
+        margin-bottom: 1rem;
+    }
+
+    .user-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .user-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+        transition: box-shadow 0.3s;
+    }
+
+    .user-card:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .profile-photo {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-bottom: 1rem;
+        border: 2px solid var(--border);
+    }
+
+    .user-name {
+        font-size: 1.25rem;
+        font-weight: 500;
+        color: var(--text);
+        margin-bottom: 0.25rem;
+    }
+
+    .user-username {
+        font-size: 0.9rem;
+        color: var(--meta-text);
+        margin-bottom: 0.5rem;
+    }
+
+    .user-interests {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        justify-content: center;
+        margin-bottom: 1rem;
+    }
+
+    .interest-tag {
+        background: var(--primary);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+    }
+
+    .follow-button {
+        background: var(--primary);
+        color: white;
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        font-weight: 500;
+        transition: background 0.3s;
+    }
+
+    .follow-button.unfollow {
+        background: #6b7280;
+    }
+
+    .follow-button:hover {
+        background: var(--primary-hover);
+    }
+
+    .follow-button.unfollow:hover {
+        background: #4b5563;
+    }
+
+    /* Messages Styling */
+    .messages {
+        margin-bottom: 1rem;
+    }
+
+    .message {
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+    }
+
+    .message.success {
+        background: #d1fae5;
+        color: #065f46;
+        border: 1px solid #34d399;
+    }
+
+    .message.success::before {
+        content: '✅';
+        margin-right: 0.5rem;
+    }
+
+    @media (max-width: 768px) {
+        .discover-container {
+            padding: 1rem;
+        }
+
+        .user-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<main class="main-content">
+    <div class="discover-container">
+        <h1 class="section-title">Discover Users</h1>
+
+        <!-- Messages -->
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="message {{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <!-- Exact Interest Match -->
+        {% if exact_match_users.exists %}
+            <section>
+                <h2 class="section-title">Users with Your Exact Interests</h2>
+                <div class="user-grid">
+                    {% for profile in exact_match_users %}
+                        <div class="user-card">
+                            <img src="{% if profile.profile_picture %}{{ profile.profile_picture.url }}{% else %}{% static 'assets\img\default_dp.png' %}{% endif %}" alt="{{ profile.user.username }}" class="profile-photo">
+                            <div class="user-name">{{ profile.user.first_name }} {{ profile.user.last_name }}</div>
+                            <div class="user-username">@{{ profile.user.username }}</div>
+                            <div class="user-interests">
+                                {% for interest in profile.interests.all %}
+                                    <span class="interest-tag">{{ interest.name }}</span>
+                                {% endfor %}
+                            </div>
+                            <button class="follow-button {% if request.user.userprofile|is_following:profile %}unfollow{% endif %}" data-profile-id="{{ profile.id }}" data-action="{% if request.user.userprofile|is_following:profile %}unfollow{% else %}follow{% endif %}">
+                                {% if request.user.userprofile|is_following:profile %}Unfollow{% else %}Follow{% endif %}
+                            </button>
+                        </div>
+                    {% endfor %}
+                </div>
+            </section>
+        {% endif %}
+
+        <!-- Group Members -->
+        {% if group_members.exists %}
+            <section>
+                <h2 class="section-title">Users in Your Groups</h2>
+                <div class="user-grid">
+                    {% for profile in group_members %}
+                        <div class="user-card">
+                            <img src="{% if profile.profile_picture %}{{ profile.profile_picture.url }}{% else %}{% static 'media\profile_pics\userplaceholder.png' %}{% endif %}" alt="{{ profile.user.username }}" class="profile-photo">
+                            <div class="user-name">{{ profile.user.first_name }} {{ profile.user.last_name }}</div>
+                            <div class="user-username">@{{ profile.user.username }}</div>
+                            <div class="user-interests">
+                                {% for interest in profile.interests.all %}
+                                    <span class="interest-tag">{{ interest.name }}</span>
+                                {% endfor %}
+                            </div>
+                            <button class="follow-button {% if request.user.userprofile|is_following:profile %}unfollow{% endif %}" data-profile-id="{{ profile.id }}" data-action="{% if request.user.userprofile|is_following:profile %}unfollow{% else %}follow{% endif %}">
+                                {% if request.user.userprofile|is_following:profile %}Unfollow{% else %}Follow{% endif %}
+                            </button>
+                        </div>
+                    {% endfor %}
+                </div>
+            </section>
+        {% endif %}
+
+        <!-- Closest Interests -->
+        {% if closest_users.exists %}
+            <section>
+                <h2 class="section-title">Users with Similar Interests</h2>
+                <div class="user-grid">
+                    {% for profile in closest_users %}
+                        <div class="user-card">
+                            <img src="{% if profile.profile_picture %}{{ profile.profile_picture.url }}{% else %}{% static 'media\profile_pics\userplaceholder.png' %}{% endif %}" alt="{{ profile.user.username }}" class="profile-photo">
+                            <div class="user-name">{{ profile.user.first_name }} {{ profile.user.last_name }}</div>
+                            <div class="user-username">@{{ profile.user.username }}</div>
+                            <div class="user-interests">
+                                {% for interest in profile.interests.all %}
+                                    <span class="interest-tag">{{ interest.name }}</span>
+                                {% endfor %}
+                            </div>
+                            <button class="follow-button {% if request.user.userprofile|is_following:profile %}unfollow{% endif %}" data-profile-id="{{ profile.id }}" data-action="{% if request.user.userprofile|is_following:profile %}unfollow{% else %}follow{% endif %}">
+                                {% if request.user.userprofile|is_following:profile %}Unfollow{% else %}Follow{% endif %}
+                            </button>
+                        </div>
+                    {% endfor %}
+                </div>
+            </section>
+        {% endif %}
+
+        <!-- Other Users -->
+        {% if other_users.exists %}
+            <section>
+                <h2 class="section-title">Other Users</h2>
+                <div class="user-grid">
+                    {% for profile in other_users %}
+                        <div class="user-card">
+                            <img src="{% if profile.profile_picture %}{{ profile.profile_picture.url }}{% else %}{% static 'media\profile_pics\userplaceholder.png' %}{% endif %}" alt="{{ profile.user.username }}" class="profile-photo">
+                            <div class="user-name">{{ profile.user.first_name }} {{ profile.user.last_name }}</div>
+                            <div class="user-username">@{{ profile.user.username }}</div>
+                            <div class="user-interests">
+                                {% for interest in profile.interests.all %}
+                                    <span class="interest-tag">{{ interest.name }}</span>
+                                {% endfor %}
+                            </div>
+                            <button class="follow-button {% if request.user.userprofile|is_following:profile %}unfollow{% endif %}" data-profile-id="{{ profile.id }}" data-action="{% if request.user.userprofile|is_following:profile %}unfollow{% else %}follow{% endif %}">
+                                {% if request.user.userprofile|is_following:profile %}Unfollow{% else %}Follow{% endif %}
+                            </button>
+                        </div>
+                    {% endfor %}
+                </div>
+            </section>
+        {% endif %}
+    </div>
+</main>
+
+<script>
+    document.querySelectorAll('.follow-button').forEach(button => {
+        button.addEventListener('click', function() {
+            const profileId = this.getAttribute('data-profile-id');
+            const action = this.getAttribute('data-action');
+            fetch('{% url "follow_user" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ profile_id: profileId, action: action })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    this.textContent = data.action === 'follow' ? 'Follow' : 'Unfollow';
+                    this.setAttribute('data-action', data.action);
+                    this.classList.toggle('unfollow', data.action === 'unfollow');
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An unexpected error occurred.');
+            });
+        });
+    });
+</script>
+{% endblock %}

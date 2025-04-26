@@ -4,176 +4,440 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Select Interests</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
+        :root {
+            --primary-1: #4c51bf;
+            --primary-2: #667eea;
+            --primary-3: #5b21b6;
+            --accent-1: #7c3aed;
+            --accent-2: #8b5cf6;
+            --neutral-1: #e0e7ff;
+            --neutral-2: #c3dafe;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            background-color: #fef4e4;
-            color: #4a4a4a;
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, var(--primary-2) 0%, var(--primary-3) 100%);
+            min-height: 100vh;
+            color: #1e293b;
+            margin: 0;
+            padding: 20px;
         }
 
         .container {
-            max-width: 1200px;
-            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.98);
             padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+            max-width: 1200px;
+            margin: 20px auto;
+            transform: translateY(0);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative; /* Ensure container is positioned to contain absolute children */
+        }
+
+        .container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
         }
 
         .title {
-            font-size: 2.5rem;
-            color: #ff9800;
-            margin-bottom: 20px;
+            font-size: 2em;
+            color: var(--primary-3);
+            margin-bottom: 30px;
             text-align: center;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .search-container {
+            position: relative;
+            max-width: 500px;
+            margin: 0 auto 40px;
+            width: 100%; /* Ensure it takes full width up to max-width */
+            box-sizing: border-box; /* Prevent padding from causing overflow */
+        }
+
+        .search-bar {
+            width: 100%;
+            padding: 14px 45px 14px 20px;
+            border: 2px solid var(--neutral-1);
+            border-radius: 12px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            background: #f8fafc;
+            color: var(--primary-3);
+            box-sizing: border-box; /* Include padding in width calculation */
+        }
+
+        .search-bar:focus {
+            outline: none;
+            border-color: var(--accent-1);
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--accent-1);
+            font-size: 1.2em;
+        }
+
+        .dropdown {
+            position: absolute;
+            top: calc(100% + 10px);
+            left: 0;
+            right: 0;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 10;
+            display: none;
+            width: 100%; /* Match the width of the search bar */
+            box-sizing: border-box; /* Prevent overflow */
+        }
+
+        .dropdown-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: var(--primary-3);
+        }
+
+        .dropdown-item:hover {
+            background: var(--neutral-1);
+            transform: translateX(5px);
+        }
+
+        .dropdown-item.selected {
+            background: linear-gradient(135deg, var(--primary-1) 0%, var(--accent-1) 100%);
+            color: white;
+            font-weight: 500;
         }
 
         #interests-container {
             display: flex;
             flex-wrap: wrap;
+            gap: 20px;
             justify-content: center;
-            gap: 15px;
+            padding: 20px;
         }
 
         .interest-item {
-            background-color: #ffe0b2;
-            padding: 20px;
-            border: 2px solid transparent;
+            background: linear-gradient(135deg, var(--neutral-1) 0%, rgba(255, 255, 255, 0.9) 100%);
+            padding: 16px 28px;
+            border: 2px solid rgba(124, 58, 237, 0.1);
             border-radius: 50px;
-            text-align: center;
             cursor: pointer;
-            width: 200px;
-            transition: background-color 0.3s ease, border-color 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 600;
+            color: var(--primary-3);
+            display: inline-flex; /* Allow width to adjust to content */
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 6px rgba(76, 81, 191, 0.08);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .interest-item::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.05) 0%, rgba(76, 81, 191, 0.05) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
 
         .interest-item:hover {
-            background-color: #ffd54f;
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 15px rgba(76, 81, 191, 0.15);
+            color: var(--accent-1);
+        }
+
+        .interest-item:hover::after {
+            opacity: 1;
         }
 
         .interest-item.selected {
-            background-color: #ff9800;
-            border-color: #ef6c00;
-            color: #fff;
+            background: linear-gradient(135deg, var(--primary-1) 0%, var(--accent-1) 100%);
+            color: white;
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
+            box-shadow: 0 8px 20px rgba(76, 81, 191, 0.2);
+            animation: selectPop 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes selectPop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+            100% { transform: scale(1.1); }
         }
 
         .button {
-            padding: 12px 25px;
-            background-color: #ff9800;
+            padding: 14px 35px;
+            background: linear-gradient(135deg, var(--primary-1) 0%, var(--accent-1) 100%);
             border: none;
-            border-radius: 5px;
-            color: #fff;
-            font-size: 1.1rem;
+            border-radius: 50px;
+            color: white;
+            font-size: 1em;
+            font-weight: 700;
             cursor: pointer;
-            margin-top: 20px;
-            transition: background-color 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-top: 30px;
+            letter-spacing: 0.5px;
         }
 
         .button:hover {
-            background-color: #e65100;
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 8px 20px rgba(76, 81, 191, 0.3);
         }
 
         .button:disabled {
-            background-color: #ccc;
+            background: var(--neutral-1);
+            color: var(--neutral-2);
             cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
 
         .has-text-right {
             text-align: right;
-            margin-top: 30px;
         }
 
-        /* Media query for smaller screens */
         @media (max-width: 768px) {
-            .title {
-                font-size: 1.5rem;
-            }
-
-            .interest-item {
-                width: 150px;
-                padding: 15px;
-                font-size: 0.9rem;
-            }
-
-            .button {
-                font-size: 1rem;
-                padding: 10px 20px;
-            }
-
             .container {
-                padding: 20px;
+                padding: 30px;
+            }
+            
+            .interest-item {
+                padding: 12px 20px;
+                font-size: 0.9em;
+            }
+            
+            .title {
+                font-size: 1.6em;
+            }
+
+            .search-container {
+                max-width: 100%;
             }
         }
 
         @media (max-width: 480px) {
-            .title {
-                font-size: 1.2rem;
-            }
-
-            .interest-item {
-                width: 120px;
-                padding: 10px;
-                font-size: 0.8rem;
-            }
-
-            .button {
-                font-size: 0.9rem;
-                padding: 8px 18px;
-            }
-
             .container {
-                padding: 15px;
+                padding: 25px;
+            }
+            
+            .interest-item {
+                padding: 12px 15px;
+                width: auto; /* Still dynamic, but ensure it fits */
+                max-width: 90%; /* Prevent overflow on small screens */
+            }
+            
+            .title {
+                font-size: 1.3em;
+            }
+            
+            .button {
+                width: 100%;
+                padding: 12px;
+            }
+
+            .search-container {
+                max-width: 100%;
             }
         }
     </style>
 </head>
 <body>
-    <section class="section">
-        <div class="container">
-            <h1 class="title">{{ username }}, choose your interests to help personalize your experience</h1>
-            <div id="interests-container">
-                {% for interest in interests %}
-                <div class="interest-item" data-id="{{ interest.id }}">
-                    {{ interest.name }}
-                </div>
-                {% endfor %}
-            </div>
-            <div class="has-text-right">
-                <button class="button" id="continue-button" disabled>Continue</button>
-            </div>
+    <div class="container">
+        <h1 class="title">{{ username }}, choose your interests to personalize your experience</h1>
+        
+        <!-- Search Bar -->
+        <div class="search-container">
+            <input type="text" id="search-bar" class="search-bar" placeholder="Search for more interests...">
+            <i class="fas fa-search search-icon"></i>
+            <div id="search-dropdown" class="dropdown"></div>
         </div>
-    </section>
+
+        <!-- Default Interests (Sample of 12) -->
+        <div id="interests-container">
+            {% for interest in sample_interests %}
+            <div class="interest-item" data-id="{{ interest.id }}">
+                {{ interest.name }}
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Continue Button -->
+        <div class="has-text-right">
+            <button class="button" id="continue-button" disabled>Continue</button>
+        </div>
+    </div>
 
     <script>
-        const interestItems = document.querySelectorAll('.interest-item');
+        // Store all interests from the server for search functionality
+        const allInterests = [
+            {% for interest in all_interests %}
+            { id: "{{ interest.id }}", name: "{{ interest.name }}" }{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ];
+
+        // DOM Elements
+        const searchBar = document.getElementById('search-bar');
+        const searchDropdown = document.getElementById('search-dropdown');
+        const interestsContainer = document.getElementById('interests-container');
         const continueButton = document.getElementById('continue-button');
         let selectedInterests = [];
+        let selectedOrder = [];
 
+        // Initial setup: Add event listeners to default interest items
+        const interestItems = document.querySelectorAll('.interest-item');
         interestItems.forEach(item => {
             item.addEventListener('click', () => {
-                const interestId = item.getAttribute('data-id');
-                // Toggle selection state
-                if (item.classList.contains('selected')) {
-                    item.classList.remove('selected');
-                    selectedInterests = selectedInterests.filter(id => id !== interestId);
-                } else {
-                    item.classList.add('selected');
-                    selectedInterests.push(interestId);
-                }
-                // Enable the Continue button if at least one interest is selected
-                continueButton.disabled = selectedInterests.length === 0;
+                toggleInterest(item);
             });
         });
 
+        // Search functionality
+        searchBar.addEventListener('input', () => {
+            const query = searchBar.value.trim().toLowerCase();
+            searchDropdown.innerHTML = '';
+
+            if (query.length === 0) {
+                searchDropdown.style.display = 'none';
+                return;
+            }
+
+            const filteredInterests = allInterests.filter(interest =>
+                interest.name.toLowerCase().includes(query)
+            );
+
+            if (filteredInterests.length === 0) {
+                searchDropdown.style.display = 'none';
+                return;
+            }
+
+            filteredInterests.forEach(interest => {
+                const dropdownItem = document.createElement('div');
+                dropdownItem.classList.add('dropdown-item');
+                dropdownItem.textContent = interest.name;
+                dropdownItem.setAttribute('data-id', interest.id);
+
+                if (selectedInterests.includes(interest.id)) {
+                    dropdownItem.classList.add('selected');
+                }
+
+                dropdownItem.addEventListener('click', () => {
+                    toggleInterest(dropdownItem, true);
+                    searchBar.value = '';
+                    searchDropdown.style.display = 'none';
+                });
+
+                searchDropdown.appendChild(dropdownItem);
+            });
+
+            searchDropdown.style.display = 'block';
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!searchBar.contains(e.target) && !searchDropdown.contains(e.target)) {
+                searchDropdown.style.display = 'none';
+            }
+        });
+
+        function toggleInterest(element, fromSearch = false) {
+            const interestId = element.getAttribute('data-id');
+            const isSelected = selectedInterests.includes(interestId);
+
+            if (isSelected) {
+                selectedInterests = selectedInterests.filter(id => id !== interestId);
+                selectedOrder = selectedOrder.filter(id => id !== interestId);
+                element.classList.remove('selected');
+            } else {
+                selectedInterests.push(interestId);
+                selectedOrder.unshift(interestId);
+                element.classList.add('selected');
+            }
+
+            document.querySelectorAll(`[data-id="${interestId}"]`).forEach(el => {
+                if (isSelected) {
+                    el.classList.remove('selected');
+                } else {
+                    el.classList.add('selected');
+                }
+            });
+
+            if (fromSearch) {
+                const dropdownItems = searchDropdown.querySelectorAll('.dropdown-item');
+                dropdownItems.forEach(item => {
+                    if (item.getAttribute('data-id') === interestId) {
+                        if (isSelected) {
+                            item.classList.remove('selected');
+                        } else {
+                            item.classList.add('selected');
+                        }
+                    }
+                });
+            }
+
+            reorderInterests();
+            continueButton.disabled = selectedInterests.length === 0;
+        }
+
+        function reorderInterests() {
+            interestsContainer.innerHTML = '';
+            
+            selectedOrder.forEach(interestId => {
+                const interest = allInterests.find(i => i.id === interestId);
+                if (interest) {
+                    const div = document.createElement('div');
+                    div.classList.add('interest-item', 'selected');
+                    div.setAttribute('data-id', interest.id);
+                    div.textContent = interest.name;
+                    div.addEventListener('click', () => toggleInterest(div));
+                    interestsContainer.appendChild(div);
+                }
+            });
+
+            const sampleInterests = [
+                {% for interest in sample_interests %}
+                { id: "{{ interest.id }}", name: "{{ interest.name }}" }{% if not forloop.last %},{% endif %}
+                {% endfor %}
+            ];
+
+            sampleInterests.forEach(interest => {
+                if (!selectedInterests.includes(interest.id)) {
+                    const div = document.createElement('div');
+                    div.classList.add('interest-item');
+                    div.setAttribute('data-id', interest.id);
+                    div.textContent = interest.name;
+                    div.addEventListener('click', () => toggleInterest(div));
+                    interestsContainer.appendChild(div);
+                }
+            });
+        }
+
         continueButton.addEventListener('click', () => {
-            // Create a form dynamically and submit via POST
             const form = document.createElement('form');
             form.method = 'POST';
             form.action = "{% url 'select_interests' %}";
             
-            // Append CSRF token
             const csrfInput = document.createElement('input');
             csrfInput.type = 'hidden';
             csrfInput.name = 'csrfmiddlewaretoken';
             csrfInput.value = "{{ csrf_token }}";
             form.appendChild(csrfInput);
             
-            // Append selected interest IDs as hidden inputs
             selectedInterests.forEach(id => {
                 const input = document.createElement('input');
                 input.type = 'hidden';

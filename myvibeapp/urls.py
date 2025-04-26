@@ -13,4 +13,6 @@ urlpatterns = [
     path('create-post/', views.create_post, name='create_post'),
     path('post/<int:post_id>/details/', views.post_detail_modal, name='post_detail_modal'),
     path('add-comment/', views.add_comment, name='add_comment'),
+    path('discover/', views.discover_users, name='discover_users'),
+    path('follow/', views.follow_user, name='follow_user'),
 ]

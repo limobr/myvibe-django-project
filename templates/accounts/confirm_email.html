@@ -1,115 +1,355 @@
-{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>myVibe | Confirm Email</title>
-    
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous" />
-    
-    <!-- Font Awesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet" integrity="sha512-Fo3rlrZj/k7ujTnHg4CGR2D7kSs0v4LLanw2qksYuRlEzO+tcaEPQogQ0KaoGN26/zrn20ImR1DfuLWnOo7aBA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirm Email - myvibe</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        .h-custom {
-            height: calc(100% - 73px);
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
         }
-        @media (max-width: 450px) {
-            .h-custom {
-                height: 100%;
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+
+        .auth-container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 500px;
+            transform: translateY(0);
+            opacity: 1;
+            transition: all 0.4s ease;
+        }
+
+        .auth-container:hover {
+            transform: translateY(-5px);
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .auth-header h1 {
+            color: #4c51bf;
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .auth-header p {
+            color: #4a5568;
+            font-size: 1em;
+        }
+
+        .messages {
+            margin-bottom: 20px;
+        }
+
+        .message {
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .otp-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .otp-input {
+            width: 40px;
+            height: 40px;
+            text-align: center;
+            font-size: 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .otp-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        }
+
+        .timer-container {
+            text-align: center;
+            margin-bottom: 15px;
+            color: #4a5568;
+        }
+
+        .resend-link {
+            display: none;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .resend-link a {
+            color: #4c51bf;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .resend-link a:hover {
+            text-decoration: underline;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #4c51bf;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        button:disabled {
+            background: #a0a0a0;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+            color: #4a5568;
+        }
+
+        .login-link a {
+            color: #4c51bf;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 480px) {
+            .auth-container {
+                padding: 30px 20px;
             }
-        }
-        .btn-primary {
-            background-color: #cda45e;
-            border-color: #cda45e;
-        }
-        .btn-primary:hover {
-            background-color: #b3924f;
-            border-color: #b3924f;
-        }
-        .bg-primary {
-            background-color: #cda45e !important;
-        }
-        #timer {
-            font-weight: bold;
-            color: #cda45e;
+
+            .otp-input {
+                width: 35px;
+                height: 35px;
+                font-size: 14px;
+            }
         }
     </style>
 </head>
 <body>
-    <section class="vh-100">
-        <div class="container-fluid h-custom">
-            <div class="row d-flex justify-content-center align-items-center h-100">
-                <div class="col-md-9 col-lg-6 col-xl-5">
-                    <img src="{% static 'assets/img/logo.png' %}" class="img-fluid" alt="myVibe Logo" />
-                </div>
-                <div class="col-md-8 col-lg-6 col-xl-4 offset-xl-1">
-                    <h1>Almost there!</h1>
-                    <p>Let's confirm your email</p>
-                    
-                    {% if messages %}
-                        {% for message in messages %}
-                            <div class="alert {% if message.tags == 'error' %}alert-danger{% elif message.tags == 'success' %}alert-success{% else %}alert-info{% endif %}" role="alert">
-                                {{ message }}
-                            </div>
-                        {% endfor %}
-                    {% endif %}
-                    
-                    {% if can_request_otp %}
-                        <form method="POST">
-                            {% csrf_token %}
-                            <button type="submit" name="request_otp" class="btn btn-primary" id="send-otp-btn">Send OTP</button>
-                        </form>
-                    {% else %}
-                        <div class="alert alert-info">
-                            OTP sent. Please wait <span id="timer">60</span> seconds to request a new one.
-                        </div>
-                    {% endif %}
-                    
-                    <form method="POST" class="mt-4">
-                        {% csrf_token %}
-                        <div>
-                            <label for="otp_input" class="form-label">Enter the 6-digit OTP sent to your email</label>
-                            <input type="text" id="otp_input" name="otp" placeholder="Enter 6-digit OTP" maxlength="6" required class="form-control" />
-                        </div>
-                        <button type="submit" name="verify_otp" class="btn btn-primary mt-2">Verify OTP</button>
-                    </form>
-                </div>
-            </div>
+    <div class="auth-container">
+        <div class="auth-header">
+            <h1>Confirm Your Email</h1>
+            <p>Please verify your email address to continue using myVibe.</p>
         </div>
-        <div class="d-flex flex-column flex-md-row text-center text-md-start justify-content-between py-4 px-4 px-xl-5 bg-primary">
-            <div class="text-white mb-3 mb-md-0">
-                Copyright © 2024. myVibe. All rights reserved.
+
+        <!-- Display messages -->
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="message {% if message.tags %}{{ message.tags }}{% endif %}">
+                {{ message }}
             </div>
-            <div>
-                <a href="#!" class="text-white me-4"><i class="fab fa-facebook-f"></i></a>
-                <a href="#!" class="text-white me-4"><i class="fab fa-twitter"></i></a>
-                <a href="#!" class="text-white me-4"><i class="fab fa-google"></i></a>
-                <a href="#!" class="text-white"><i class="fab fa-linkedin-in"></i></a>
-            </div>
+            {% endfor %}
         </div>
-    </section>
-    
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
-    
+        {% endif %}
+
+        <!-- Form to request OTP -->
+        <form method="POST" action="">
+            {% csrf_token %}
+            <button type="submit" name="request_otp" id="requestOtpBtn" {% if not can_request_otp %}disabled{% endif %}>
+                {% if can_request_otp %}Request OTP{% else %}Wait to Request OTP{% endif %}
+            </button>
+        </form>
+
+        <!-- Form to verify OTP -->
+        <form method="POST" action="" style="margin-top: 20px;">
+            {% csrf_token %}
+            <div class="otp-container">
+                <input type="number" class="otp-input" maxlength="1" pattern="[0-9]*" inputmode="numeric" required>
+                <input type="number" class="otp-input" maxlength="1" pattern="[0-9]*" inputmode="numeric" required>
+                <input type="number" class="otp-input" maxlength="1" pattern="[0-9]*" inputmode="numeric" required>
+                <input type="number" class="otp-input" maxlength="1" pattern="[0-9]*" inputmode="numeric" required>
+                <input type="number" class="otp-input" maxlength="1" pattern="[0-9]*" inputmode="numeric" required>
+                <input type="number" class="otp-input" maxlength="1" pattern="[0-9]*" inputmode="numeric" required>
+                <input type="hidden" name="otp" id="otp-hidden">
+            </div>
+            <div class="timer-container">
+                <span id="timer">Code expires in 02:00</span>
+            </div>
+            <div class="resend-link" id="resendLink">
+                <a href="#" onclick="resendOTP()">Resend OTP</a>
+            </div>
+            <button type="submit" name="verify_otp" id="confirmBtn" disabled>Verify OTP</button>
+        </form>
+
+        <div class="login-link">
+            <a href="{% url 'home' %}">Back to Home</a>
+        </div>
+    </div>
+
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const timerElement = document.getElementById('timer');
-            if (timerElement) {
-                let timeLeft = 60;
-                const countdown = setInterval(function() {
-                    timeLeft--;
-                    timerElement.textContent = timeLeft;
-                    if (timeLeft <= 0) {
-                        clearInterval(countdown);
-                        window.location.reload();  // Reload to show "Send OTP" button
-                    }
-                }, 1000);
-            }
+        // OTP Input Handling
+        const otpInputs = document.querySelectorAll('.otp-input');
+        const confirmBtn = document.getElementById('confirmBtn');
+        const otpHiddenInput = document.getElementById('otp-hidden');
+        const requestOtpBtn = document.getElementById('requestOtpBtn');
+        const timerElement = document.getElementById('timer');
+        const resendLink = document.getElementById('resendLink');
+
+        otpInputs.forEach((input, index) => {
+            input.addEventListener('input', (e) => {
+                // Ensure only numeric input
+                const value = e.target.value;
+                if (value && !/^[0-9]$/.test(value)) {
+                    e.target.value = '';
+                    return;
+                }
+
+                // Move to next input if current input has value
+                if (value.length === 1 && index < otpInputs.length - 1) {
+                    otpInputs[index + 1].focus();
+                }
+
+                // Update hidden input with combined OTP
+                const otpValue = Array.from(otpInputs).map(input => input.value).join('');
+                otpHiddenInput.value = otpValue;
+
+                // Enable button if all fields are filled
+                const allFilled = Array.from(otpInputs).every(input => input.value.length === 1);
+                confirmBtn.disabled = !allFilled;
+            });
+
+            input.addEventListener('keydown', (e) => {
+                // Handle backspace to move to previous input
+                if (e.key === 'Backspace' && e.target.value.length === 0 && index > 0) {
+                    otpInputs[index - 1].focus();
+                }
+            });
         });
+
+        // Get server-side OTP creation timestamp (in milliseconds)
+        const otpCreatedAt = {% if profile.otp_created_at %}{{ profile.otp_created_at.timestamp|floatformat:"0" }} * 1000{% else %}0{% endif %};
+
+        // Calculate remaining time for OTP expiry (2 minutes)
+        const expiryDuration = 120 * 1000; // 2 minutes in milliseconds
+        const expiryTime = otpCreatedAt + expiryDuration;
+        let expiryTimeLeft = otpCreatedAt ? Math.max(0, Math.floor((expiryTime - Date.now()) / 1000)) : 0;
+
+        // Calculate remaining time for Request OTP cooldown (1 minute)
+        const requestCooldownDuration = 60 * 1000; // 1 minute in milliseconds
+        const requestCooldownEnd = otpCreatedAt + requestCooldownDuration;
+        let requestTimeLeft = otpCreatedAt ? Math.max(0, Math.floor((requestCooldownEnd - Date.now()) / 1000)) : 0;
+
+        // Timer for OTP expiry
+        function startExpiryTimer() {
+            if (!otpCreatedAt || expiryTimeLeft <= 0) {
+                timerElement.textContent = "Code has expired";
+                resendLink.style.display = 'block';
+                confirmBtn.disabled = true;
+                return;
+            }
+
+            const expiryTimerInterval = setInterval(() => {
+                expiryTimeLeft--;
+                const minutes = Math.floor(expiryTimeLeft / 60).toString().padStart(2, '0');
+                const seconds = (expiryTimeLeft % 60).toString().padStart(2, '0');
+                timerElement.textContent = `Code expires in ${minutes}:${seconds}`;
+
+                if (expiryTimeLeft <= 0) {
+                    clearInterval(expiryTimerInterval);
+                    timerElement.textContent = "Code has expired";
+                    resendLink.style.display = 'block';
+                    confirmBtn.disabled = true;
+                }
+            }, 1000);
+        }
+
+        // Timer for Request OTP cooldown
+        function startRequestTimer() {
+            if (!otpCreatedAt || requestTimeLeft <= 0) {
+                requestOtpBtn.disabled = false;
+                requestOtpBtn.textContent = "Request OTP";
+                return;
+            }
+
+            requestOtpBtn.disabled = true;
+            const requestTimerInterval = setInterval(() => {
+                requestTimeLeft--;
+                const minutes = Math.floor(requestTimeLeft / 60).toString().padStart(2, '0');
+                const seconds = (requestTimeLeft % 60).toString().padStart(2, '0');
+                requestOtpBtn.textContent = `Wait ${minutes}:${seconds} to Request OTP`;
+
+                if (requestTimeLeft <= 0) {
+                    clearInterval(requestTimerInterval);
+                    requestOtpBtn.disabled = false;
+                    requestOtpBtn.textContent = "Request OTP";
+                }
+            }, 1000);
+        }
+
+        // Start timers if OTP has been created
+        if (otpCreatedAt > 0) {
+            startExpiryTimer();
+            startRequestTimer();
+        }
+
+        function resendOTP() {
+            // Trigger the "Request OTP" button
+            requestOtpBtn.click();
+        }
     </script>
 </body>
 </html>

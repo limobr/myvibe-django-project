@@ -2,492 +2,697 @@
 {% load static %}
 
 {% block content %}
-  <!-- Leaflet CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <!-- Font Awesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
-
-  <style>
-
-    .create-post-form {
-      background: var(--card-bg);
-      border-radius: 20px;
-      padding: 1.5rem;
-      box-shadow: var(--shadow);
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      overflow-y: auto;
-      transition: background 0.3s ease, color 0.3s ease;
-    }
-
-    /* Form group styling */
-    .form-group {
-      margin-bottom: 1.5rem;
-    }
-
-    .form-group label {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-weight: 500;
-      color: var(--text);
-      margin-bottom: 0.5rem;
-    }
-
-    /* Input fields */
-    textarea, select, input {
-      width: 100%;
-      padding: 1rem;
-      border: 2px solid var(--border);
-      border-radius: 12px;
-      margin-top: 0.5rem;
-      background: var(--input-bg);
-      color: var(--text);
-      transition: all 0.2s ease;
-      max-width: 100%;
-    }
-
-    textarea:focus, select:focus, input:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
-      outline: none;
-    }
-
-    /* Submit button */
-    .btn-submit {
-      background: var(--primary);
-      color: white;
-      border: none;
-      padding: 1rem 2rem;
-      border-radius: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      box-shadow: var(--shadow);
-      margin-top: auto;
-      position: sticky;
-      bottom: 0;
-      width: 100%;
-      transition: background 0.3s ease, color 0.3s ease;
-    }
-
-    .btn-submit:hover {
-      background: var(--primary-hover);
-    }
-
-    /* Interest tags */
-    .audience-interests span {
-      background: var(--primary);
-      padding: 6px 12px;
-      border-radius: 8px;
-      color: white;
-      font-size: 0.9rem;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      margin: 4px;
-      transition: background 0.3s ease;
-    }
-
-    .change-button {
-      background: var(--border);
-      color: var(--text);
-      border: none;
-      padding: 8px 16px;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .change-button:hover {
-      background: var(--primary);
-      color: white;
-    }
-
-    /* Modal styling */
-    #interest-modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: var(--modal-overlay);
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-    }
-
-    .modal-content {
-      background: var(--modal-bg);
-      border-radius: 20px;
-      padding: 1.5rem;
-      width: 90%;
-      max-width: 500px;
-      max-height: 80vh;
-      overflow-y: auto;
-      box-shadow: var(--shadow);
-      color: var(--text);
-      transition: background 0.3s ease, color 0.3s ease;
-    }
-
-    /* Modal animations */
-    @keyframes modalSlideIn {
-      from { transform: translateY(20px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
-    }
-
-    .modal-content {
-      animation: modalSlideIn 0.3s ease-out;
-    }
-
-    /* Modal elements */
-    .interest-option {
-      padding: 8px 16px;
-      border-radius: 8px;
-      background: var(--light-bg);
-      color: var(--text);
-      margin: 4px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .interest-option.selected {
-      background: var(--primary);
-      color: white;
-    }
-
-    .search-box input {
-      padding: 12px 16px;
-      border: 2px solid var(--border);
-      border-radius: 8px;
-      background: var(--input-bg);
-      color: var(--text);
-      width: 100%;
-      transition: all 0.2s ease;
-    }
-
-    .modal-footer button {
-      padding: 10px 24px;
-      border-radius: 8px;
-      font-weight: 600;
-      border: none;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .modal-footer button.okay-btn {
-      background: var(--primary);
-      color: white;
-    }
-
-    .modal-footer button.close-btn {
-      background: var(--border);
-      color: var(--text);
-    }
-
-    .modal-footer button.okay-btn:hover {
-      background: var(--primary-hover);
-    }
-
-    .modal-footer button.close-btn:hover {
-      background: var(--primary);
-      color: white;
-    }
-
-    /* Map styling */
-    #map {
-      height: 250px;
-      border-radius: 12px;
-      margin-top: 10px;
-      border: 2px solid var(--border);
-      transition: border-color 0.3s ease;
-    }
-
-    .map-btn {
-      background: var(--border);
-      color: var(--text);
-      border: none;
-      padding: 8px 16px;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      font-size: 0.9rem;
-      margin-right: 8px;
-    }
-
-    .map-btn:hover {
-      background: var(--primary);
-      color: white;
-    }
-
-    .leaflet-control-attribution {
-      display: none;
-    }
-
-    .location-container {
-      margin-bottom: 1.5rem;
-    }
-
-    /* Responsive adjustments */
-    @media (max-width: 768px) {
-      .post-container {
-        padding: 10px;
-      }
-
-      .create-post-form {
-        padding: 1rem;
-        border-radius: 12px;
-      }
-
-      #map {
-        height: 200px;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .post-container {
-        padding: 0;
-      }
-
-      .create-post-form {
-        border-radius: 0;
-        padding: 1rem;
-        min-height: calc(100vh - 60px);
-      }
-
-      .btn-submit {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        border-radius: 0;
-        padding: 1rem;
-        box-shadow: 0 -4px 12px var(--shadow);
-      }
-
-      textarea, select, input {
-        padding: 0.8rem;
-        font-size: 0.9rem;
-      }
-
-      .form-group label {
-        font-size: 0.9rem;
-      }
-
-      #map {
-        height: 150px;
-      }
-
-      .map-btn {
-        padding: 6px 12px;
-        font-size: 0.8rem;
-      }
-    }
-  </style>
-
-    <form class="create-post-form" method="POST" action="{% url 'create_post' %}" enctype="multipart/form-data">
+<div class="create-post-wrapper">
+  <div class="create-post-form">
+    <h2>Create a Post</h2>
+    <form method="POST" enctype="multipart/form-data">
       {% csrf_token %}
-      <!-- Hidden fields for coordinates -->
-      <input type="hidden" name="latitude" id="latitude">
-      <input type="hidden" name="longitude" id="longitude">
-
-      <!-- Description Field -->
+      
+      <!-- Description -->
       <div class="form-group">
-        <label for="description"><i class="fas fa-edit"></i> What's on your mind?</label>
-        <textarea name="description" id="description" rows="4" placeholder="Share your thoughts..." required></textarea>
+        <label for="description"><i class="fas fa-comment"></i> What's on your mind?</label>
+        <textarea name="description" id="description" class="post-textarea" rows="4" placeholder="Share your thoughts..." required></textarea>
       </div>
 
-      <!-- Privacy Field -->
+      <!-- Interests -->
+      <div class="form-group">
+        <label for="interest-search"><i class="fas fa-tags"></i> Audience Interests</label>
+        <div class="selected-interests audience-interests"></div>
+        <div class="all-interests">
+          {% for interest in interests %}
+            <span class="interest-item interest-option" data-id="{{ interest.id }}">{{ interest.name }}</span>
+          {% endfor %}
+        </div>
+        <button type="button" class="choose-other-btn change-button">Choose Other Interests</button>
+        <div class="search-interests search-box" style="display: none;">
+          <input type="text" id="interest-search" class="post-search-input" placeholder="Search interests...">
+          <div id="interest-suggestions" class="interest-suggestions"></div>
+        </div>
+        <!-- Container for multiple hidden inputs to store selected interest IDs -->
+        <div id="selected-interests-container"></div>
+      </div>
+
+      <!-- Privacy -->
       <div class="form-group">
         <label for="privacy"><i class="fas fa-lock"></i> Privacy</label>
-        <select name="privacy" id="privacy" required>
+        <select name="privacy" id="privacy" class="post-select">
           <option value="public">Public</option>
-          <option value="private">Private</option>
           <option value="friends">Friends Only</option>
+          <option value="private">Private</option>
         </select>
       </div>
 
-      <!-- Interests Field -->
-      <div class="form-group">
-        <label><i class="fas fa-tags"></i> Audience Interests</label>
-        <div class="audience-interests">
-          {% for interest in user_interests %}
-            <span>{{ interest.name }}</span>
-          {% endfor %}
-        </div>
-        <button type="button" class="change-button" onclick="openModal()">Change</button>
-      </div>
-
-      <!-- Location Field -->
+      <!-- Location -->
       <div class="form-group location-container">
-        <label><i class="fas fa-map-marker-alt"></i> Location</label>
-        <input type="text" name="location" id="location" placeholder="Search or click map..." readonly>
-        <div id="map"></div>
-        <div class="map-buttons" style="margin-top: 10px;">
-          <button type="button" class="map-btn" onclick="locateUser()">
-            <i class="fas fa-location-arrow"></i> Use Current Location
-          </button>
-          <button type="button" class="map-btn" onclick="clearLocation()">
-            <i class="fas fa-times"></i> Clear Location
-          </button>
+        <label for="location"><i class="fas fa-map-marker-alt"></i> Location</label>
+        <div class="location-input-wrapper">
+          <input type="text" name="location" id="location" class="post-input" placeholder="Enter a location...">
+          <button type="button" id="use-current-location" class="change-button"><i class="fas fa-crosshairs"></i> Use Current Location</button>
         </div>
+        <div class="autocomplete-suggestions" id="location-suggestions"></div>
+        <input type="hidden" name="latitude" id="latitude">
+        <input type="hidden" name="longitude" id="longitude">
+        <div id="map"></div>
       </div>
 
-      <!-- Media Upload Field -->
+      <!-- Media -->
       <div class="form-group">
-        <label for="media"><i class="fas fa-camera"></i> Upload Media</label>
-        <input type="file" name="media" id="media" accept="image/*,video/*">
+        <label for="media"><i class="fas fa-camera"></i> Add Media</label>
+        <input type="file" name="media" id="media" class="post-file-input" accept="image/*,video/*">
       </div>
 
-      <!-- Submit Button -->
-      <div style="text-align: right; margin-top: 2rem;">
-        <button type="submit" class="btn-submit">
-          <i class="fas fa-paper-plane"></i> Post
-        </button>
-      </div>
+      <!-- Submit -->
+      <button type="submit" class="btn-submit">Post</button>
     </form>
-
-  <!-- Modal for Changing Interests -->
-  <div id="interest-modal" class="modal">
-    <div class="modal-content">
-      <h3>Select Interests</h3>
-      <div class="form-group search-box">
-        <input type="text" id="search-input" placeholder="Search interests...">
-      </div>
-      <div class="interest-list">
-        {% for interest in interests %}
-          <div class="interest-option" data-id="{{ interest.id }}">
-            {{ interest.name }}
-          </div>
-        {% endfor %}
-      </div>
-      <div class="modal-footer">
-        <button class="close-btn" onclick="closeModal()">Close</button>
-        <button class="okay-btn" onclick="applyInterests()">Okay</button>
-      </div>
-    </div>
   </div>
+</div>
 
-  <!-- Leaflet JS -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script>
-    // Map-related JavaScript
-    let map;
-    let marker;
+<!-- Leaflet CSS and JS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-    function initMap() {
-      // Initialize map with default coordinates
-      map = L.map('map').setView([0, 0], 2);
-      
-      // Add OpenStreetMap tiles
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors'
-      }).addTo(map);
+<style>
+  /* Scoped to .create-post-wrapper to avoid collisions */
+  .create-post-wrapper {
+    --primary: #6969f7;
+    --primary-hover: #4f46e5;
+    --bg: #ffffff;
+    --text: #101038;
+    --card-bg: #f8fafc;
+    --border: #e5e7eb;
+    --shadow: rgba(0, 0, 0, 0.1);
+  }
 
-      // Add click event handler
-      map.on('click', function(e) {
-        updateMarker(e.latlng);
-        reverseGeocode(e.latlng);
-      });
+  .create-post-wrapper[data-theme="dark"] {
+    --bg: #0f172a;
+    --text: #f8fafc;
+    --card-bg: #1e293b;
+    --border: #334155;
+    --primary: #ffffff;
+    --shadow: rgba(255, 255, 255, 0.1);
+  }
 
-      // Try to get user's current location
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          position => {
-            const userLocation = [position.coords.latitude, position.coords.longitude];
-            map.setView(userLocation, 13);
-            updateMarker(userLocation);
-            reverseGeocode(userLocation);
-          },
-          error => console.error('Error getting location:', error)
-        );
-      }
+  .create-post-wrapper .create-post-form {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 4px 6px -1px var(--shadow);
+    border: 1px solid var(--border);
+    max-width: 600px;
+    margin: 2rem auto;
+    transition: background 0.3s ease, color 0.3s ease;
+    box-sizing: border-box;
+  }
+
+  .create-post-wrapper h2 {
+    font-size: 1.5rem;
+    color: var(--text);
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+
+  .create-post-wrapper .form-group {
+    margin-bottom: 1.25rem;
+  }
+
+  .create-post-wrapper .form-group label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+  }
+
+  .create-post-wrapper textarea,
+  .create-post-wrapper select,
+  .create-post-wrapper input:not([type="file"]):not([type="hidden"]) {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg);
+    color: var(--text);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    font-size: 1rem;
+    box-sizing: border-box;
+  }
+
+  .create-post-wrapper .post-file-input {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 0.9rem;
+  }
+
+  .create-post-wrapper textarea {
+    resize: vertical;
+    min-height: 100px;
+    max-height: 200px;
+  }
+
+  .create-post-wrapper textarea:focus,
+  .create-post-wrapper select:focus,
+  .create-post-wrapper input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(105, 105, 247, 0.2);
+    outline: none;
+  }
+
+  .create-post-wrapper .btn-submit {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 6px -1px var(--shadow);
+    width: 100%;
+    font-size: 1rem;
+    transition: background 0.3s ease;
+  }
+
+  .create-post-wrapper .btn-submit:hover {
+    background: var(--primary-hover);
+  }
+
+  .create-post-wrapper .audience-interests {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .create-post-wrapper .audience-interests span {
+    background: var(--primary);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    color: white;
+    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .create-post-wrapper .audience-interests .remove-interest {
+    cursor: pointer;
+    font-size: 0.9rem;
+    margin-left: 0.25rem;
+    padding: 0 0.25rem;
+  }
+
+  .create-post-wrapper .all-interests {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .create-post-wrapper .change-button {
+    background: var(--border);
+    color: var(--text);
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+
+  .create-post-wrapper .change-button:hover {
+    background: var(--primary);
+    color: white;
+  }
+
+  .create-post-wrapper .interest-option {
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    background: var(--card-bg);
+    color: var(--text);
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+
+  .create-post-wrapper .interest-option.selected,
+  .create-post-wrapper .interest-option:hover {
+    background: var(--primary);
+    color: white;
+  }
+
+  .create-post-wrapper .search-box input {
+    padding: 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg);
+    color: var(--text);
+    width: 100%;
+    font-size: 0.9rem;
+  }
+
+  .create-post-wrapper .interest-suggestions {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    max-height: 200px;
+    overflow-y: auto;
+    margin-top: 0.5rem;
+    box-shadow: 0 4px 6px -1px var(--shadow);
+  }
+
+  .create-post-wrapper .interest-suggestion {
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    color: var(--text);
+    font-size: 0.9rem;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+
+  .create-post-wrapper .interest-suggestion:hover {
+    background: var(--primary);
+    color: white;
+  }
+
+  .create-post-wrapper #map {
+    height: 200px;
+    border-radius: 8px;
+    margin-top: 0.5rem;
+    border: 1px solid var(--border);
+  }
+
+  .create-post-wrapper .location-container {
+    margin-bottom: 1.25rem;
+  }
+
+  .create-post-wrapper .location-input-wrapper {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+
+  .create-post-wrapper .location-input-wrapper input {
+    flex: 1;
+  }
+
+  .create-post-wrapper .location-input-wrapper button {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    white-space: nowrap;
+  }
+
+  .create-post-wrapper .autocomplete-suggestions {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    max-height: 200px;
+    overflow-y: auto;
+    margin-top: 0.25rem;
+    box-shadow: 0 4px 6px -1px var(--shadow);
+  }
+
+  .create-post-wrapper .autocomplete-suggestion {
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    color: var(--text);
+    font-size: 0.9rem;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+
+  .create-post-wrapper .autocomplete-suggestion:hover {
+    background: var(--primary);
+    color: white;
+  }
+
+  /* Responsive Design for Larger Screens */
+  @media (min-width: 769px) {
+    .create-post-wrapper .create-post-form {
+      padding: 2.5rem;
+      max-width: 700px;
+      margin: 3rem auto;
+      border-radius: 20px;
     }
 
-    function updateMarker(latlng) {
-      if (marker) map.removeLayer(marker);
-      marker = L.marker(latlng).addTo(map);
-      document.getElementById('latitude').value = latlng.lat;
-      document.getElementById('longitude').value = latlng.lng;
+    .create-post-wrapper h2 {
+      font-size: 1.75rem;
+      margin-bottom: 2rem;
     }
 
-    async function reverseGeocode(latlng) {
-      try {
-        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latlng.lat}&lon=${latlng.lng}`);
-        const data = await response.json();
-        document.getElementById('location').value = data.display_name || 'Location selected';
-      } catch (error) {
-        console.error('Reverse geocoding error:', error);
-        document.getElementById('location').value = 'Location selected';
-      }
+    .create-post-wrapper .form-group {
+      margin-bottom: 1.5rem;
     }
 
-    function locateUser() {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          position => {
-            const userLocation = [position.coords.latitude, position.coords.longitude];
-            map.setView(userLocation, 13);
-            updateMarker(userLocation);
-            reverseGeocode(userLocation);
-          },
-          error => alert('Error getting current location: ' + error.message)
-        );
-      } else {
-        alert('Geolocation is not supported by this browser.');
-      }
+    .create-post-wrapper .form-group label {
+      font-size: 1.1rem;
     }
 
-    function clearLocation() {
-      if (marker) map.removeLayer(marker);
-      document.getElementById('location').value = '';
-      document.getElementById('latitude').value = '';
-      document.getElementById('longitude').value = '';
+    .create-post-wrapper textarea,
+    .create-post-wrapper select,
+    .create-post-wrapper input:not([type="file"]):not([type="hidden"]) {
+      padding: 0.85rem;
+      font-size: 1.1rem;
+      border-radius: 10px;
     }
 
-    // Initialize the map when the page loads
-    window.onload = initMap;
-
-    // Modal JavaScript
-    const interestModal = document.getElementById("interest-modal");
-
-    function openModal() {
-      interestModal.style.display = "flex";
+    .create-post-wrapper .post-file-input {
+      padding: 0.6rem;
+      font-size: 1rem;
     }
 
-    function closeModal() {
-      interestModal.style.display = "none";
+    .create-post-wrapper textarea {
+      min-height: 120px;
+      max-height: 250px;
     }
 
-    function applyInterests() {
-      const selectedInterests = document.querySelectorAll('.interest-option.selected');
-      const audienceInterests = document.querySelector('.audience-interests');
-      audienceInterests.innerHTML = '';
-      selectedInterests.forEach(option => {
-        const interestName = option.innerText;
+    .create-post-wrapper .btn-submit {
+      padding: 0.85rem 2rem;
+      font-size: 1.1rem;
+      border-radius: 10px;
+    }
+
+    .create-post-wrapper .change-button,
+    .create-post-wrapper .interest-option,
+    .create-post-wrapper .interest-suggestion {
+      padding: 0.6rem 1.2rem;
+      font-size: 1rem;
+    }
+
+    .create-post-wrapper .audience-interests,
+    .create-post-wrapper .all-interests {
+      gap: 0.75rem;
+    }
+
+    .create-post-wrapper #map {
+      height: 250px;
+    }
+  }
+
+  /* Responsive Design for Medium Screens */
+  @media (max-width: 768px) {
+    .create-post-wrapper .create-post-form {
+      padding: 1.5rem;
+      margin: 1rem;
+      border-radius: 12px;
+      max-width: 100%;
+    }
+
+    .create-post-wrapper h2 {
+      font-size: 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .create-post-wrapper .form-group label {
+      font-size: 0.9rem;
+    }
+
+    .create-post-wrapper textarea,
+    .create-post-wrapper select,
+    .create-post-wrapper input:not([type="file"]):not([type="hidden"]) {
+      padding: 0.65rem;
+      font-size: 0.9rem;
+    }
+
+    .create-post-wrapper .post-file-input {
+      padding: 0.4rem;
+      font-size: 0.85rem;
+    }
+
+    .create-post-wrapper .btn-submit {
+      padding: 0.65rem 1.25rem;
+      font-size: 0.9rem;
+    }
+
+    .create-post-wrapper .change-button,
+    .create-post-wrapper .interest-option,
+    .create-post-wrapper .interest-suggestion {
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
+    }
+
+    .create-post-wrapper #map {
+      height: 180px;
+    }
+  }
+
+  /* Responsive Design for Small Screens */
+  @media (max-width: 480px) {
+    .create-post-wrapper .create-post-form {
+      padding: 1rem;
+      margin: 0.5rem;
+      border-radius: 8px;
+      max-width: 100%;
+    }
+
+    .create-post-wrapper h2 {
+      font-size: 1.1rem;
+      margin-bottom: 1rem;
+    }
+
+    .create-post-wrapper .form-group label {
+      font-size: 0.85rem;
+    }
+
+    .create-post-wrapper textarea,
+    .create-post-wrapper select,
+    .create-post-wrapper input:not([type="file"]):not([type="hidden"]) {
+      padding: 0.6rem;
+      font-size: 0.85rem;
+    }
+
+    .create-post-wrapper .post-file-input {
+      padding: 0.35rem;
+      font-size: 0.8rem;
+    }
+
+    .create-post-wrapper .btn-submit {
+      padding: 0.6rem 1rem;
+      font-size: 0.85rem;
+    }
+
+    .create-post-wrapper .change-button,
+    .create-post-wrapper .interest-option,
+    .create-post-wrapper .interest-suggestion {
+      padding: 0.4rem 0.8rem;
+      font-size: 0.85rem;
+    }
+
+    .create-post-wrapper #map {
+      height: 150px;
+    }
+
+    .create-post-wrapper .location-input-wrapper {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .create-post-wrapper .location-input-wrapper button {
+      width: 100%;
+      margin-top: 0.5rem;
+    }
+  }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Interests Logic
+  const userInterestIds = {{ user_interest_ids|safe }};
+  const allInterests = {{ interests|safe }};
+  const selectedInterestsDiv = document.querySelector('.selected-interests');
+  const allInterestsDiv = document.querySelector('.all-interests');
+  const chooseOtherBtn = document.querySelector('.choose-other-btn');
+  const searchInterestsDiv = document.querySelector('.search-interests');
+  const interestSearchInput = document.getElementById('interest-search');
+  const interestSuggestionsDiv = document.getElementById('interest-suggestions');
+  const selectedInterestsContainer = document.getElementById('selected-interests-container');
+  let selectedIds = [...userInterestIds];
+
+  function displaySelectedInterests() {
+    selectedInterestsDiv.innerHTML = '';
+    selectedIds.forEach(id => {
+      const interest = allInterests.find(i => i.id === id);
+      if (interest) {
         const span = document.createElement('span');
-        span.classList.add('interest');
-        span.innerText = interestName;
-        audienceInterests.appendChild(span);
-      });
-      closeModal();
-    }
-
-    document.querySelectorAll('.interest-option').forEach(option => {
-      option.addEventListener('click', () => {
-        option.classList.toggle('selected');
-      });
-    });
-
-    // Theme change listener to ensure map updates
-    document.addEventListener('themeChange', (e) => {
-      const theme = e.detail.theme;
-      console.log('Theme changed to:', theme);
-      // Trigger map redraw if needed
-      if (map) {
-        map.invalidateSize();
+        span.textContent = interest.name;
+        span.dataset.id = interest.id;
+        span.classList.add('selected-interest');
+        if (userInterestIds.includes(id)) {
+          span.classList.add('highlighted');
+        }
+        const removeBtn = document.createElement('span');
+        removeBtn.textContent = '×';
+        removeBtn.classList.add('remove-interest');
+        removeBtn.addEventListener('click', () => {
+          selectedIds = selectedIds.filter(i => i !== id);
+          displaySelectedInterests();
+          updateHiddenInputs();
+        });
+        span.appendChild(removeBtn);
+        selectedInterestsDiv.appendChild(span);
       }
     });
-  </script>
+  }
+
+  document.querySelectorAll('.interest-item').forEach(item => {
+    const id = parseInt(item.dataset.id);
+    if (userInterestIds.includes(id)) {
+      item.classList.add('highlighted');
+    }
+    item.addEventListener('click', () => {
+      if (!selectedIds.includes(id)) {
+        selectedIds.push(id);
+        displaySelectedInterests();
+        updateHiddenInputs();
+      }
+    });
+  });
+
+  displaySelectedInterests();
+
+  chooseOtherBtn.addEventListener('click', () => {
+    searchInterestsDiv.style.display = 'block';
+    interestSearchInput.focus();
+  });
+
+  interestSearchInput.addEventListener('input', () => {
+    const query = interestSearchInput.value.toLowerCase();
+    const filteredInterests = allInterests.filter(i => 
+      i.name.toLowerCase().includes(query) && !selectedIds.includes(i.id)
+    );
+    interestSuggestionsDiv.innerHTML = '';
+    filteredInterests.forEach(interest => {
+      const suggestion = document.createElement('div');
+      suggestion.textContent = interest.name;
+      suggestion.classList.add('interest-sSuggestion');
+      suggestion.addEventListener('click', () => {
+        selectedIds.push(interest.id);
+        displaySelectedInterests();
+        updateHiddenInputs();
+        interestSearchInput.value = '';
+        interestSuggestionsDiv.innerHTML = '';
+      });
+      interestSuggestionsDiv.appendChild(suggestion);
+    });
+  });
+
+  function updateHiddenInputs() {
+    selectedInterestsContainer.innerHTML = '';
+    selectedIds.forEach(id => {
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'interests';
+      input.value = id;
+      selectedInterestsContainer.appendChild(input);
+    });
+  }
+  updateHiddenInputs();
+
+  // Location Logic with Leaflet
+  const locationInput = document.getElementById('location');
+  const latitudeInput = document.getElementById('latitude');
+  const longitudeInput = document.getElementById('longitude');
+  const locationSuggestions = document.getElementById('location-suggestions');
+  const useCurrentLocationBtn = document.getElementById('use-current-location');
+
+  // Initialize Leaflet Map
+  const map = L.map('map').setView([0, 0], 2); // Default center at [0, 0], zoom level 2
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+  }).addTo(map);
+
+  // Add a marker
+  let marker = L.marker([0, 0]).addTo(map);
+  marker.setLatLng([0, 0]);
+
+  // Function to update marker and hidden inputs
+  function updateLocation(lat, lng, displayName) {
+    marker.setLatLng([lat, lng]);
+    map.setView([lat, lng], 13); // Zoom to the selected location
+    latitudeInput.value = lat;
+    longitudeInput.value = lng;
+    locationInput.value = displayName || `${lat}, ${lng}`;
+  }
+
+  // Map click event to set location
+  map.on('click', function(e) {
+    const lat = e.latlng.lat;
+    const lng = e.latlng.lng;
+    // Reverse geocode to get the display name
+    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+      .then(response => response.json())
+      .then(data => {
+        const displayName = data.display_name || `${lat}, ${lng}`;
+        updateLocation(lat, lng, displayName);
+      })
+      .catch(error => {
+        console.error('Reverse geocoding error:', error);
+        updateLocation(lat, lng, `${lat}, ${lng}`);
+      });
+  });
+
+  // Location search with autocomplete
+  locationInput.addEventListener('input', function() {
+    const query = locationInput.value;
+    if (query.length < 3) {
+      locationSuggestions.innerHTML = '';
+      return;
+    }
+
+    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`)
+      .then(response => response.json())
+      .then(data => {
+        locationSuggestions.innerHTML = '';
+        data.forEach(item => {
+          const suggestion = document.createElement('div');
+          suggestion.classList.add('autocomplete-suggestion');
+          suggestion.textContent = item.display_name;
+          suggestion.addEventListener('click', () => {
+            const lat = parseFloat(item.lat);
+            const lng = parseFloat(item.lon);
+            updateLocation(lat, lng, item.display_name);
+            locationSuggestions.innerHTML = '';
+          });
+          locationSuggestions.appendChild(suggestion);
+        });
+      })
+      .catch(error => {
+        console.error('Location search error:', error);
+      });
+  });
+
+  // Use current location
+  useCurrentLocationBtn.addEventListener('click', function() {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        position => {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+          // Reverse geocode to get the display name
+          fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+            .then(response => response.json())
+            .then(data => {
+              const displayName = data.display_name || `${lat}, ${lng}`;
+              updateLocation(lat, lng, displayName);
+            })
+            .catch(error => {
+              console.error('Reverse geocoding error:', error);
+              updateLocation(lat, lng, `${lat}, ${lng}`);
+            });
+        },
+        error => {
+          console.error('Geolocation error:', error);
+          alert('Unable to retrieve your location. Please allow location access or enter a location manually.');
+        }
+      );
+    } else {
+      alert('Geolocation is not supported by your browser.');
+    }
+  });
+});
+</script>
 {% endblock %}

@@ -1,2 +1,217 @@
-I want the next page after registration to be one for choosing interests where a collection of interests is presented to the user for them to choose from like music, coding, cooking etc
-Hence I need to figure out how I will create an efficient model to store the interests created by admin
+This is regiter page and view, make the functional and add message errors like wrong passwords
+
+def register(request):
+    """Show the registration form and handle user registration"""
+    if request.method == 'POST':
+        # Get form data
+        first_name = request.POST['first_name']
+        last_name = request.POST['last_name']
+        username = request.POST['username']
+        email = request.POST['email']
+        password = request.POST['password']
+        confirm_password = request.POST['confirm_password']
+
+        # Check if passwords match
+        if password == confirm_password:
+            # Check if username or email already exists
+            if User.objects.filter(username=username).exists():
+                messages.error(request, 'Username already exists')
+            elif User.objects.filter(email=email).exists():
+                messages.error(request, 'Email already in use')
+            else:
+                # Create the user if validation passes
+                user = User.objects.create_user(
+                    username=username,
+                    email=email,
+                    password=password,
+                    first_name=first_name,
+                    last_name=last_name
+                )
+                user.save()
+                
+                # Use get_or_create to avoid duplicate UserProfile entries
+                user_profile, created = UserProfile.objects.get_or_create(
+                    user=user,
+                    defaults={'usertype': 'user'}
+                )
+                # If the profile already existed, update its usertype if necessary
+                if not created:
+                    user_profile.usertype = 'user'
+                    user_profile.save()
+
+                messages.success(request, "Account created successfully")
+                return redirect('home')
+        else:
+            messages.error(request, 'Passwords do not match')
+
+    return render(request, 'accounts/register.html')
+
+the page
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auth Pages</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+
+        .auth-container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 500px;
+            transform: translateY(0);
+            opacity: 1;
+            transition: all 0.4s ease;
+        }
+
+        .auth-container:hover {
+            transform: translateY(-5px);
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .auth-header h1 {
+            color: #4c51bf;
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        }
+
+        .input-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #cbd5e0;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #4c51bf;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+            color: #4a5568;
+        }
+
+        .login-link a {
+            color: #4c51bf;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        @media (max-width: 480px) {
+            .auth-container {
+                padding: 30px 20px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Signup Page -->
+    <div class="auth-container">
+        <div class="auth-header">
+            <h1>Create Account</h1>
+        </div>
+        <form>
+            <div class="form-grid">
+                <div class="form-group">
+                    <input type="text" placeholder="First Name" required>
+                    <i class="fas fa-user input-icon"></i>
+                </div>
+                <div class="form-group">
+                    <input type="text" placeholder="Last Name" required>
+                    <i class="fas fa-user input-icon"></i>
+                </div>
+            </div>
+            <div class="form-group">
+                <input type="text" placeholder="Username" required>
+                <i class="fas fa-at input-icon"></i>
+            </div>
+            <div class="form-group">
+                <input type="email" placeholder="Email" required>
+                <i class="fas fa-envelope input-icon"></i>
+            </div>
+            <div class="form-group">
+                <input type="password" placeholder="Password" required>
+                <i class="fas fa-lock input-icon"></i>
+            </div>
+            <div class="form-group">
+                <input type="password" placeholder="Confirm Password" required>
+                <i class="fas fa-lock input-icon"></i>
+            </div>
+            <button type="submit">Sign Up</button>
+        </form>
+        <div class="login-link">
+            Already have an account? <a href="#">Login</a>
+        </div>
+    </div>
+</body>
+</html>

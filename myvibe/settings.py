@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-t#^n&v$d*hp_buv^(dpkz#1mhj-t^gvpwqeb!vfr2@!9z%0ba)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', '192.168.100.28']
+ALLOWED_HOSTS = ['127.0.0.1', '192.168.100.28', '192.168.1.193']
 
 
 # Application definition
@@ -68,6 +68,8 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'events.context_processors.events_context',
+                'accounts.context_processors.notification_count',
+                'myvibeapp.context_processors.active_menu',
             ],
         },
     },
@@ -143,8 +145,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'myvibecompany23@gmail.com'  # Replace with your Gmail address
-EMAIL_HOST_PASSWORD = 'nlne mmzc uunw tgpp'  # Replace with the 16-character App Password (no spaces)
+EMAIL_HOST_USER = 'myvibeinc.llc@gmail.com'  # Replace with your Gmail address
+EMAIL_HOST_PASSWORD = 'ccsj oeun sqws ggbs'  # Replace with the 16-character App Password (no spaces)
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 

@@ -2,129 +2,358 @@
 {% load static %}
 
 {% block content %}
-
   <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
- <style>
-        /* events creation  */
 
-.stepwizard-step p {
-  margin-top: 0px;
-  color: var(--text-color, #666);
-}
+  <!-- Custom styles for this page -->
+  <link rel="stylesheet" href="{% static 'assets/events/styles.css' %}">
 
-.stepwizard-row {
-  display: table-row;
-}
-
-.stepwizard {
-  display: table;
-  width: 100%;
-  position: relative;
-}
-
-.stepwizard-step button[disabled] {
-  /* opacity: 1 !important; */
-  /* filter: alpha(opacity=100) !important; */
-}
-
-.stepwizard .btn.disabled, .stepwizard .btn[disabled], .stepwizard fieldset[disabled] .btn {
-  opacity: 1 !important;
-  color: var(--disabled-text, #bbb);
-}
-
-.stepwizard-row:before {
-  top: 14px;
-  bottom: 0;
-  position: absolute;
-  content: " ";
-  width: 100%;
-  height: 1px;
-  background-color: var(--line-color, #ccc);
-  z-index: 0;
-}
-
-.stepwizard-step {
-  display: table-cell;
-  text-align: center;
-  position: relative;
-}
-
-.btn-circle {
-  width: 30px;
-  height: 30px;
-  text-align: center;
-  padding: 6px 0;
-  font-size: 12px;
-  line-height: 1.428571429;
-  border-radius: 15px;
-}
-
-/* Additional styles for Step 3 (Map and Search) */
-#map {
-  margin-bottom: 15px; /* Space between map and inputs */
-  background: var(--map-bg, #fff);
-}
-
-#location-search {
-  position: relative;
-}
-
-#suggestions {
-  width: 100%; /* Match the width of the search input */
-  max-height: 200px;
-  overflow-y: auto;
-  padding: 0;
-  margin-top: 0; /* Align directly below input */
-  border-radius: 0 0 4px 4px; /* Match Bootstrap form-control */
-  z-index: 1000; /* Ensure it appears above the map */
-  background-color: var(--dropdown-bg, #fff);
-  border-color: var(--dropdown-border, #ddd);
-}
-
-#suggestions .dropdown-item {
-  padding: 5px 10px;
-  cursor: pointer;
-  white-space: normal; /* Allow text wrapping */
-  font-size: 14px;
-  color: var(--dropdown-text, #333);
-}
-
-#suggestions .dropdown-item:hover {
-  background-color: var(--dropdown-hover-bg, #f8f9fa);
-  color: var(--dropdown-hover-text, #333);
-}
-
-/* Theme-aware overrides for Bootstrap elements */
-.panel {
-  background-color: var(--panel-bg, #fff);
-  border-color: var(--panel-border, #ddd);
-}
-
-.panel-primary > .panel-heading {
-  background-color: var(--panel-heading-bg, #337ab7);
-  color: var(--panel-heading-color, #fff);
-  border-color: var(--panel-border, #ddd);
-}
-
-.btn-primary {
-  background-color: var(--btn-primary-bg, #337ab7);
-  border-color: var(--btn-primary-border, #2e6da4);
-  color: var(--btn-text, #fff);
-}
-
-.btn-primary:hover {
-  background-color: var(--btn-primary-hover-bg, #286090);
-  border-color: var(--btn-primary-hover-border, #204d74);
-}
-
-.form-control {
-  background-color: var(--input-bg, #fff);
-  color: var(--input-text, #555);
-  border-color: var(--input-border, #ccc);
-}
-
-</style>
+  <style>
+    /* Form-specific theme variables */
+.event-creation-container {
+    --input-bg: #fff;
+    --input-text: #101038;
+    --input-border: #e5e7eb;
+    --input-focus: #6969f7;
+    --btn-success-bg: #22c55e;
+    --btn-success-border: #16a34a;
+    --btn-success-hover-bg: #16a34a;
+    --btn-success-hover-border: #15803d;
+    --step-bg: #e5e7eb;
+    --step-text: #101038;
+    --step-active-bg: #6969f7;
+    --step-active-text: #fff;
+    --dropdown-bg: #fff;
+    --dropdown-border: #e5e7eb;
+    --dropdown-text: #101038;
+    --dropdown-hover-bg: #f8fafc;
+    --dropdown-hover-text: #101038;
+    --map-bg: #fff;
+  }
+  
+  .event-creation-container[data-theme="dark"] {
+    --input-bg: #1e293b;
+    --input-text: #f8fafc;
+    --input-border: #334155;
+    --input-focus: #4f46e5;
+    --btn-success-bg: #16a34a;
+    --btn-success-border: #15803d;
+    --btn-success-hover-bg: #15803d;
+    --btn-success-hover-border: #166534;
+    --step-bg: #334155;
+    --step-text: #f8fafc;
+    --step-active-bg: #4f46e5;
+    --step-active-text: #f8fafc;
+    --dropdown-bg: #1e293b;
+    --dropdown-border: #334155;
+    --dropdown-text: #f8fafc;
+    --dropdown-hover-bg: #334155;
+    --dropdown-hover-text: #f8fafc;
+    --map-bg: #1e293b;
+  }
+  
+  /* Scoped styles for event creation form */
+  .event-creation-container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background: var(--card-bg);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  /* Step wizard */
+  .event-creation-container .stepwizard {
+    display: table;
+    width: 100%;
+    position: relative;
+    margin-bottom: 30px;
+  }
+  
+  .event-creation-container .stepwizard-row {
+    display: table-row;
+  }
+  
+  .event-creation-container .stepwizard-step {
+    display: table-cell;
+    text-align: center;
+    position: relative;
+    padding: 10px 0;
+  }
+  
+  .event-creation-container .stepwizard-step p {
+    margin-top: 8px;
+    color: var(--text);
+    font-size: 12px;
+    font-weight: 500;
+  }
+  
+  .event-creation-container .stepwizard-row:before {
+    top: 22px;
+    bottom: 0;
+    position: absolute;
+    content: " ";
+    width: 100%;
+    height: 2px;
+    background-color: var(--border);
+    z-index: 0;
+  }
+  
+  .event-creation-container .btn-circle {
+    width: 36px;
+    height: 36px;
+    text-align: center;
+    padding: 8px 0;
+    font-size: 14px;
+    line-height: 1.428571429;
+    border-radius: 50%;
+    background: var(--step-bg);
+    color: var(--step-text);
+    border: 2px solid var(--border);
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 1;
+  }
+  
+  .event-creation-container .btn-circle.btn-success {
+    background: var(--step-active-bg);
+    color: var(--step-active-text);
+    border-color: var(--primary);
+  }
+  
+  .event-creation-container .btn-circle:hover:not([disabled]) {
+    background: var(--primary-hover);
+    color: var(--step-active-text);
+    border-color: var(--primary-hover);
+  }
+  
+  .event-creation-container .stepwizard .btn.disabled,
+  .event-creation-container .stepwizard .btn[disabled],
+  .event-creation-container .stepwizard fieldset[disabled] .btn {
+    opacity: 0.6 !important;
+    cursor: not-allowed;
+  }
+  
+  /* Form elements */
+  .event-creation-container .panel {
+    background-color: var(--card-bg);
+    border-color: var(--border);
+    margin-bottom: 20px;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+  }
+  
+  .event-creation-container .panel-primary > .panel-heading {
+    background-color: var(--primary);
+    color: var(--text);
+    border-color: var(--border);
+    border-radius: 8px 8px 0 0;
+    padding: 15px;
+  }
+  
+  .event-creation-container .panel-body {
+    padding: 20px;
+  }
+  
+  .event-creation-container .btn-primary {
+    background-color: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+    border-radius: 6px;
+    padding: 10px 20px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+  }
+  
+  .event-creation-container .btn-primary:hover {
+    background-color: var(--primary-hover);
+    border-color: var(--primary-hover);
+  }
+  
+  .event-creation-container .btn-success {
+    background-color: var(--btn-success-bg);
+    border-color: var(--btn-success-border);
+    color: #fff;
+    border-radius: 6px;
+    padding: 10px 20px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+  }
+  
+  .event-creation-container .btn-success:hover {
+    background-color: var(--btn-success-hover-bg);
+    border-color: var(--btn-success-hover-border);
+  }
+  
+  .event-creation-container .form-control {
+    background-color: var(--input-bg);
+    color: var(--input-text);
+    border: 2px solid var(--input-border);
+    border-radius: 6px;
+    padding: 10px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    box-shadow: inset 0 1px 2px var(--shadow);
+  }
+  
+  .event-creation-container .form-control:focus {
+    border-color: var(--input-focus);
+    box-shadow: 0 0 0 3px rgba(105, 105, 247, 0.2);
+    outline: none;
+  }
+  
+  .event-creation-container .form-control[disabled] {
+    background-color: var(--border);
+    opacity: 0.7;
+  }
+  
+  .event-creation-container .form-group.has-error .form-control {
+    border-color: #dc2626;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.2);
+  }
+  
+  .event-creation-container textarea.form-control {
+    resize: vertical;
+    min-height: 100px;
+  }
+  
+  .event-creation-container select.form-control[multiple] {
+    padding: 5px;
+  }
+  
+  .event-creation-container input[type="file"].form-control {
+    padding: 7px;
+  }
+  
+  /* Map and search */
+  .event-creation-container .event-map {
+    height: 400px;
+    margin-bottom: 20px;
+    background: var(--map-bg);
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    transition: border-color 0.3s ease;
+  }
+  
+  .event-creation-container #location-search {
+    position: relative;
+  }
+  
+  .event-creation-container #suggestions {
+    width: 100%;
+    max-height: 200px;
+    overflow-y: auto;
+    padding: 0;
+    margin-top: 2px;
+    border-radius: 6px;
+    z-index: 1000;
+    background-color: var(--dropdown-bg);
+    border: 2px solid var(--dropdown-border);
+    box-shadow: var(--shadow);
+  }
+  
+  .event-creation-container #suggestions .dropdown-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    white-space: normal;
+    font-size: 14px;
+    color: var(--dropdown-text);
+    transition: all 0.2s ease;
+  }
+  
+  .event-creation-container #suggestions .dropdown-item:hover {
+    background-color: var(--dropdown-hover-bg);
+    color: var(--dropdown-hover-text);
+  }
+  
+  /* Labels and instructions */
+  .event-creation-container .control-label {
+    color: var(--text);
+    font-weight: 500;
+    margin-bottom: 8px;
+    display: block;
+  }
+  
+  .event-creation-container .panel-body p {
+    color: var(--text);
+    margin-bottom: 15px;
+  }
+  
+  /* Spacer */
+  .form-spacer {
+    height: 100px;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .event-creation-container {
+      margin: 10px;
+      padding: 15px;
+    }
+  
+    .event-creation-container .stepwizard-step {
+      font-size: 11px;
+    }
+  
+    .event-creation-container .btn-circle {
+      width: 30px;
+      height: 30px;
+      font-size: 12px;
+      padding: 6px 0;
+    }
+  
+    .event-creation-container .event-map {
+      height: 300px;
+    }
+  
+    .event-creation-container .panel-body {
+      padding: 15px;
+    }
+  
+    .form-spacer {
+      height: 80px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .event-creation-container .stepwizard {
+      display: block;
+    }
+  
+    .event-creation-container .stepwizard-row {
+      display: block;
+    }
+  
+    .event-creation-container .stepwizard-step {
+      display: inline-block;
+      margin: 5px;
+    }
+  
+    .event-creation-container .stepwizard-row:before {
+      display: none;
+    }
+  
+    .event-creation-container .btn-circle {
+      width: 26px;
+      height: 26px;
+      font-size: 11px;
+      padding: 5px 0;
+    }
+  
+    .event-creation-container .form-control {
+      font-size: 13px;
+      padding: 8px;
+    }
+  
+    .form-spacer {
+      height: 60px;
+    }
+  }
+  </style>
+  <!-- Scoped container for event creation form -->
+  <div class="event-creation-container">
     <div class="stepwizard">
       <div class="stepwizard-row setup-panel">
         <div class="stepwizard-step col-xs-2">
@@ -156,8 +385,9 @@
           <p><small>Guests</small></p>
         </div>
       </div>
+    </div>
 
-    <form role="form" method="post" enctype="multipart/form-data" action="{% url 'create_event' %}">
+    <form role="form" method="post" enctype="multipart/form-data" action="{% url 'create_event' %}" class="event-creation-form">
       {% csrf_token %}
 
       <!-- Step 1: Basic Details -->
@@ -172,7 +402,7 @@
           </div>
           <div class="form-group">
             <label class="control-label">Description</label>
-            <textarea name="description" required="required" class="form-control" placeholder="Describe your event"></textarea>
+            <textarea name="description" required="required" class="form-control" placeholder="Describe your event" rows="4"></textarea>
           </div>
           <div class="form-group">
             <label class="control-label">Creator</label>
@@ -215,9 +445,9 @@
           <div class="form-group">
             <label class="control-label">Search Location</label>
             <input type="text" id="location-search" class="form-control" placeholder="Search for a location in Kenya..." />
-            <div id="suggestions" class="dropdown-menu" style="width: 100%; max-height: 200px; overflow-y: auto;"></div>
+            <div id="suggestions" class="dropdown-menu"></div>
           </div>
-          <div id="map" style="height: 400px;"></div>
+          <div id="map" class="event-map"></div>
           <div class="form-group">
             <label class="control-label">Latitude</label>
             <input type="number" step="0.000001" name="latitude" required="required" class="form-control" readonly />
@@ -239,7 +469,7 @@
           <p>Select interests related to your event (hold Ctrl/Cmd to select multiple):</p>
           <div class="form-group">
             <label class="control-label">Interests</label>
-            <select name="interests" multiple="multiple" class="form-control" required="required">
+            <select name="interests" multiple="multiple" class="form-control" required="required" size="5">
               {% for interest in interests %}
                 <option value="{{ interest.id }}">{{ interest.name }}</option>
               {% endfor %}
@@ -318,7 +548,7 @@
           <p>Invite existing users (select multiple):</p>
           <div class="form-group">
             <label class="control-label">Existing Users</label>
-            <select name="invited_users" multiple="multiple" class="form-control">
+            <select name="invited_users" multiple="multiple" class="form-control" size="5">
               {% for user in users %}
                 <option value="{{ user.id }}">{{ user.get_full_name|default:user.username }}</option>
               {% endfor %}
@@ -327,17 +557,22 @@
           <p>Invite unregistered guests (one per line):</p>
           <div class="form-group">
             <label class="control-label">External Guests</label>
-            <textarea name="external_guests" class="form-control" placeholder="e.g., John Doe
-Jane Smith"></textarea>
+            <textarea name="external_guests" class="form-control" placeholder="e.g., John Doe\nJane Smith" rows="4"></textarea>
           </div>
           <button class="btn btn-success pull-right" type="submit">Create Event!</button>
         </div>
       </div>
     </form>
   </div>
+  <!-- Spacer to prevent content cutoff -->
+  <div class="form-spacer"></div>
 
   <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- jQuery and Bootstrap JS -->
+  <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
   <!-- Custom JS for step wizard and map -->
   <script src="{% static 'assets/events/index.js' %}"></script>

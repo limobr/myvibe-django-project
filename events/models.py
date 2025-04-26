@@ -133,3 +133,13 @@ class EventNotification(models.Model):
 
     def __str__(self):
         return f"Notification for {self.user} - {self.notification_type}"
+
+
+class Invite(models.Model):
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='event_invites')
+    recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='invites')
+    sent_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('event', 'recipient')

@@ -3,8 +3,9 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.decorators import login_required
 from django.core.files.storage import FileSystemStorage
 from django.contrib import messages
-from accounts.models import Interest, User
+from accounts.models import Interest, User, UserProfile, Notification
 from .models import Attendance, Event, EventComment, EventImage, EventLike, EventShare
+from django.urls import reverse
 
 @login_required
 def create_event(request):
@@ -70,10 +71,18 @@ def create_event(request):
 
         if invited_user_ids:
             for user_id in invited_user_ids:
+                user = User.objects.get(id=user_id)
                 Attendance.objects.create(
                     event=event,
-                    user=User.objects.get(id=user_id),
+                    user=user,
                     status='invited'
+                )
+                # Notify invited users
+                Notification.objects.create(
+                    recipient=user,
+                    message=f"You've been invited to the event '{event.title}' by {creator.username}",
+                    link=reverse('events:event_detail', kwargs={'event_id': event.id}),
+                    is_read=False
                 )
 
         if external_guests:
@@ -85,8 +94,37 @@ def create_event(request):
                         status='invited'
                     )
 
+        # Notify followers and users with matching interests (if public)
+        if is_public:
+            # Notify followers
+            creator_profile = creator.userprofile
+            followers = creator_profile.followers
+            for follower in followers:
+                Notification.objects.create(
+                    recipient=follower.user,
+                    message=f"{creator.username} created a new event: '{event.title}'",
+                    link=reverse('events:event_detail', kwargs={'event_id': event.id}),
+                    is_read=False
+                )
+
+            # Notify users with matching interests (excluding creator and already invited users)
+            invited_users = User.objects.filter(attendance__event=event, attendance__status='invited')
+            event_interests = event.interests.all()
+            interested_users = UserProfile.objects.filter(interests__in=event_interests).exclude(
+                user=creator
+            ).exclude(
+                user__in=invited_users
+            ).distinct()
+            for profile in interested_users:
+                Notification.objects.create(
+                    recipient=profile.user,
+                    message=f"A new event '{event.title}' matches your interests",
+                    link=reverse('events:event_detail', kwargs={'event_id': event.id}),
+                    is_read=False
+                )
+
         messages.success(request, 'Event created successfully!')
-        return redirect('home')  # Adjust to your home URL name
+        return redirect('myvibeapp:home')  # Adjusted to match app namespace
 
     # GET request: Render the form
     interests = Interest.objects.all()
@@ -99,14 +137,12 @@ def create_event(request):
     }
     return render(request, 'events/create-event.html', context)
 
-
 def events_view(request):
     events = Event.objects.filter(is_public=True).order_by('start_time')
     for event in events:
         # Attach the primary image to the event object
         event.primary_image = event.images.filter(is_primary=True).first()
     return render(request, 'events/events_view.html', {'events': events})
-
 
 def event_detail(request, event_id):
     event = get_object_or_404(Event, id=event_id)
@@ -134,53 +170,93 @@ def event_detail(request, event_id):
     }
     return render(request, 'events/event_detail.html', context)
 
-# Like/Unlike an Event
 @login_required
 def like_event(request, event_id):
     event = get_object_or_404(Event, id=event_id)
     like, created = EventLike.objects.get_or_create(user=request.user, event=event)
-    if not created:
+    if created:
+        # Notify the event creator (if not the liker)
+        if event.creator != request.user:
+            Notification.objects.create(
+                recipient=event.creator,
+                message=f"{request.user.username} liked your event '{event.title}'",
+                link=reverse('events:event_detail', kwargs={'event_id': event.id}),
+                is_read=False
+            )
+    else:
         like.delete()  # Unlike if already liked
-    return redirect('event_detail', event_id=event_id)
+    return redirect('events:event_detail', event_id=event_id)
 
-# Share an Event
 @login_required
 def share_event(request, event_id):
     event = get_object_or_404(Event, id=event_id)
     if request.method == 'POST':
         shared_via = request.POST.get('shared_via', 'social')  # Default to social media
         EventShare.objects.create(user=request.user, event=event, shared_via=shared_via)
+        
+        # Notify the event creator (if not the sharer)
+        if event.creator != request.user:
+            Notification.objects.create(
+                recipient=event.creator,
+                message=f"{request.user.username} shared your event '{event.title}'",
+                link=reverse('events:event_detail', kwargs={'event_id': event.id}),
+                is_read=False
+            )
+        
         messages.success(request, 'Event shared successfully!')
-    return redirect('event_detail', event_id=event_id)
+    return redirect('events:event_detail', event_id=event_id)
 
-# Add a Comment
 @login_required
 def add_comment(request, event_id):
     event = get_object_or_404(Event, id=event_id)
     if request.method == 'POST':
         content = request.POST.get('content')
         if content:
-            EventComment.objects.create(user=request.user, event=event, content=content)
+            comment = EventComment.objects.create(user=request.user, event=event, content=content)
+            
+            # Notify the event creator (if not the commenter)
+            if event.creator != request.user:
+                Notification.objects.create(
+                    recipient=event.creator,
+                    message=f"{request.user.username} commented on your event '{event.title}'",
+                    link=reverse('events:event_detail', kwargs={'event_id': event.id}),
+                    is_read=False
+                )
+            
             messages.success(request, 'Comment added!')
-    return redirect('event_detail', event_id=event_id)
+    return redirect('events:event_detail', event_id=event_id)
 
-# Join Waiting List
 @login_required
 def join_waiting_list(request, event_id):
     event = get_object_or_404(Event, id=event_id)
     if not Attendance.objects.filter(event=event, user=request.user).exists():
         # Check if max attendees is reached (if not unlimited)
         if event.max_attendees > 0 and event.attendees.filter(status='attending').count() >= event.max_attendees:
-            Attendance.objects.create(event=event, user=request.user, status='waiting_list')
+            attendance = Attendance.objects.create(event=event, user=request.user, status='waiting_list')
             messages.success(request, 'You have joined the waiting list.')
+            
+            # Notify the event creator
+            Notification.objects.create(
+                recipient=event.creator,
+                message=f"{request.user.username} joined the waiting list for your event '{event.title}'",
+                link=reverse('events:event_detail', kwargs={'event_id': event.id}),
+                is_read=False
+            )
         else:
-            Attendance.objects.create(event=event, user=request.user, status='attending')
+            attendance = Attendance.objects.create(event=event, user=request.user, status='attending')
             messages.success(request, 'You are now attending the event.')
+            
+            # Notify the event creator
+            Notification.objects.create(
+                recipient=event.creator,
+                message=f"{request.user.username} is attending your event '{event.title}'",
+                link=reverse('events:event_detail', kwargs={'event_id': event.id}),
+                is_read=False
+            )
     else:
         messages.error(request, 'You are already registered for this event.')
-    return redirect('event_detail', event_id=event_id)
+    return redirect('events:event_detail', event_id=event_id)
 
-# Accept an Invite
 @login_required
 def accept_invite(request, event_id):
     event = get_object_or_404(Event, id=event_id)
@@ -190,10 +266,27 @@ def accept_invite(request, event_id):
         if event.max_attendees > 0 and event.attendees.filter(status='attending').count() >= event.max_attendees:
             attendance.status = 'waiting_list'
             messages.info(request, 'Event is full. You have been placed on the waiting list.')
+            
+            # Notify the event creator
+            Notification.objects.create(
+                recipient=event.creator,
+                message=f"{request.user.username} accepted your invite but was placed on the waiting list for '{event.title}'",
+                link=reverse('events:event_detail', kwargs={'event_id': event.id}),
+                is_read=False
+            )
         else:
             attendance.status = 'attending'
             messages.success(request, 'You have accepted the invite and are now attending.')
+            
+            # Notify the event creator
+            Notification.objects.create(
+                recipient=event.creator,
+                message=f"{request.user.username} accepted your invite and is attending '{event.title}'",
+                link=reverse('events:event_detail', kwargs={'event_id': event.id}),
+                is_read=False
+            )
         attendance.save()
     else:
         messages.error(request, 'You are not invited to this event.')
-    return redirect('event_detail', event_id=event_id)
+    return redirect('events:event_detail', event_id=event_id)
+

@@ -1,0 +1,516 @@
+{% extends "myvibe/base.html" %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+    .edit-event-container {
+        padding: 2rem;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .page-title {
+        margin-bottom: 2rem;
+        color: var(--primary, #2563eb);
+        font-size: 2rem;
+        font-weight: 600;
+    }
+
+    .form-section {
+        margin-bottom: 2rem;
+        border: 1px solid var(--border, #d1d5db);
+        border-radius: 8px;
+        padding: 1.5rem;
+        background: var(--card-bg, #ffffff);
+    }
+
+    .form-section legend {
+        font-size: 1.25rem;
+        font-weight: bold;
+        color: var(--text, #1f2937);
+        margin-bottom: 1rem;
+        padding: 0 0.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: var(--text, #1f2937);
+        font-weight: 500;
+        font-size: 0.95rem;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+        width: 100%;
+        padding: 0.8rem;
+        border: 1px solid var(--border, #d1d5db);
+        border-radius: 8px;
+        background: var(--bg, #f9fafb);
+        color: var(--text, #1f2937);
+        font-size: 1rem;
+        transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+        border-color: var(--primary, #2563eb);
+        box-shadow: 0 0 5px rgba(37, 99, 235, 0.3);
+        outline: none;
+    }
+
+    .form-group textarea {
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    .form-group input[type="checkbox"] {
+        width: auto;
+        margin-right: 0.5rem;
+    }
+
+    .form-group .checkbox-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .form-group .checkbox-group label {
+        display: flex;
+        align-items: center;
+        font-weight: normal;
+        margin-bottom: 0;
+    }
+
+    .map-container {
+        height: 400px;
+        margin-bottom: 1rem;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .image-preview {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .image-item {
+        position: relative;
+        width: 100px;
+        height: 100px;
+    }
+
+    .image-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 1px solid var(--border, #d1d5db);
+    }
+
+    .remove-image {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        background: #dc2626;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: background 0.3s;
+    }
+
+    .remove-image:hover {
+        background: #b91c1c;
+    }
+
+    .submit-button {
+        background: var(--primary, #2563eb);
+        color: white;
+        padding: 1rem 2rem;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        width: 100%;
+        font-size: 1rem;
+        font-weight: 500;
+        transition: background 0.3s;
+    }
+
+    .submit-button:hover {
+        background: var(--primary-hover, #1d4ed8);
+    }
+
+    /* Error Message Styling */
+    .error-message {
+        background: #fee2e2;
+        color: #dc2626;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+        padding: 1rem;
+        border-radius: 8px;
+        border: 1px solid #f87171;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .error-message ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .error-message li {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+
+    .error-message li::before {
+        content: '⚠';
+        margin-right: 0.5rem;
+        font-size: 1rem;
+    }
+
+    .form-group.error input,
+    .form-group.error textarea,
+    .form-group.error select {
+        border-color: #dc2626;
+        background: #fef2f2;
+    }
+
+    .form-group.error::after {
+        content: attr(data-error);
+        color: #dc2626;
+        font-size: 0.8rem;
+        margin-top: 0.25rem;
+        display: block;
+    }
+
+    /* Modal Dialog Styling */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 1000;
+        overflow: auto;
+    }
+
+    .modal-content {
+        position: relative;
+        background: #ffffff; /* Fallback to white if --card-bg is undefined */
+        border-radius: 8px;
+        padding: 1.5rem;
+        max-width: 400px;
+        width: 90%;
+        margin: 10% auto;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        text-align: center;
+        z-index: 1001;
+    }
+
+    .modal-content h3 {
+        margin-bottom: 1rem;
+        color: #1f2937;
+        font-size: 1.25rem;
+        font-weight: 600;
+    }
+
+    .modal-content p {
+        color: #64748b;
+        margin-bottom: 1.5rem;
+        font-size: 0.95rem;
+    }
+
+    .modal-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+    }
+
+    .modal-button {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 0.95rem;
+        font-weight: 500;
+        transition: background 0.3s;
+    }
+
+    .modal-button.continue {
+        background: #dc2626;
+        color: white;
+    }
+
+    .modal-button.continue:hover {
+        background: #b91c1c;
+    }
+
+    .modal-button.cancel {
+        background: #e5e7eb;
+        color: #1f2937;
+    }
+
+    .modal-button.cancel:hover {
+        background: #d1d5db;
+    }
+</style>
+
+<main class="main-content">
+    <div class="edit-event-container">
+        <h1 class="page-title">Edit Event</h1>
+        {% if errors %}
+            <div class="error-message">
+                <ul>
+                    {% for error in errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <!-- Event Details -->
+            <fieldset class="form-section">
+                <legend>Event Details</legend>
+                <div class="form-group">
+                    <label for="title">Title</label>
+                    <input type="text" name="title" id="title" value="{{ event.title }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea name="description" id="description" rows="5" required>{{ event.description }}</textarea>
+                </div>
+                <div class="form-group">
+                    <label for="category">Category</label>
+                    <select name="category" id="category" required>
+                        {% for value, label in event.EVENT_CATEGORIES %}
+                            <option value="{{ value }}" {% if event.category == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="tags">Tags (comma-separated)</label>
+                    <input type="text" name="tags" id="tags" value="{% for tag in event.tags.all %}{{ tag.name }}{% if not forloop.last %}, {% endif %}{% endfor %}">
+                </div>
+            </fieldset>
+
+            <!-- Timing & Venue -->
+            <fieldset class="form-section">
+                <legend>Timing & Venue</legend>
+                <div class="form-group">
+                    <label for="start_time">Start Time</label>
+                    <input type="datetime-local" name="start_time" id="start_time" value="{{ event.start_time|date:'Y-m-d\TH:i' }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="end_time">End Time</label>
+                    <input type="datetime-local" name="end_time" id="end_time" value="{{ event.end_time|date:'Y-m-d\TH:i' }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="venue_name">Venue Name</label>
+                    <input type="text" name="venue_name" id="venue_name" value="{{ event.venue_name }}" required>
+                </div>
+            </fieldset>
+
+            <!-- Location -->
+            <fieldset class="form-section">
+                <legend>Location</legend>
+                <div class="form-group">
+                    <label for="location-search">Search Location</label>
+                    <input type="text" id="location-search" placeholder="Search for a location...">
+                </div>
+                <div id="map" class="map-container"></div>
+                <div class="form-group">
+                    <label for="latitude">Latitude</label>
+                    <input type="number" name="latitude" id="latitude" step="0.000001" value="{{ event.latitude }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="longitude">Longitude</label>
+                    <input type="number" name="longitude" id="longitude" step="0.000001" value="{{ event.longitude }}" required>
+                </div>
+            </fieldset>
+
+            <!-- Interests -->
+            <fieldset class="form-section">
+                <legend>Interests</legend>
+                <div class="form-group">
+                    <label>Interests</label>
+                    <div class="checkbox-group">
+                        {% for interest in all_interests %}
+                            <label>
+                                <input type="checkbox" name="interests" value="{{ interest.id }}" {% if interest in event.interests.all %}checked{% endif %}>
+                                {{ interest.name }}
+                            </label>
+                        {% endfor %}
+                    </div>
+                </div>
+            </fieldset>
+
+            <!-- Logistics -->
+            <fieldset class="form-section">
+                <legend>Logistics</legend>
+                <div class="form-group">
+                    <label for="max_attendees">Max Attendees (0 for unlimited)</label>
+                    <input type="number" name="max_attendees" id="max_attendees" value="{{ event.max_attendees }}" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="price">Price (0.00 if free)</label>
+                    <input type="number" name="price" id="price" step="0.01" value="{{ event.price }}" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="registration_deadline">Registration Deadline</label>
+                    <input type="datetime-local" name="registration_deadline" id="registration_deadline" value="{{ event.registration_deadline|date:'Y-m-d\TH:i' }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="is_public">Is Public</label>
+                    <input type="checkbox" name="is_public" id="is_public" {% if event.is_public %}checked{% endif %}>
+                </div>
+            </fieldset>
+
+            <!-- Images -->
+            <fieldset class="form-section">
+                <legend>Images</legend>
+                <div class="image-preview">
+                    {% for image in event.images.all %}
+                        <div class="image-item">
+                            <img src="{{ image.image.url }}" alt="Event Image">
+                            <button type="button" class="remove-image" data-image-id="{{ image.id }}" onclick="showDeleteModal({{ image.id }})">×</button>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="form-group">
+                    <label for="images">Add Images</label>
+                    <input type="file" name="images" id="images" multiple accept="image/*">
+                </div>
+            </fieldset>
+
+            <button type="submit" class="submit-button">Save Changes</button>
+        </form>
+
+        <!-- Delete Confirmation Modal -->
+        <div id="deleteModal" class="modal">
+            <div class="modal-content">
+                <h3>Confirm Deletion</h3>
+                <p>Are you sure you want to remove this image?</p>
+                <div class="modal-buttons">
+                    <button class="modal-button continue" onclick="confirmDelete()">Continue</button>
+                    <button class="modal-button cancel" onclick="closeModal()">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    // Initialize Leaflet map
+    var map = L.map('map').setView([{{ event.latitude|default:"0" }}, {{ event.longitude|default:"0" }}], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+    var marker = L.marker([{{ event.latitude|default:"0" }}, {{ event.longitude|default:"0" }}], {draggable: true}).addTo(map);
+
+    // Update form fields on marker drag
+    marker.on('dragend', function(e) {
+        var latlng = e.target.getLatLng();
+        document.getElementById('latitude').value = latlng.lat.toFixed(6);
+        document.getElementById('longitude').value = latlng.lng.toFixed(6);
+    });
+
+    // Location search with Nominatim
+    var searchInput = document.getElementById('location-search');
+    searchInput.addEventListener('input', function() {
+        var query = this.value;
+        if (query.length < 3) return;
+
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.length > 0) {
+                    var place = data[0];
+                    map.setView([place.lat, place.lon], 13);
+                    marker.setLatLng([place.lat, place.lon]);
+                    document.getElementById('latitude').value = parseFloat(place.lat).toFixed(6);
+                    document.getElementById('longitude').value = parseFloat(place.lon).toFixed(6);
+                }
+            });
+    });
+
+    // Modal and image deletion handling
+    let currentImageId = null;
+
+    function showDeleteModal(imageId) {
+        console.log('Showing modal for image ID:', imageId); // Debug log
+        currentImageId = imageId;
+        const modal = document.getElementById('deleteModal');
+        modal.style.display = 'block';
+        // Ensure modal content is visible
+        const modalContent = modal.querySelector('.modal-content');
+        modalContent.style.display = 'block';
+        modalContent.style.opacity = '1';
+    }
+
+    function closeModal() {
+        console.log('Closing modal'); // Debug log
+        const modal = document.getElementById('deleteModal');
+        modal.style.display = 'none';
+        currentImageId = null;
+    }
+
+    function confirmDelete() {
+        if (currentImageId) {
+            console.log('Deleting image ID:', currentImageId); // Debug log
+            fetch('{% url "remove_event_image" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ image_id: currentImageId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Image deleted successfully'); // Debug log
+                    document.querySelector(`.image-item [data-image-id="${currentImageId}"]`).parentElement.remove();
+                    closeModal();
+                } else {
+                    console.error('Error removing image:', data.error); // Debug log
+                    alert('Error removing image: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Fetch error:', error); // Debug log
+                alert('Error removing image: ' + error);
+            });
+        }
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('deleteModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            console.log('Clicked outside modal'); // Debug log
+            closeModal();
+        }
+    });
+</script>
+{% endblock %}

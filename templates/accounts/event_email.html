@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>myVibe Event Invitation</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; background-color: #f8f9fa;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: #f8f9fa;">
+        <tr>
+            <td align="center">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
+                    <!-- Header -->
+                    <tr>
+                        <td style="background-color: #cda45e; color: #ffffff; padding: 20px; text-align: center;">
+                            <h1 style="margin: 0; font-size: 24px; font-weight: bold;">You're Invited to {{ event.title }}!</h1>
+                        </td>
+                    </tr>
+                    <!-- Content -->
+                    <tr>
+                        <td style="padding: 20px; color: #333333;">
+                            <h2 style="font-size: 20px; margin: 0 0 10px; color: #cda45e; font-weight: bold;">Hello {{ recipient.username }},</h2>
+                            <p style="margin: 0 0 15px; font-size: 16px; line-height: 1.5;">You've been invited to an exciting event on myVibe! Join us for a memorable experience.</p>
+                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin: 20px 0;">
+                                <tr>
+                                    <td style="font-size: 16px; line-height: 1.5; padding: 5px 0;"><strong>Event:</strong> {{ event.title }}</td>
+                                </tr>
+                                <tr>
+                                    <td style="font-size: 16px; line-height: 1.5; padding: 5px 0;"><strong>Date & Time:</strong> {{ event.start_time|date:"M j, Y" }} at {{ event.start_time|time:"g:i A" }}</td>
+                                </tr>
+                                <tr>
+                                    <td style="font-size: 16px; line-height: 1.5; padding: 5px 0;"><strong>Venue:</strong> {{ event.venue_name }}</td>
+                                </tr>
+                                <tr>
+                                    <td style="font-size: 16px; line-height: 1.5; padding: 5px 0;"><strong>Description:</strong> {{ event.description|truncatewords:30 }}</td>
+                                </tr>
+                            </table>
+                            <p style="margin: 15px 0; text-align: center;">
+                                <a href="{{ domain }}{% url 'view_event' event.id %}" style="display: inline-block; background-color: #cda45e; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-size: 16px; font-weight: 500;">View Event Details</a>
+                            </p>
+                        </td>
+                    </tr>
+                    <!-- Footer -->
+                    <tr>
+                        <td style="background-color: #f8f9fa; padding: 10px; text-align: center; font-size: 12px; color: #666666;">
+                            <p style="margin: 0 0 5px;">myVibe - Connect with like-minded people</p>
+                            <p style="margin: 0 0 5px;">Copyright &copy; 2025 myVibe. All rights reserved.</p>
+                            <p style="margin: 0;">
+                                <a href="https://facebook.com/myvibe" style="color: #cda45e; text-decoration: none;">Facebook</a> |
+                                <a href="https://twitter.com/myvibe" style="color: #cda45e; text-decoration: none;">Twitter</a> |
+                                <a href="https://linkedin.com/company/myvibe" style="color: #cda45e; text-decoration: none;">LinkedIn</a>
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

@@ -1,0 +1,192 @@
+{% extends "myvibe/base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+      /* My Events Page Styles */
+      .events-container {
+        padding: 2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      .page-title {
+        margin-bottom: 2rem;
+        color: var(--primary, #2563eb);
+      }
+
+      .events-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+      }
+
+      .event-card {
+        background: var(--card-bg, #ffffff);
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px var(--shadow, rgba(0, 0, 0, 0.1));
+        transition: transform 0.3s ease;
+      }
+
+      .event-card:hover {
+        transform: translateY(-5px);
+      }
+
+      .event-image {
+        height: 200px;
+        background-size: cover;
+        background-position: center;
+        position: relative;
+      }
+
+      .event-details {
+        padding: 1.5rem;
+      }
+
+      .event-title {
+        margin-bottom: 0.75rem;
+        color: var(--text, #1f2937);
+      }
+
+      .event-date,
+      .event-time {
+        color: var(--text, #1f2937);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .event-stats {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 1.5rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border, #d1d5db);
+      }
+
+      .stat-item {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        color: var(--text, #1f2937);
+      }
+
+      .button-container {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1rem;
+      }
+
+      .edit-button,
+      .view-button {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        text-decoration: none;
+        border-radius: 8px;
+        text-align: center;
+        font-size: 0.95rem;
+        font-weight: 500;
+        transition: background 0.3s;
+      }
+
+      .edit-button {
+        background: var(--primary, #2563eb);
+        color: white;
+        flex: 1;
+      }
+
+      .edit-button:hover {
+        background: var(--primary-hover, #1d4ed8);
+      }
+
+      .view-button {
+        background: #6b7280;
+        color: white;
+        flex: 1;
+      }
+
+      .view-button:hover {
+        background: #4b5563;
+      }
+
+      @media (max-width: 768px) {
+        .events-container {
+          padding: 1rem;
+        }
+
+        .events-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .event-card {
+          margin-bottom: 1rem;
+        }
+
+        .event-image {
+          height: 150px;
+        }
+
+        .event-details {
+          padding: 1rem;
+        }
+
+        .button-container {
+          flex-direction: column;
+          gap: 0.5rem;
+        }
+
+        .edit-button,
+        .view-button {
+          width: 100%;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .page-title {
+          font-size: 1.5rem;
+        }
+
+        .event-title {
+          font-size: 1.1rem;
+        }
+
+        .stat-item {
+          font-size: 0.9rem;
+        }
+      }
+</style>
+
+<main class="main-content">
+    <div class="events-container">
+        <h1 class="page-title">My Events</h1>
+        <div class="events-grid">
+            {% for event in events %}
+                <div class="event-card">
+                    <div class="event-image" style="background-image: url('{{ event.get_primary_image }}');"></div>
+                    <div class="event-details">
+                        <h3 class="event-title">{{ event.title }}</h3>
+                        <p class="event-date">
+                            <i class="fas fa-calendar-alt"></i> {{ event.start_time|date:"F j, Y" }}
+                        </p>
+                        <p class="event-time">
+                            <i class="fas fa-clock"></i> {{ event.start_time|date:"g:i A" }} - {{ event.end_time|date:"g:i A" }}
+                        </p>
+                        <div class="event-stats">
+                            <div class="stat-item"><i class="fas fa-heart"></i> {{ event.likes.count }}</div>
+                            <div class="stat-item"><i class="fas fa-comment"></i> {{ event.comments.count }}</div>
+                        </div>
+                        <div class="button-container">
+                            <a href="{% url 'edit_event' event.id %}" class="edit-button">Edit</a>
+                            <a href="{% url 'view_event' event.id %}" class="view-button">View</a>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <p>No events found.</p>
+            {% endfor %}
+        </div>
+    </div>
+</main>
+{% endblock %}

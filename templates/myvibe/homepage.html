@@ -1,5 +1,6 @@
 {% extends "myvibe/base.html" %}
 {% load static %}
+
 {% block content %}
 <style>
   .create-post {
@@ -11,20 +12,20 @@
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
     margin-bottom: 20px;
     transition: transform 0.2s;
-}
+  }
 
-.create-post:hover {
+  .create-post:hover {
     transform: translateY(-2px);
-}
+  }
 
-.create-post .profile-pic img {
+  .create-post .profile-pic img {
     width: 50px;
     height: 50px;
     border-radius: 50%;
     object-fit: cover;
-}
+  }
 
-.create-post input {
+  .create-post input {
     flex: 1;
     padding: 12px;
     font-size: 1rem;
@@ -34,122 +35,815 @@
     cursor: pointer;
     margin-left: 10px;
     transition: border-color 0.3s;
-}
+  }
 
-.create-post input:hover {
+  .create-post input:hover {
     border-color: var(--primary);
-}
+  }
+
+  .posts-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .post-card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 15px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
+    cursor: pointer;
+  }
+
+  .post-card:hover {
+    transform: translateY(-2px);
+  }
+
+  .welcome-card {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+    color: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+  }
+
+  .welcome-card h3 {
+    margin: 0 0 10px;
+    font-size: 1.5rem;
+  }
+
+  .welcome-card p {
+    margin: 5px 0;
+    font-size: 1rem;
+  }
+
+  .welcome-card a {
+    color: #fff;
+    text-decoration: underline;
+    font-weight: 500;
+  }
+
+  .welcome-card a:hover {
+    color: #ddd;
+  }
+
+  .post-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .post-author {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .post-author .profile-img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .post-meta h4 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: var(--text);
+  }
+
+  .post-info {
+    display: flex;
+    gap: 10px;
+    font-size: 0.9rem;
+    color: #666;
+  }
+
+  .post-options {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: var(--text);
+  }
+
+  .post-caption {
+    margin: 10px 0;
+    font-size: 1rem;
+    color: var(--text);
+  }
+
+  .post-media img,
+  .post-media video {
+    width: 100%;
+    max-height: 400px;
+    object-fit: cover;
+    border-radius: 8px;
+  }
+
+  .post-stats {
+    display: flex;
+    gap: 20px;
+    margin: 10px 0;
+    font-size: 0.9rem;
+    color: #666;
+  }
+
+  .stat-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .post-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  .post-action {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    transition: background 0.2s;
+  }
+
+  .post-action:hover {
+    background: var(--primary);
+    color: white;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 20px;
+    background: var(--card-bg);
+    border-radius: 12px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .empty-state i {
+    font-size: 2rem;
+    color: var(--primary);
+  }
+
+  .empty-state p {
+    margin-top: 10px;
+    font-size: 1rem;
+    color: var(--text);
+  }
+
+  /* Modal Styles */
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    overflow: auto;
+  }
+
+  .modal-content {
+    position: relative;
+    background: var(--card-bg);
+    margin: 5% auto;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    width: 90%;
+    max-width: 600px;
+    max-height: 80vh;
+    overflow-y: auto;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .close-modal {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--text);
+    transition: color 0.2s;
+  }
+
+  .close-modal:hover {
+    color: var(--primary);
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Post Details Styles within Modal */
+  .post-details {
+    padding: 0;
+    box-shadow: none;
+  }
+
+  .post-details .post-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+  }
+
+  .post-details .profile-img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .post-details .post-meta h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: var(--text);
+  }
+
+  .post-details .post-info {
+    display: flex;
+    gap: 10px;
+    font-size: 0.9rem;
+    color: #666;
+  }
+
+  .post-details .post-caption {
+    margin: 10px 0;
+    font-size: 1rem;
+    color: var(--text);
+  }
+
+  .media-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .media-item {
+    position: relative;
+    width: 100%;
+  }
+
+  .media-content {
+    width: 100%;
+    max-height: calc(100vh - 250px);
+    object-fit: contain;
+    border-radius: 8px;
+    cursor: pointer;
+    display: block;
+  }
+
+  .media-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 5px;
+  }
+
+  .media-btn {
+    background: none;
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
+    color: var(--text);
+    transition: color 0.2s;
+  }
+
+  .media-btn:hover {
+    color: var(--primary);
+  }
+
+  .comments-section {
+    position: relative;
+    padding-bottom: 80px;
+  }
+
+  .comments-section h3 {
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+    color: var(--text);
+  }
+
+  .comments-list {
+    max-height: 200px;
+    overflow-y: auto;
+    margin-bottom: 20px;
+  }
+
+  .comment {
+    background: var(--bg);
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+
+  .comment-text {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--text);
+  }
+
+  .comment-meta {
+    font-size: 0.8rem;
+    color: #666;
+  }
+
+  .comment-form {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    position: sticky;
+    bottom: 20px;
+    background: var(--card-bg);
+    padding: 10px 0;
+    z-index: 10;
+  }
+
+  .comment-input {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    color: var(--text);
+    background: var(--bg);
+  }
+
+  .comment-form .btn-primary {
+    padding: 8px 15px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background 0.2s;
+  }
+
+  .comment-form .btn-primary:hover {
+    background: var(--primary-hover);
+  }
+
+  .comment-loader {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--primary);
+    border-top: 2px solid transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  /* Responsive Design for Modal */
+  @media (max-width: 768px) {
+    .modal-content {
+      width: 95%;
+      margin: 2% auto;
+      padding: 15px;
+      max-height: 90vh;
+    }
+
+    .close-modal {
+      font-size: 1.3rem;
+      top: 5px;
+      right: 10px;
+    }
+
+    .post-details .post-header {
+      gap: 8px;
+    }
+
+    .post-details .profile-img {
+      width: 40px;
+      height: 40px;
+    }
+
+    .post-details .post-meta h3 {
+      font-size: 1rem;
+    }
+
+    .post-details .post-info {
+      font-size: 0.8rem;
+    }
+
+    .media-content {
+      max-height: calc(100vh - 300px);
+    }
+
+    .comments-section {
+      padding-bottom: 90px;
+    }
+
+    .comments-section h3 {
+      font-size: 1rem;
+    }
+
+    .comment-form {
+      flex-direction: column;
+      gap: 8px;
+      bottom: 20px;
+    }
+
+    .comment-input,
+    .comment-form .btn-primary {
+      width: 100%;
+      font-size: 0.85rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .modal-content {
+      width: 98%;
+      margin: 1% auto;
+      padding: 10px;
+      max-height: 95vh;
+    }
+
+    .close-modal {
+      font-size: 1.2rem;
+      top: 5px;
+      right: 8px;
+    }
+
+    .post-details .profile-img {
+      width: 35px;
+      height: 35px;
+    }
+
+    .post-details .post-meta h3 {
+      font-size: 0.9rem;
+    }
+
+    .post-details .post-info {
+      font-size: 0.75rem;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .media-content {
+      max-height: calc(100vh - 350px);
+    }
+
+    .comments-section {
+      padding-bottom: 100px;
+    }
+
+    .comments-list {
+      max-height: 150px;
+    }
+
+    .comment-text {
+      font-size: 0.85rem;
+    }
+
+    .comment-meta {
+      font-size: 0.7rem;
+    }
+
+    .comment-form {
+      bottom: 20px;
+    }
+  }
+
+  /* Responsive Design for Welcome Card */
+  @media (max-width: 768px) {
+    .welcome-card h3 {
+      font-size: 1.3rem;
+    }
+
+    .welcome-card p {
+      font-size: 0.9rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .welcome-card h3 {
+      font-size: 1.1rem;
+    }
+
+    .welcome-card p {
+      font-size: 0.85rem;
+    }
+  }
 </style>
-    <!-- Post Creator -->
-    <div class="create-post">
-      <div class="profile-pic">
-          {% if user.is_authenticated and user.userprofile.profile_picture %}
-              <img src="{{ user.userprofile.profile_picture.url }}" alt="{{ user.first_name }}'s profile picture" />
-          {% else %}
-              <img src="{% static 'assets/myvibe/images/main-profile.jpg' %}" alt="Default profile picture" />
-          {% endif %}
-      </div>
-      <input type="text" placeholder="Create a post here?" onclick="window.location.href='{% url 'create_post' %}'"  readonly />
+
+<!-- Post Creator -->
+<div class="create-post">
+  <div class="profile-pic">
+    {% if user.is_authenticated and user.userprofile.profile_picture %}
+      <img src="{{ user.userprofile.profile_picture.url }}" alt="{{ user.first_name }}'s profile picture" />
+    {% else %}
+      <img src="{% static 'assets/myvibe/images/main-profile.jpg' %}" alt="Default profile picture" />
+    {% endif %}
   </div>
+  <input type="text" placeholder="Create a post here?" onclick="window.location.href='{% url 'create_post' %}'" readonly />
+</div>
 
-    <!-- Posts Feed -->
-    {% if posts %}
-      <div class="posts-container">
-        {% for post in posts %}
-          <div class="post-card card" onclick="openPostModal({{ post.id }})">
-            <!-- Post Header -->
-            <div class="post-header">
-              <div class="post-author">
-                {% if post.user.userprofile.profile_picture %}
-                  <img src="{{ post.user.userprofile.profile_picture.url }}" 
-                       class="profile-img" 
-                       alt="{{ post.user.username }}">
-                {% else %}
-                  <img src="{% static 'assets/myvibe/images/default_profile.jpg' %}" 
-                       class="profile-img" 
-                       alt="Default profile">
-                {% endif %}
-                <div class="post-meta">
-                  <h4 class="author-name">{{ post.user.get_full_name|default:post.user.username }}</h4>
-                  <div class="post-info">
-                    <span class="post-location">{{ post.short_location }}</span>
-                    <span class="post-time">{{ post.created_at|timesince }} ago</span>
-                  </div>
-                </div>
-              </div>
-              <button class="post-options">
-                <i class="fas fa-ellipsis-v"></i>
-              </button>
-            </div>
+<!-- Posts Feed -->
+{% if is_first_visit %}
+  <div class="posts-container">
+    <!-- Welcome Card for First Visit -->
+    <div class="welcome-card">
+      <h3>Welcome to myVibe, {{ user.get_full_name|default:user.username }}!</h3>
+      <p>We’re excited to have you here! Start exploring and sharing your vibes.</p>
+      <p>Tip: Complete your profile to let others know more about you! <a href="{% url 'my_profile' %}">Update your profile now</a>.</p>
+    </div>
 
-            <!-- Post Content -->
-            {% if post.description %}
-              <p class="post-caption">{{ post.description }}</p>
+    <!-- Regular Posts -->
+    {% for post in posts %}
+      <div class="post-card card" onclick="openPostModal({{ post.id }})">
+        <!-- Post Header -->
+        <div class="post-header">
+          <div class="post-author">
+            {% if post.user.userprofile.profile_picture %}
+              <img src="{{ post.user.userprofile.profile_picture.url }}" 
+                   class="profile-img" 
+                   alt="{{ post.user.username }}">
+            {% else %}
+              <img src="{% static 'assets/myvibe/images/default_profile.jpg' %}" 
+                   class="profile-img" 
+                   alt="Default profile">
             {% endif %}
-
-            <!-- Post Media -->
-            {% with first_media=post.media_files.all|first %}
-              {% if first_media %}
-                <div class="post-media">
-                  {% if first_media.media_type == 'image' %}
-                    <img src="{{ first_media.file.url }}" 
-                         class="post-image" 
-                         alt="Post image">
-                  {% else %}
-                    <video controls class="post-video">
-                      <source src="{{ first_media.file.url }}" type="video/mp4">
-                    </video>
-                  {% endif %}
-                </div>
-              {% endif %}
-            {% endwith %}
-
-            <!-- Post Stats -->
-            <div class="post-stats">
-              <div class="stat-item">
-                <i class="fas fa-heart"></i>
-                <span>{{ post.total_likes }}</span>
+            <div class="post-meta">
+              <h4 class="author-name">{{ post.user.get_full_name|default:post.user.username }}</h4>
+              <div class="post-info">
+                <span class="post-location">{{ post.short_location }}</span>
+                <span class="post-time">{{ post.created_at|timesince }} ago</span>
               </div>
-              <div class="stat-item">
-                <i class="fas fa-comment"></i>
-                <span>{{ post.total_comments }}</span>
-              </div>
-              <div class="stat-item">
-                <i class="fas fa-share"></i>
-                <span>{{ post.total_shares }}</span>
-              </div>
-            </div>
-
-            <!-- Post Actions -->
-            <div class="post-actions">
-              <button class="post-action like-btn">
-                <i class="far fa-heart"></i> Like
-              </button>
-              <button class="post-action comment-btn">
-                <i class="far fa-comment"></i> Comment
-              </button>
-              <button class="post-action share-btn">
-                <i class="far fa-share"></i> Share
-              </button>
             </div>
           </div>
-        {% endfor %}
-      </div>
-    {% else %}
-      <div class="empty-state card">
-        <i class="fas fa-feather"></i>
-        <p>No posts found. Be the first to create one!</p>
-      </div>
-    {% endif %}
-{% endblock %}
+          <button class="post-options">
+            <i class="fas fa-ellipsis-v"></i>
+          </button>
+        </div>
 
+        <!-- Post Content -->
+        {% if post.description %}
+          <p class="post-caption">{{ post.description }}</p>
+        {% endif %}
+
+        <!-- Post Media -->
+        {% with first_media=post.media_files.all|first %}
+          {% if first_media %}
+            <div class="post-media">
+              {% if first_media.media_type == 'image' %}
+                <img src="{{ first_media.file.url }}" 
+                     class="post-image" 
+                     alt="Post image">
+              {% else %}
+                <video controls class="post-video">
+                  <source src="{{ first_media.file.url }}" type="video/mp4">
+                </video>
+              {% endif %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        <!-- Post Stats -->
+        <div class="post-stats">
+          <div class="stat-item">
+            <i class="fas fa-heart"></i>
+            <span>{{ post.total_likes }}</span>
+          </div>
+          <div class="stat-item">
+            <i class="fas fa-comment"></i>
+            <span>{{ post.total_comments }}</span>
+          </div>
+          <div class="stat-item">
+            <i class="fas fa-share"></i>
+            <span>{{ post.total_shares }}</span>
+          </div>
+        </div>
+
+        <!-- Post Actions -->
+        <div class="post-actions">
+          <button class="post-action like-btn">
+            <i class="far fa-heart"></i> Like
+          </button>
+          <button class="post-action comment-btn">
+            <i class="far fa-comment"></i> Comment
+          </button>
+          <button class="post-action share-btn">
+            <i class="far fa-share"></i> Share
+          </button>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% elif posts %}
+  <div class="posts-container">
+    {% for post in posts %}
+      <div class="post-card card" onclick="openPostModal({{ post.id }})">
+        <!-- Post Header -->
+        <div class="post-header">
+          <div class="post-author">
+            {% if post.user.userprofile.profile_picture %}
+              <img src="{{ post.user.userprofile.profile_picture.url }}" 
+                   class="profile-img" 
+                   alt="{{ post.user.username }}">
+            {% else %}
+              <img src="{% static 'assets/myvibe/images/default_profile.jpg' %}" 
+                   class="profile-img" 
+                   alt="Default profile">
+            {% endif %}
+            <div class="post-meta">
+              <h4 class="author-name">{{ post.user.get_full_name|default:post.user.username }}</h4>
+              <div class="post-info">
+                <span class="post-location">{{ post.short_location }}</span>
+                <span class="post-time">{{ post.created_at|timesince }} ago</span>
+              </div>
+            </div>
+          </div>
+          <button class="post-options">
+            <i class="fas fa-ellipsis-v"></i>
+          </button>
+        </div>
+
+        <!-- Post Content -->
+        {% if post.description %}
+          <p class="post-caption">{{ post.description }}</p>
+        {% endif %}
+
+        <!-- Post Media -->
+        {% with first_media=post.media_files.all|first %}
+          {% if first_media %}
+            <div class="post-media">
+              {% if first_media.media_type == 'image' %}
+                <img src="{{ first_media.file.url }}" 
+                     class="post-image" 
+                     alt="Post image">
+              {% else %}
+                <video controls class="post-video">
+                  <source src="{{ first_media.file.url }}" type="video/mp4">
+                </video>
+              {% endif %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        <!-- Post Stats -->
+        <div class="post-stats">
+          <div class="stat-item">
+            <i class="fas fa-heart"></i>
+            <span>{{ post.total_likes }}</span>
+          </div>
+          <div class="stat-item">
+            <i class="fas fa-comment"></i>
+            <span>{{ post.total_comments }}</span>
+          </div>
+          <div class="stat-item">
+            <i class="fas fa-share"></i>
+            <span>{{ post.total_shares }}</span>
+          </div>
+        </div>
+
+        <!-- Post Actions -->
+        <div class="post-actions">
+          <button class="post-action like-btn">
+            <i class="far fa-heart"></i> Like
+          </button>
+          <button class="post-action comment-btn">
+            <i class="far fa-comment"></i> Comment
+          </button>
+          <button class="post-action share-btn">
+            <i class="far fa-share"></i> Share
+          </button>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="empty-state card">
+    <i class="fas fa-feather"></i>
+    <p>No posts found. Be the first to create one!</p>
+  </div>
+{% endif %}
+
+<!-- Modal for Post Details -->
 <div class="modal" id="postModal">
   <div class="modal-content">
-      <button class="close-modal">&times;</button>
-      <div id="modalContent"></div>
+    <button class="close-modal" onclick="closePostModal()">×</button>
+    <div id="modalContent"></div>
   </div>
 </div>
 
 <script>
   var csrfToken = '{{ csrf_token }}';
+
+  function openPostModal(postId) {
+    const modal = document.getElementById('postModal');
+    const modalContent = document.getElementById('modalContent');
+
+    modal.style.display = 'block';
+
+    fetch(`/post/${postId}/`, {
+      method: 'GET',
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+      },
+    })
+      .then(response => response.text())
+      .then(data => {
+        modalContent.innerHTML = data;
+        initializeCommentForm();
+      })
+      .catch(error => {
+        console.error('Error loading post details:', error);
+        modalContent.innerHTML = '<p>Error loading post details.</p>';
+      });
+
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closePostModal() {
+    const modal = document.getElementById('postModal');
+    modal.style.display = 'none';
+    document.getElementById('modalContent').innerHTML = '';
+    document.body.style.overflow = 'auto';
+  }
+
+  document.getElementById('postModal').addEventListener('click', function(event) {
+    if (event.target === this) {
+      closePostModal();
+    }
+  });
+
+  function initializeCommentForm() {
+    const commentForm = document.getElementById('commentForm');
+    if (commentForm) {
+      const postId = commentForm.getAttribute('data-post-id');
+      const commentInput = commentForm.querySelector('.comment-input');
+      const commentSection = document.getElementById('commentsSection');
+      const loader = commentForm.querySelector('.comment-loader');
+
+      commentForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const commentText = commentInput.value.trim();
+
+        if (!commentText) return;
+
+        loader.style.display = 'block';
+
+        fetch(`/post/${postId}/comment/`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': csrfToken,
+            'X-Requested-With': 'XMLHttpRequest',
+          },
+          body: new URLSearchParams({
+            'text': commentText,
+          }),
+        })
+          .then(response => response.json())
+          .then(data => {
+            loader.style.display = 'none';
+            if (data.success) {
+              const commentDiv = document.createElement('div');
+              commentDiv.className = 'comment card';
+              commentDiv.innerHTML = `
+                <p class="comment-text">${data.text}</p>
+                <small class="comment-meta">${data.user} - ${data.created_at}</small>
+              `;
+              commentSection.prepend(commentDiv);
+              commentInput.value = '';
+            } else {
+              alert('Error posting comment: ' + (data.error || 'Unknown error'));
+            }
+          })
+          .catch(error => {
+            loader.style.display = 'none';
+            console.error('Error posting comment:', error);
+            alert('Error posting comment.');
+          });
+      });
+    }
+  }
+
+  function openMediaDialog(url, type) {
+    window.open(url, '_blank');
+  }
 </script>
+{% endblock %}

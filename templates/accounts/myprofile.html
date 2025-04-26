@@ -1,0 +1,240 @@
+{% extends "myvibe/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="profile-content">
+    <!-- Profile Header -->
+    <div class="profile-header card">
+        <div class="profile-banner"></div>
+        <div class="profile-info">
+            <div class="myprofile-img-container">
+                <img src="{{ profile.get_profile_picture_url }}" alt="Profile" class="profile-main-img" />
+                <a href="{% url 'upload_image' %}" class="myprofile-edit-photo">
+                    <i class="fas fa-pen"></i>
+                </a>
+            </div>
+            <h2>{{ profile.user.get_full_name|default:profile.user.username }}</h2>
+            <p class="profile-bio">{{ profile.bio|default:"No bio provided" }}</p>
+            <div class="profile-stats">
+                <div class="stat">
+                    <span class="stat-number">{{ followers_count }}</span>
+                    <span class="stat-label">Followers</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number">{{ following_count }}</span>
+                    <span class="stat-label">Following</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number">{{ posts_count }}</span>
+                    <span class="stat-label">Posts</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number">{{ events_count }}</span>
+                    <span class="stat-label">Events</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Navigation with Tabs -->
+    <nav class="profile-nav">
+        <button class="nav-tab active" data-target="about">About</button>
+        <button class="nav-tab" data-target="edit-profile">Edit Profile</button>
+        <button class="nav-tab" data-target="photos">Photos</button>
+        <button class="nav-tab" data-target="my-posts">Posts</button>
+        <button class="nav-tab" data-target="my-events">Events</button>
+    </nav>
+
+    <!-- Profile Sections Container -->
+    <div class="profile-sections-container">
+        <!-- About Section -->
+        <div class="profile-section active" id="about">
+            <div class="about-section card">
+                <h3>Personal Information</h3>
+                <div class="detail-item">
+                    <i class="fas fa-user"></i>
+                    <div class="detail-content">
+                        <span class="detail-label">Name</span>
+                        <span>{{ profile.user.get_full_name|default:profile.user.username }}</span>
+                    </div>
+                </div>
+                <div class="detail-item">
+                    <i class="fas fa-at"></i>
+                    <div class="detail-content">
+                        <span class="detail-label">Username</span>
+                        <span>@{{ profile.user.username }}</span>
+                    </div>
+                </div>
+                <div class="detail-item">
+                    <i class="fas fa-envelope"></i>
+                    <div class="detail-content">
+                        <span class="detail-label">Email</span>
+                        <span>
+                            {{ profile.user.email }}
+                            {% if profile.email_confirmed %}
+                                <span class="myprofile-verified-badge">Verified</span>
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+                <div class="detail-item">
+                    <i class="fas fa-phone"></i>
+                    <div class="detail-content">
+                        <span class="stat-label">Phone</span>
+                        <span>{{ profile.phone|default:"Not provided" }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Profile Section -->
+        <div class="profile-section" id="edit-profile">
+            <div class="myprofile-edit-form card">
+                <h3>Edit Profile</h3>
+                <form method="post" action="{% url 'edit_profile' %}">
+                    {% csrf_token %}
+                    <div class="myprofile-form-group">
+                        <label>First Name</label>
+                        <input type="text" name="first_name" value="{{ profile.user.first_name }}" class="myprofile-form-input" />
+                    </div>
+                    <div class="myprofile-form-group">
+                        <label>Last Name</label>
+                        <input type="text" name="last_name" value="{{ profile.user.last_name }}" class="myprofile-form-input" />
+                    </div>
+                    <div class="myprofile-form-group">
+                        <label>Email</label>
+                        <input type="email" name="email" value="{{ profile.user.email }}" class="myprofile-form-input" />
+                    </div>
+                    <div class="myprofile-form-group">
+                        <label>Phone Number</label>
+                        <input type="tel" name="phone" value="{{ profile.phone }}" class="myprofile-form-input" />
+                    </div>
+                    <div class="myprofile-form-group">
+                        <label>Date of Birth</label>
+                        <input type="date" name="date_of_birth" value="{{ profile.date_of_birth|date:'Y-m-d' }}" class="myprofile-form-input" />
+                    </div>
+                    <div class="myprofile-form-group">
+                        <label>Bio</label>
+                        <input type="text" name="bio" value="{{ profile.bio|default:'' }}" class="myprofile-form-input" maxlength="150" />
+                    </div>
+                    <button type="submit" class="myprofile-save-button">Save Changes</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Photos Section -->
+        <div class="profile-section" id="photos">
+            <div class="myprofile-photos-grid card">
+                <div class="myprofile-photo-category">
+                    <h4>
+                        Post Photos <a href="#" class="myprofile-view-more">View More</a>
+                    </h4>
+                    <div class="myprofile-photo-grid">
+                        {% for photo in photos %}
+                            <div class="myprofile-photo-item">
+                                <img src="{{ photo.file.url }}" alt="Post" />
+                            </div>
+                        {% empty %}
+                            <p>No photos available.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="myprofile-photo-category">
+                    <h4>
+                        Event Photos <a href="#" class="myprofile-view-more">View More</a>
+                    </h4>
+                    <div class="myprofile-photo-grid">
+                        {% for event_image in event_images %}
+                            <div class="myprofile-photo-item">
+                                <img src="{{ event_image.image.url }}" alt="Event" />
+                            </div>
+                        {% empty %}
+                            <p>No event photos available.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- My Posts Section -->
+        <div class="profile-section" id="my-posts">
+            <div class="card">
+                <h3>
+                    Recent Posts <a href="#" class="myprofile-view-more">View More</a>
+                </h3>
+                {% for post in posts %}
+                    <div class="myprofile-post-card card">
+                        {% if post.first_image %}
+                            <div class="myprofile-post-image">
+                                <img src="{{ post.first_image.file.url }}" alt="Post Image">
+                            </div>
+                        {% endif %}
+                        <div class="myprofile-post-details">
+                            {% if post.description %}
+                                <p class="myprofile-post-caption">{{ post.description|truncatechars:100 }}</p>
+                            {% endif %}
+                            <p class="myprofile-post-date">{{ post.created_at|date:"F j, Y" }}</p>
+                            <div class="myprofile-post-engagement">
+                                <span><i class="fas fa-heart"></i> {{ post.likes.count }}</span>
+                                <span><i class="fas fa-comment"></i> {{ post.comments.count }}</span>
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <p>No posts available.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- My Events Section -->
+        <div class="profile-section" id="my-events">
+            <div class="card">
+                <h3>
+                    My Events <a href="{% url 'my_event_list' %}" class="myprofile-view-more">View More</a>
+                </h3>
+                {% for event in events %}
+                    <div class="myprofile-event-card card">
+                        <div class="myprofile-event-image">
+                            <img src="{{ event.get_primary_image }}" alt="Event Image">
+                        </div>
+                        <div class="myprofile-event-details">
+                            <p class="myprofile-event-title">{{ event.title }}</p>
+                            <p class="myprofile-event-date">{{ event.start_time|date:"F j, Y, g:i a" }}</p>
+                            <div class="myprofile-event-engagement">
+                                <span><i class="fas fa-heart"></i> {{ event.likes.count }}</span>
+                                <span><i class="fas fa-comment"></i> {{ event.comments.count }}</span>
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <p>No upcoming events.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Profile section navigation with tabs
+document.addEventListener('DOMContentLoaded', () => {
+    const tabs = document.querySelectorAll('.nav-tab');
+    const sections = document.querySelectorAll('.profile-section');
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            // Remove active class from all tabs and sections
+            tabs.forEach(t => t.classList.remove('active'));
+            sections.forEach(s => s.classList.remove('active'));
+
+            // Add active class to clicked tab and corresponding section
+            tab.classList.add('active');
+            const targetId = tab.getAttribute('data-target');
+            const targetSection = document.getElementById(targetId);
+            if (targetSection) {
+                targetSection.classList.add('active');
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

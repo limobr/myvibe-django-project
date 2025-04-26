@@ -1,0 +1,856 @@
+{% extends "myvibe/base.html" %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+<style>
+    :root {
+        --text: #1f2937;
+        --card-bg: #ffffff;
+        --border: #d1d5db;
+        --bg: #f9fafb;
+        --primary: #3b82f6;
+        --primary-hover: #2563eb;
+        --meta-text: #6b7280;
+        --comment-text: #4b5563;
+        --success: #10b981;
+        --success-hover: #059669;
+        --error: #ef4444;
+        --error-hover: #dc2626;
+    }
+
+    [data-theme="dark"] {
+        --text: #e5e7eb;
+        --card-bg: #1f2937;
+        --border: #374151;
+        --bg: #111827;
+        --meta-text: #9ca3af;
+        --comment-text: #d1d5db;
+    }
+
+    .event-page-card {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: var(--card-bg);
+        border-radius: 12px;
+    }
+
+    .event-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        color: var(--text);
+    }
+
+    .event-header-buttons {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .edit-button, .invite-button {
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+    }
+
+    .edit-button {
+        background-color: var(--primary);
+    }
+
+    .edit-button:hover {
+        background-color: var(--primary-hover);
+    }
+
+    .invite-button {
+        background-color: var(--success);
+    }
+
+    .invite-button:hover {
+        background-color: var(--success-hover);
+    }
+
+    .event-price {
+        background: var(--success);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 1rem;
+        margin-left: 1rem;
+    }
+
+    .event-details-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+    }
+
+    .detail-card {
+        background: var(--card-bg);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        color: var(--text);
+    }
+
+    .detail-card h3 {
+        color: var(--text);
+    }
+
+    .detail-list li {
+        margin: 0.75rem 0;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid var(--border);
+        color: var(--text);
+    }
+
+    .event-gallery {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .event-gallery img {
+        border-radius: 8px;
+        height: 200px;
+        object-fit: cover;
+        width: 100%;
+    }
+
+    .map-container {
+        height: 300px;
+        border-radius: 12px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .map-overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 1rem;
+        border-radius: 0 0 12px 12px;
+    }
+
+    .map-link {
+        color: var(--primary);
+        text-decoration: none;
+    }
+
+    .map-link:hover {
+        text-decoration: underline;
+    }
+
+    .attendees-list {
+        max-height: 200px;
+        overflow-y: auto;
+    }
+
+    .attendee {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid var(--border);
+        color: var(--text);
+    }
+
+    .status.invited {
+        color: #f59e0b;
+    }
+
+    .status.attending {
+        color: var(--success);
+    }
+
+    .status.declined {
+        color: #ef4444;
+    }
+
+    .status.waiting_list {
+        color: var(--meta-text);
+    }
+
+    .tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+    }
+
+    .tag {
+        background: var(--primary);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.9rem;
+    }
+
+    .meta-info {
+        color: var(--meta-text);
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+    }
+
+    .event-social {
+        display: flex;
+        gap: 1.5rem;
+        margin-top: 0.5rem;
+        color: var(--meta-text);
+    }
+
+    .event-social span {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .comments-section {
+        margin-top: 1rem;
+    }
+
+    .comment {
+        padding: 0.75rem 0;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .comment .username {
+        font-weight: 500;
+        color: var(--text);
+    }
+
+    .comment .content {
+        margin-top: 0.25rem;
+        color: var(--comment-text);
+    }
+
+    .comment .timestamp {
+        font-size: 0.85rem;
+        color: var(--meta-text);
+        margin-top: 0.25rem;
+    }
+
+    .event-meta {
+        color: var(--meta-text);
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+    }
+
+    .modal.active {
+        display: flex;
+    }
+
+    .modal-content {
+        background: var(--card-bg);
+        border-radius: 12px;
+        max-width: 800px;
+        width: 90%;
+        max-height: 80vh;
+        overflow-y: auto;
+        padding: 2rem;
+        position: relative;
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .modal-close {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: var(--text);
+    }
+
+    .user-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 1.5rem;
+    }
+
+    .user-table th, .user-table td {
+        padding: 0.75rem;
+        text-align: left;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .user-table th {
+        background: var(--bg);
+        color: var(--text);
+        font-weight: 600;
+    }
+
+    .profile-photo-small {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .send-button {
+        background: var(--success);
+        color: white;
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+
+    .send-button:hover {
+        background: var(--success-hover);
+    }
+
+    .send-button:disabled {
+        background: var(--meta-text);
+        cursor: not-allowed;
+    }
+
+    .bulk-send {
+        background: var(--primary);
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        margin-top: 1rem;
+    }
+
+    .bulk-send:hover {
+        background: var(--primary-hover);
+    }
+
+    .email-sent-cell {
+        text-align: center;
+    }
+
+    .email-sent-cell .spinner {
+        display: inline-block;
+        font-size: 1rem;
+        color: var(--primary);
+    }
+
+    .email-sent-cell .success {
+        color: var(--success);
+    }
+
+    .email-sent-cell .error {
+        color: var(--error);
+    }
+
+    .notification-modal .modal-content {
+        max-width: 500px;
+        padding: 1.5rem;
+        text-align: center;
+    }
+
+    .notification-modal .modal-content.success {
+        border-left: 4px solid var(--success);
+    }
+
+    .notification-modal .modal-content.error {
+        border-left: 4px solid var(--error);
+    }
+
+    .notification-modal .message {
+        font-size: 1.1rem;
+        color: var(--text);
+        margin-bottom: 1rem;
+    }
+
+    .notification-modal .modal-close {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+    }
+
+    .notification-modal .ok-button {
+        background: var(--primary);
+        color: white;
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 500;
+    }
+
+    .notification-modal .ok-button:hover {
+        background: var(--primary-hover);
+    }
+
+    @media (max-width: 768px) {
+        .event-page-card {
+            padding: 1rem;
+        }
+
+        .event-details-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .event-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .event-header-buttons {
+            width: 100%;
+            justify-content: space-between;
+        }
+
+        .user-table {
+            font-size: 0.9rem;
+        }
+
+        .profile-photo-small {
+            width: 30px;
+            height: 30px;
+        }
+
+        .send-button {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.9rem;
+        }
+
+        .notification-modal .modal-content {
+            width: 95%;
+            padding: 1rem;
+        }
+    }
+</style>
+
+<main class="main-content">
+    <div class="event-page-card card">
+        <div class="event-header">
+            <div class="event-header-left">
+                <h1>{{ event.title }} <span class="event-price">{% if event.price == 0 %}Free{% else %}Ksh.{{ event.price }}{% endif %}</span></h1>
+                <div class="event-social">
+                    <span>👍 {{ likes_count }} Interested {% if user_has_liked %}(You liked this){% endif %}</span>
+                    <span>💬 {{ comments.count }} Comments</span>
+                    <span>↪️ {{ event.shares.count }} Shares</span>
+                </div>
+                {% if attendance %}
+                    <p class="meta-info">Your status: <span class="status {{ attendance.status }}">{{ attendance.get_status_display }}</span></p>
+                {% endif %}
+            </div>
+            <div class="event-header-buttons">
+                {% if is_creator %}
+                    <a href="{% url 'edit_event' event.id %}" class="edit-button"><i class="fas fa-edit"></i> Edit</a>
+                    <button class="invite-button" id="inviteButton"><i class="fas fa-envelope"></i> Send Email Invite</button>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="event-details-grid">
+            <div class="event-details-column">
+                <div class="detail-card">
+                    <h3>Event Details</h3>
+                    <ul class="detail-list">
+                        <li><strong>Organizer:</strong> {{ event.creator.username }}</li>
+                        <li><strong>Date & Time:</strong> {{ event.start_time|date:"M j, Y" }} • {{ event.start_time|time:"g:i A" }} - {{ event.end_time|time:"g:i A" }}</li>
+                        <li><strong>Venue:</strong> {{ event.venue_name }}</li>
+                        <li><strong>Category:</strong> {{ event.get_category_display }}</li>
+                        <li><strong>Registration Deadline:</strong> {{ event.registration_deadline|date:"M j, Y" }} • {{ event.registration_deadline|time:"g:i A" }}</li>
+                        <li><strong>Visibility:</strong> {% if event.is_public %}Public{% else %}Private{% endif %}</li>
+                    </ul>
+                </div>
+
+                <div class="detail-card">
+                    <h3>Description</h3>
+                    <p>{{ event.description }}</p>
+                </div>
+
+                <div class="detail-card">
+                    <h3>Interests & Tags</h3>
+                    <div class="tags">
+                        {% for interest in event.interests.all %}
+                            <span class="tag">{{ interest.name }}</span>
+                        {% endfor %}
+                    </div>
+                    <p class="meta-info">
+                        {% if event.tags.all %}
+                            Tags: {% for tag in event.tags.all %}{{ tag.name }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                        {% else %}
+                            No tags added
+                        {% endif %}
+                    </p>
+                </div>
+
+                <div class="detail-card">
+                    <h3>Comments</h3>
+                    <div class="comments-section">
+                        {% for comment in comments %}
+                            <div class="comment">
+                                <div class="username">{{ comment.user.username }}</div>
+                                <div class="content">{{ comment.content }}</div>
+                                <div class="timestamp">{{ comment.created_at|date:"M j, Y, g:i A" }}</div>
+                            </div>
+                        {% empty %}
+                            <p class="meta-info">No comments yet.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="event-details-column">
+                <div class="detail-card">
+                    <h3>Attendees ({{ event.attendees.count }}/{% if event.max_attendees == 0 %}Unlimited{% else %}{{ event.max_attendees }}{% endif %})</h3>
+                    <div class="attendees-list">
+                        {% for attendee in event.attendees.all|slice:":5" %}
+                            <div class="attendee">
+                                <span>{{ attendee.user.username|default:attendee.external_guest }}</span>
+                                <span class="status {{ attendee.status }}">{{ attendee.get_status_display }}</span>
+                            </div>
+                        {% empty %}
+                            <p class="meta-info">No attendees yet.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="detail-card">
+                    <h3>Gallery</h3>
+                    <div class="event-gallery">
+                        {% for image in event.images.all %}
+                            <img src="{{ image.image.url }}" alt="{{ event.title }}" />
+                        {% empty %}
+                            <p class="meta-info">No images available.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="detail-card">
+                    <h3>Location</h3>
+                    <div id="map" class="map-container">
+                        <div class="map-overlay">
+                            <p>{{ event.venue_name }}</p>
+                            <a href="https://www.google.com/maps/search/?api=1&query={{ event.latitude }},{{ event.longitude }}" class="map-link" target="_blank">Open in Google Maps</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="event-meta">
+            <p>Created: {{ event.created_at|date:"M j, Y • g:i A" }}</p>
+            <p>Updated: {{ event.updated_at|date:"M j, Y • g:i A" }}</p>
+        </div>
+
+        {% if is_creator %}
+        <div id="inviteModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Send Event Invites</h2>
+                    <button class="modal-close" onclick="closeInviteModal()">×</button>
+                </div>
+                {% if invited_users %}
+                <h3>Invited or Attending</h3>
+                <table class="user-table invited">
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" class="select-all" data-group="invited"></th>
+                            <th>Profile</th>
+                            <th>Username</th>
+                            <th class="email-sent-cell">Email Sent</th>
+                            <th>Send</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for profile in invited_users %}
+                        <tr>
+                            <td><input type="checkbox" class="user-checkbox" data-user-id="{{ profile.user.id }}" {% if profile.invite_sent %}disabled{% endif %}></td>
+                            <td><img src="{{ profile.get_profile_picture_url }}" alt="{{ profile.user.username }}'s profile" class="profile-photo-small"></td>
+                            <td>{{ profile.user.username }}</td>
+                            <td class="email-sent-cell">{% if profile.invite_sent %}<i class="fas fa-check success"></i>{% else %}–{% endif %}</td>
+                            <td>
+                                <button class="send-button" data-user-id="{{ profile.user.id }}" {% if profile.invite_sent %}disabled{% endif %}>Send</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% endif %}
+
+                {% if interest_aligned_users %}
+                <h3>Users with Matching Interests</h3>
+                <table class="user-table interest">
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" class="select-all" data-group="interest"></th>
+                            <th>Profile</th>
+                            <th>Username</th>
+                            <th class="email-sent-cell">Email Sent</th>
+                            <th>Send</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for profile in interest_aligned_users %}
+                        <tr>
+                            <td><input type="checkbox" class="user-checkbox" data-user-id="{{ profile.user.id }}" {% if profile.invite_sent %}disabled{% endif %}></td>
+                            <td><img src="{{ profile.get_profile_picture_url }}" alt="{{ profile.user.username }}'s profile" class="profile-photo-small"></td>
+                            <td>{{ profile.user.username }}</td>
+                            <td class="email-sent-cell">{% if profile.invite_sent %}<i class="fas fa-check success"></i>{% else %}–{% endif %}</td>
+                            <td>
+                                <button class="send-button" data-user-id="{{ profile.user.id }}" {% if profile.invite_sent %}disabled{% endif %}>Send</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% endif %}
+
+                {% if other_users %}
+                <h3>Other Users</h3>
+                <table class="user-table other">
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" class="select-all" data-group="other"></th>
+                            <th>Profile</th>
+                            <th>Username</th>
+                            <th class="email-sent-cell">Email Sent</th>
+                            <th>Send</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for profile in other_users %}
+                        <tr>
+                            <td><input type="checkbox" class="user-checkbox" data-user-id="{{ profile.user.id }}" {% if profile.invite_sent %}disabled{% endif %}></td>
+                            <td><img src="{{ profile.get_profile_picture_url }}" alt="{{ profile.user.username }}'s profile" class="profile-photo-small"></td>
+                            <td>{{ profile.user.username }}</td>
+                            <td class="email-sent-cell">{% if profile.invite_sent %}<i class="fas fa-check success"></i>{% else %}–{% endif %}</td>
+                            <td>
+                                <button class="send-button" data-user-id="{{ profile.user.id }}" {% if profile.invite_sent %}disabled{% endif %}>Send</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% endif %}
+
+                <button class="bulk-send" onclick="sendBulkInvites()">Send Selected Invites</button>
+            </div>
+        </div>
+
+        <!-- Notification Modal -->
+        <div id="notificationModal" class="modal notification-modal">
+            <div class="modal-content">
+                <button class="modal-close" onclick="closeNotificationModal()">×</button>
+                <p class="message"></p>
+                <button class="ok-button" onclick="closeNotificationModal()">OK</button>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</main>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    // Map initialization
+    var map = L.map('map').setView([{{ event.latitude|default:"0" }}, {{ event.longitude|default:"0" }}], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+    L.marker([{{ event.latitude|default:"0" }}, {{ event.longitude|default:"0" }}]).addTo(map);
+
+    // Modal functions
+    function openInviteModal() {
+        const modal = document.getElementById('inviteModal');
+        if (modal) {
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            console.log('Invite modal opened');
+        } else {
+            console.error('Invite modal element not found');
+        }
+    }
+
+    function closeInviteModal() {
+        const modal = document.getElementById('inviteModal');
+        if (modal) {
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+            console.log('Invite modal closed');
+        } else {
+            console.error('Invite modal element not found');
+        }
+    }
+
+    function openNotificationModal(message, isSuccess) {
+        console.log('Opening notification modal:', { message, isSuccess });
+        const modal = document.getElementById('notificationModal');
+        const modalContent = modal.querySelector('.modal-content');
+        const messageElement = modal.querySelector('.message');
+
+        if (modal && modalContent && messageElement) {
+            messageElement.textContent = message;
+            modalContent.classList.remove('success', 'error');
+            modalContent.classList.add(isSuccess ? 'success' : 'error');
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        } else {
+            console.error('Notification modal elements not found');
+        }
+    }
+
+    function closeNotificationModal() {
+        console.log('Closing notification modal');
+        const modal = document.getElementById('notificationModal');
+        if (modal) {
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+        } else {
+            console.error('Notification modal element not found');
+        }
+    }
+
+    // Event listeners
+    document.addEventListener('DOMContentLoaded', function() {
+        const inviteButton = document.getElementById('inviteButton');
+        if (inviteButton) {
+            inviteButton.addEventListener('click', openInviteModal);
+            console.log('Invite button listener attached');
+        } else {
+            console.error('Invite button not found');
+        }
+
+        document.querySelectorAll('.send-button').forEach(button => {
+            button.addEventListener('click', function() {
+                const userId = this.getAttribute('data-user-id');
+                console.log('Send button clicked for user ID:', userId);
+                sendInvite([userId], this);
+            });
+        });
+
+        document.querySelectorAll('.select-all').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const group = this.getAttribute('data-group');
+                console.log('Select-all changed for group:', group, 'Checked:', this.checked);
+                document.querySelectorAll(`.user-table.${group} tbody input.user-checkbox:not(:disabled)`).forEach(cb => {
+                    cb.checked = this.checked;
+                });
+            });
+        });
+    });
+
+    function sendBulkInvites() {
+        const selectedUsers = Array.from(document.querySelectorAll('.user-checkbox:checked')).map(cb => cb.getAttribute('data-user-id'));
+        console.log('Bulk send initiated, selected users:', selectedUsers);
+        if (selectedUsers.length === 0) {
+            openNotificationModal('Please select at least one user to invite.', false);
+            return;
+        }
+        sendInvite(selectedUsers, document.querySelector('.bulk-send'));
+    }
+
+    function sendInvite(userIds, button) {
+        console.log('Sending invite for user IDs:', userIds);
+        button.disabled = true;
+
+        // Show spinner for each user
+        userIds.forEach(userId => {
+            const row = document.querySelector(`tr:has(input[data-user-id="${userId}"])`);
+            if (row) {
+                const emailSentCell = row.querySelector('.email-sent-cell');
+                if (emailSentCell) {
+                    emailSentCell.innerHTML = '<i class="fas fa-spinner fa-spin spinner"></i>';
+                }
+            }
+        });
+
+        fetch('{% url "send_invite" event.id %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ user_ids: userIds })
+        })
+        .then(response => {
+            console.log('Fetch response received:', response);
+            if (!response.ok) {
+                return response.text().then(text => {
+                    throw new Error(`HTTP error! Status: ${response.status}, Body: ${text}`);
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Parsed JSON response:', data);
+            button.disabled = false;
+
+            // Show notification
+            openNotificationModal(data.message || (data.success ? 'Invites sent successfully' : 'Failed to send invites'), data.success);
+
+            // Update UI for each user based on results
+            if (data.results) {
+                data.results.forEach(result => {
+                    const userId = result.user_id;
+                    const row = document.querySelector(`tr:has(input[data-user-id="${userId}"])`);
+                    if (row) {
+                        const emailSentCell = row.querySelector('.email-sent-cell');
+                        if (emailSentCell) {
+                            emailSentCell.innerHTML = result.success ? '<i class="fas fa-check success"></i>' : '<i class="fas fa-times error"></i>';
+                            if (result.success) {
+                                row.querySelector('.send-button').disabled = true;
+                                row.querySelector('.user-checkbox').disabled = true;
+                            }
+                        }
+                    }
+                });
+            } else {
+                // Fallback for unexpected response
+                userIds.forEach(userId => {
+                    const row = document.querySelector(`tr:has(input[data-user-id="${userId}"])`);
+                    if (row) {
+                        const emailSentCell = row.querySelector('.email-sent-cell');
+                        if (emailSentCell) {
+                            emailSentCell.innerHTML = '<i class="fas fa-times error"></i>';
+                        }
+                    }
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Fetch error:', error);
+            button.disabled = false;
+            openNotificationModal(`Failed to send invite: ${error.message}`, false);
+
+            // Reset spinners on error
+            userIds.forEach(userId => {
+                const row = document.querySelector(`tr:has(input[data-user-id="${userId}"])`);
+                if (row) {
+                    const emailSentCell = row.querySelector('.email-sent-cell');
+                    if (emailSentCell) {
+                        emailSentCell.innerHTML = '–';
+                    }
+                }
+            });
+        });
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,155 @@
+{% extends 'myvibe/base.html' %}
+
+{% block content %}
+<div class="notifications-container">
+    <div class="notifications-header">
+        <h2>Notifications</h2>
+        {% if notifications %}
+        <button id="clear-all-notifications" class="btn btn-secondary">Clear All</button>
+        {% endif %}
+    </div>
+
+    {% if notifications %}
+        <ul class="notifications-list">
+        {% for notification in notifications %}
+            <li class="notification-item {% if notification.is_read %}read{% else %}unread{% endif %}" data-notification-id="{{ notification.id }}">
+                <div class="notification-content">
+                    <a href="{{ notification.link }}" class="notification-message">
+                        {{ notification.message }}
+                    </a>
+                    <small class="notification-timestamp">{{ notification.created_at|date:"M d, Y H:i" }}</small>
+                </div>
+                <div class="notification-actions">
+                    <button class="toggle-read-btn" title="{% if notification.is_read %}Mark as Unread{% else %}Mark as Read{% endif %}">
+                        <i class="fas {% if notification.is_read %}fa-envelope-open{% else %}fa-envelope{% endif %}"></i>
+                    </button>
+                    <button class="delete-notification-btn" title="Delete Notification">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p class="no-notifications">No notifications found.</p>
+    {% endif %}
+</div>
+
+{% csrf_token %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Get the CSRF token from the meta tag
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    // Toggle Read/Unread Status
+    document.querySelectorAll('.toggle-read-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const notificationItem = this.closest('.notification-item');
+            const notificationId = notificationItem.dataset.notificationId;
+            const isRead = notificationItem.classList.contains('read');
+
+            fetch('/toggle-notification-read/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken,
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({ notification_id: notificationId, is_read: !isRead })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    notificationItem.classList.toggle('read');
+                    notificationItem.classList.toggle('unread');
+                    const icon = this.querySelector('i');
+                    icon.classList.toggle('fa-envelope');
+                    icon.classList.toggle('fa-envelope-open');
+                    this.title = isRead ? 'Mark as Read' : 'Mark as Unread';
+
+                    // Update the unread count in the sidebar and mobile nav
+                    updateNotificationBadges(data.unread_count);
+                } else {
+                    console.error('Toggle failed:', data.error);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    });
+
+    // Delete Individual Notification
+    document.querySelectorAll('.delete-notification-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const notificationItem = this.closest('.notification-item');
+            const notificationId = notificationItem.dataset.notificationId;
+
+            fetch('/delete-notification/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken,
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({ notification_id: notificationId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    notificationItem.remove();
+                    if (!document.querySelector('.notification-item')) {
+                        document.querySelector('.notifications-container').innerHTML = '<p class="no-notifications">No notifications found.</p>';
+                    }
+                    // Update the unread count in the sidebar and mobile nav
+                    updateNotificationBadges(data.unread_count);
+                } else {
+                    console.error('Delete failed:', data.error);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    });
+
+    // Clear All Notifications
+    const clearAllButton = document.getElementById('clear-all-notifications');
+    if (clearAllButton) {
+        clearAllButton.addEventListener('click', function() {
+            fetch('/clear-notifications/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken,
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.querySelector('.notifications-list').remove();
+                    document.querySelector('.notifications-container').innerHTML = '<p class="no-notifications">No notifications found.</p>';
+                    // Update the unread count in the sidebar and mobile nav
+                    updateNotificationBadges(0);
+                } else {
+                    console.error('Clear failed:', data.error);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    }
+
+    // Function to update notification badges
+    function updateNotificationBadges(unreadCount) {
+        const badges = document.querySelectorAll('.badge');
+        badges.forEach(badge => {
+            if (unreadCount > 0) {
+                badge.textContent = unreadCount;
+                badge.style.display = 'inline-block';
+            } else {
+                badge.style.display = 'none';
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

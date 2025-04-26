@@ -346,13 +346,6 @@
 </style>
 
 <div class="event-detail-container">
-    <!-- Messages -->
-    {% if messages %}
-        {% for message in messages %}
-            <div class="ev-alert ev-alert-{{ message.tags }}">{{ message }}</div>
-        {% endfor %}
-    {% endif %}
-
     <div class="event-detail-header">
         <h1 class="display-4">{{ event.title }}</h1>
         <div class="ev-price-tag">

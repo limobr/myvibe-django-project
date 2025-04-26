@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'myvibe/base.html' %}
 {% load static %}
 {% block content %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
@@ -62,7 +62,8 @@
 
     .btn-upload,
     .btn-secondary,
-    .btn-primary {
+    .btn-primary,
+    .btn-skip {
         background-color: #007bff;
         color: white;
         padding: 0.8rem 2rem;
@@ -79,7 +80,8 @@
 
     .btn-upload i,
     .btn-secondary i,
-    .btn-primary i {
+    .btn-primary i,
+    .btn-skip i {
         font-size: 1.2rem;
     }
 
@@ -91,9 +93,14 @@
         background-color: #28a745;
     }
 
+    .btn-skip {
+        background-color: #dc3545; /* Red color to differentiate the skip button */
+    }
+
     .btn-upload:hover,
     .btn-secondary:hover,
-    .btn-primary:hover {
+    .btn-primary:hover,
+    .btn-skip:hover {
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
@@ -146,6 +153,14 @@
         display: flex;
     }
 
+    /* Button Container for Upload Screen */
+    .upload-buttons {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        gap: 1rem;
+    }
+
     /* Responsive Styles */
     @media (max-width: 768px) {
         .upload-card {
@@ -167,7 +182,8 @@
 
         .btn-upload,
         .btn-secondary,
-        .btn-primary {
+        .btn-primary,
+        .btn-skip {
             padding: 0.7rem 1.5rem;
             font-size: 0.9rem;
         }
@@ -185,9 +201,15 @@
 
         .btn-upload,
         .btn-secondary,
-        .btn-primary {
+        .btn-primary,
+        .btn-skip {
             width: 100%;
             justify-content: center;
+        }
+
+        .upload-buttons {
+            flex-direction: column;
+            gap: 0.5rem;
         }
 
         .cropper-wrapper {
@@ -204,10 +226,15 @@
                 <div class="image-preview-container">
                     <img id="image-preview" class="preview-image" src="{{ profile_picture_url|default:'/static/assets/img/upload.png' }}">
                 </div>
-                <input type="file" id="image-input" accept="image/*" hidden>
-                <button class="btn-upload" onclick="document.getElementById('image-input').click()">
-                    <i class="fas fa-cloud-upload-alt"></i> Choose Photo
-                </button>
+                <div class="upload-buttons">
+                    <input type="file" id="image-input" accept="image/*" hidden>
+                    <button class="btn-upload" onclick="document.getElementById('image-input').click()">
+                        <i class="fas fa-cloud-upload-alt"></i> Choose Photo
+                    </button>
+                    <button class="btn-skip" onclick="window.location.href='{% url 'home' %}'">
+                        <i class="fas fa-forward"></i> Skip
+                    </button>
+                </div>
             </div>
         </div>
 

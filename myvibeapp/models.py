@@ -83,3 +83,5 @@ class View(models.Model):
 
     class Meta:
         ordering = ['-viewed_at']
+
+
